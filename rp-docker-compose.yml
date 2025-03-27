@@ -1,5 +1,5 @@
 networks:
-  springboot-network:
+  retailpulse-network:
     driver: bridge
 
 volumes:
@@ -29,7 +29,7 @@ services:
       start_period: 10s
       timeout: 10s
     networks:
-      - springboot-network
+      - retailpulse-network
 
   # RP MySQL service
   mysql-rp:
@@ -50,7 +50,7 @@ services:
       start_period: 10s
       timeout: 10s
     networks:
-      - springboot-network
+      - retailpulse-network
 
   # IAM Spring Boot service
   app-iam:
@@ -70,7 +70,7 @@ services:
       mysql-auth:
         condition: service_healthy
     networks:
-      - springboot-network
+      - retailpulse-network
 
   # User Management Spring Boot service
   app-um:
@@ -93,7 +93,7 @@ services:
       app-iam:
         condition: service_started
     networks:
-      - springboot-network
+      - retailpulse-network
 
   # RP Spring Boot service
   app-rp:
@@ -116,4 +116,23 @@ services:
       app-iam:
         condition: service_started
     networks:
-      - springboot-network
+      - retailpulse-network
+
+  # Frontend Web Applicaiton
+  app-web:
+    image: web-app-server
+    container_name: app-web
+    build:
+      context: ./web-app
+      dockerfile: Dockerfile
+    ports:
+      - "4200:80"
+    depends_on:
+      app-rp:
+        condition: service_started
+      app-iam:
+        condition: service_started
+      app-um:
+        condition: service_started
+    networks:
+      - retailpulse-network
