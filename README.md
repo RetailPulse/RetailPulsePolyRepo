@@ -6,8 +6,21 @@ Evalyn Low Wei Xuan,
 William Siling Tjhi,
 Yap Chong Hwee Casper,
 
+To clone the repo with the submodules, please follow the steps below:
+1. Create the root directory
+2. Clone the top level repo:
+   
+   _git clone git@github.com:RetailPulse/RetailPulsePolyRepo.git_
+
+3. cd RetailPulsePolyRepo 
+4. Run the following commands to initialize and clone the submodules:
+   
+   _git submodule init_
+
+   _git submodule update_
+
 To run the **server-side applications**, please follow the steps below:
-1. from Parent directory RetailPulse/
+1. From Parent directory RetailPulsePolyRepo/
 2. Run the following command to start the docker containers
 
    _docker compose -f rp-docker-compose.yml up --build_
