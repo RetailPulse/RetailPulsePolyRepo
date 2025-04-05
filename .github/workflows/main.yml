@@ -22,21 +22,35 @@ jobs:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-    - name: Determine changed submodules
+    - name: Determine changed submodules (with fallback)
       id: changes
       run: |
-        echo "changed_submodules<<EOF" >> $GITHUB_OUTPUT
-        git diff --name-only ${{ github.event.before }} ${{ github.sha }} | awk -F/ '{print $1}' | sort -u >> $GITHUB_OUTPUT
-        echo "EOF" >> $GITHUB_OUTPUT
+        BEFORE_SHA="${{ github.event.before }}"
+        AFTER_SHA="${{ github.sha }}"
 
-    - name: Build and push images
+        echo "⏳ Checking for changes between commits:"
+        echo "BEFORE: $BEFORE_SHA"
+        echo "AFTER:  $AFTER_SHA"
+
+        # Validate the before SHA (handles first-push edge case)
+        if [ -z "$BEFORE_SHA" ] || ! git cat-file -e "$BEFORE_SHA^{commit}" 2>/dev/null; then
+          echo "⚠️ 'before' SHA is missing or invalid. Falling back to HEAD~1"
+          BEFORE_SHA=$(git rev-parse HEAD~1)
+        fi
+
+        CHANGED=$(git diff --name-only "$BEFORE_SHA" "$AFTER_SHA" | awk -F/ '{print $1}' | sort -u | uniq | xargs)
+
+        echo "Detected changed directories: $CHANGED"
+        echo "changed=$CHANGED" >> $GITHUB_OUTPUT
+
+    - name: Build and push Docker images
       run: |
-        for dir in ${{ steps.changes.outputs.changed_submodules }}; do
+        for dir in ${{ steps.changes.outputs.changed }}; do
           if [ -f "$dir/Dockerfile" ]; then
-            echo "Building and pushing $dir..."
-            docker build -t mydockerhubuser/${dir}:latest $dir
-            docker push mydockerhubuser/${dir}:latest
+            echo "📦 Building and pushing $dir..."
+            docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/$dir:latest $dir
+            docker push ${{ secrets.DOCKERHUB_USERNAME }}/$dir:latest
           else
-            echo "Skipping $dir (no Dockerfile found)"
+            echo "⚠️ Skipping $dir (no Dockerfile found)"
           fi
         done
