@@ -6,7 +6,7 @@
 	url = git@github.com:RetailPulse/user-management.git
 [submodule "backend"]
 	path = backend
-	url = git@github.com:RetailPulse/backend.git
+	url = https://github.com/RetailPulse/backend.git
 [submodule "web-app"]
 	path = web-app
 	url = git@github.com:RetailPulse/web-app.git
