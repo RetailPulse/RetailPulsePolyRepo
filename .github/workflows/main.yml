@@ -24,33 +24,9 @@ jobs:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-    - name: Determine changed submodules (with fallback)
-      id: changes
-      run: |
-        BEFORE_SHA="${{ github.event.before }}"
-        AFTER_SHA="${{ github.sha }}"
-
-        echo "⏳ Checking for changes between commits:"
-        echo "BEFORE: $BEFORE_SHA"
-        echo "AFTER:  $AFTER_SHA"
-
-        # Validate the before SHA (handles first-push edge case)
-        if [ -z "$BEFORE_SHA" ] || ! git cat-file -e "$BEFORE_SHA^{commit}" 2>/dev/null; then
-          echo "⚠️ 'before' SHA is missing or invalid. Falling back to HEAD~1"
-          BEFORE_SHA=$(git rev-parse HEAD~1)
-        fi
-
-        CHANGED=$(git diff --name-only "$BEFORE_SHA" "$AFTER_SHA" | awk -F/ '{print $1}' | sort -u | uniq | xargs)
-
-        echo "Detected changed directories: $CHANGED"
-        echo "changed=$CHANGED" >> $GITHUB_OUTPUT
-
-    - name: Debug changed paths
-      run: echo "CHANGED DIRS = ${{ steps.changes.outputs.changed }}"
-
     - name: Build and push Docker images
       run: |
-        for dir in ${{ steps.changes.outputs.changed }}; do
+        for dir in backend web-app user-management identity-access-management; do
           if [ -f "$dir/Dockerfile" ]; then
             echo "📦 Building and pushing $dir..."
             docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/$dir:latest $dir
