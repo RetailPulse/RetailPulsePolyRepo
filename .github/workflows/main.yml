@@ -45,6 +45,9 @@ jobs:
         echo "Detected changed directories: $CHANGED"
         echo "changed=$CHANGED" >> $GITHUB_OUTPUT
 
+    - name: Debug changed paths
+      run: echo "CHANGED DIRS = ${{ steps.changes.outputs.changed }}"
+
     - name: Build and push Docker images
       run: |
         for dir in ${{ steps.changes.outputs.changed }}; do
