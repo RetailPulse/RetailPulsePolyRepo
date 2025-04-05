@@ -15,6 +15,7 @@ jobs:
       with:
         submodules: true
         token: ${{ secrets.SUBMODULES_TOKEN }}
+        persist-credentials: false
 
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
