@@ -26,7 +26,7 @@ jobs:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-    - name: Build and push Docker images
+    - name: Build and push Docker images for all submodules
       run: |
         for dir in backend web-app user-management identity-access-management; do
           if [ -f "$dir/Dockerfile" ]; then
