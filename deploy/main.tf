@@ -1,9 +1,9 @@
 terraform {
   backend "s3" {
-    bucket         = "my-tofu-state-bucket"       # Replace with your S3 bucket name
+    bucket         = "rp-tofu-state-bucket"       # Replace with your S3 bucket name
     key            = "state/tofu.tfstate"           # Replace or adjust the path as needed
     region         = "ap-southeast-1"
-    dynamodb_table = "my-tofu-state-lock"           # Replace with your DynamoDB table name (if you are using one)
+    dynamodb_table = "rp-tofu-state-lock"           # Replace with your DynamoDB table name (if you are using one)
   }
 }
 
