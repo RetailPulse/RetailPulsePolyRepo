@@ -15,7 +15,7 @@ jobs:
       # Install OpenTofu CLI
       - name: Install OpenTofu
         run: |
-          wget -qO- https://releases.opentofu.org/otofu_latest_linux_amd64.tar.gz | tar zxvf -
+          curl -fsSL https://releases.opentofu.org/otofu_latest_linux_amd64.tar.gz | tar zxvf -
           sudo mv tofu /usr/local/bin/
 
       # Configure AWS credentials using secrets stored in GitHub
