@@ -26,7 +26,7 @@ jobs:
 
       # Initialize your OpenTofu project (fetch providers, etc.)
       - name: Initialize OpenTofu
-        run: cd deploy && tofu init
+        run: cd deploy && tofu init -reconfigure
 
       # Run a plan to review the changes that will be applied
       - name: Plan Infrastructure

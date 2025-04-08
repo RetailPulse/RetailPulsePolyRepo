@@ -29,7 +29,7 @@ jobs:
       # Initialize dependency selections and generate the lock file
       - name: Initialize OpenTofu
         working-directory: deploy
-        run: tofu init
+        run: tofu init -reconfigure
 
       # Destroy the infrastructure from the deploy folder
       - name: Destroy Infrastructure
