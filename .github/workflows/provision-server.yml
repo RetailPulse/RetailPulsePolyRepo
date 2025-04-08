@@ -1,28 +1,39 @@
-name: Provision AWS Server
+name: Deploy Infrastructure
 
+# Trigger the workflow manually from the GitHub Actions tab
 on:
   workflow_dispatch:
 
 jobs:
-  provision:
+  deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Repository
+      # Checkout the repository to access your main.tf file
+      - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Setup OpenTofu
-        uses: opentofu/setup-opentofu@v0.1.0
+      # Install OpenTofu CLI
+      - name: Install OpenTofu
+        run: |
+          wget -qO- https://releases.opentofu.org/otofu_latest_linux_amd64.tar.gz | tar zxvf -
+          sudo mv tofu /usr/local/bin/
+
+      # Configure AWS credentials using secrets stored in GitHub
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
         with:
-          version: "latest"
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-southeast-1
 
+      # Initialize your OpenTofu project (fetch providers, etc.)
       - name: Initialize OpenTofu
-        working-directory: ./deploy
-        run: opentofu init
+        run: tofu init
 
+      # Run a plan to review the changes that will be applied
       - name: Plan Infrastructure
-        working-directory: ./deploy
-        run: opentofu plan
+        run: tofu plan
 
+      # Apply the infrastructure changes to provision resources
       - name: Apply Infrastructure
-        working-directory: ./deploy
-        run: opentofu apply -auto-approve
+        run: tofu apply -auto-approve
