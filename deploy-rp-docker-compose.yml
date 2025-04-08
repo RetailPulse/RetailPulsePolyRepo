@@ -1,0 +1,126 @@
+networks:
+  retailpulse-network:
+    driver: bridge
+
+volumes:
+  mysql_identity_access_vol:
+    driver: local
+  mysql_backend_vol:
+    driver: local
+
+services:
+  # IAM MySQL service
+  mysql-auth:
+    image: mysql:latest
+    container_name: mysql-auth
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: identity_access
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./deploy/identity.init.sql:/docker-entrypoint-initdb.d/init.sql
+      - mysql_identity_access_vol:/var/lib/mysql
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
+      interval: 30s
+      retries: 5
+      start_period: 10s
+      timeout: 10s
+    networks:
+      - retailpulse-network
+
+  # RP MySQL service
+  mysql-rp:
+    image: mysql:latest
+    container_name: mysql-rp
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: RetailPulseDB
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_backend_vol:/var/lib/mysql
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
+      interval: 30s
+      retries: 5
+      start_period: 10s
+      timeout: 10s
+    networks:
+      - retailpulse-network
+
+  # IAM Spring Boot service
+  app-iam:
+    image: galvinlwy/identity-access-management:latest
+    container_name: app-iam
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-auth:3306/identity_access
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: password
+      SERVER_PORT: 8081
+    ports:
+      - "8081:8081"
+    depends_on:
+      mysql-auth:
+        condition: service_healthy
+    networks:
+      - retailpulse-network
+
+  # User Management Spring Boot service
+  app-um:
+    image: galvinlwy/user-management:latest
+    container_name: app-um
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-auth:3306/identity_access
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: password
+      SERVER_PORT: 8083
+      AUTH_SERVER_URL: http://app-iam:8081
+    ports:
+      - "8083:8083"
+    depends_on:
+      mysql-auth:
+        condition: service_healthy
+      app-iam:
+        condition: service_started
+    networks:
+      - retailpulse-network
+
+  # RP Spring Boot service
+  app-rp:
+    image: galvinlwy/backend:latest
+    container_name: app-rp
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-rp:3306/RetailPulseDB
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: password
+      SERVER_PORT: 8085
+      AUTH_SERVER_URL: http://app-iam:8081
+    ports:
+      - "8085:8085"    
+    depends_on:
+      mysql-rp:
+        condition: service_healthy
+      app-iam:
+        condition: service_started
+    networks:
+      - retailpulse-network
+
+  # Frontend Web Applicaiton
+  app-web:
+    image: galvinlwy/web-app:latest
+    container_name: app-web
+    ports:
+      - "4200:80"
+    depends_on:
+      app-rp:
+        condition: service_started
+      app-iam:
+        condition: service_started
+      app-um:
+        condition: service_started
+    networks:
+      - retailpulse-network
