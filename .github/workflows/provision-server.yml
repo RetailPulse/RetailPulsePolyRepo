@@ -26,12 +26,12 @@ jobs:
 
       # Initialize your OpenTofu project (fetch providers, etc.)
       - name: Initialize OpenTofu
-        run: tofu init
+        run: cd deploy && tofu init
 
       # Run a plan to review the changes that will be applied
       - name: Plan Infrastructure
-        run: tofu plan
+        run: cd deploy && tofu plan
 
       # Apply the infrastructure changes to provision resources
       - name: Apply Infrastructure
-        run: tofu apply -auto-approve
+        run: cd deploy && tofu apply -auto-approve
