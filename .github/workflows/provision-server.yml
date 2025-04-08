@@ -13,10 +13,8 @@ jobs:
         uses: actions/checkout@v3
 
       # Install OpenTofu CLI
-      - name: Install OpenTofu
-        run: |
-          curl -fsSL https://releases.opentofu.org/otofu_latest_linux_amd64.tar.gz | tar zxvf -
-          sudo mv tofu /usr/local/bin/
+      - name: Setup OpenTofu
+        uses: opentofu/setup-opentofu@v1  # Replace with the actual action you find
 
       # Configure AWS credentials using secrets stored in GitHub
       - name: Configure AWS credentials
