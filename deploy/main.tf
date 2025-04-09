@@ -1,9 +1,9 @@
 terraform {
   backend "s3" {
-    bucket         = "rp-tofu-state-bucket"       # Replace with your S3 bucket name
-    key            = "state/tofu.tfstate"           # Replace or adjust the path as needed
+    bucket         = "rp-tofu-state-bucket"       
+    key            = "state/tofu.tfstate"           
     region         = "ap-southeast-1"
-    dynamodb_table = "rp-tofu-state-lock"           # Replace with your DynamoDB table name (if you are using one)
+    dynamodb_table = "rp-tofu-state-lock"           
   }
 }
 
@@ -11,7 +11,6 @@ provider "aws" {
   region = "ap-southeast-1"
 }
 
-# Define a security group to allow SSH (and optionally HTTP)
 resource "aws_security_group" "docker_sg" {
   name        = "docker-sg"
   description = "Allow SSH and UI access"
@@ -39,9 +38,8 @@ resource "aws_security_group" "docker_sg" {
   }
 }
 
-# Create the EC2 instance with Docker and Docker Compose
 resource "aws_instance" "docker_host" {
-  ami                    = "ami-01938df366ac2d954"  # Replace with a suitable AMI ID for your chosen OS
+  ami                    = "ami-01938df366ac2d954"  # Use a suitable Ubuntu AMI
   instance_type          = "t2.micro"
   key_name               = "RetailPulse-Sem1"
   vpc_security_group_ids = [aws_security_group.docker_sg.id]
@@ -49,10 +47,27 @@ resource "aws_instance" "docker_host" {
   
   user_data = <<-EOF
     #!/bin/bash
-    apt-get update -y
-    apt-get install -y docker.io docker-compose
-    systemctl start docker
-    systemctl enable docker
+    set -e
+
+    # Install required packages
+    sudo apt-get update -y
+    sudo apt-get install -y ca-certificates curl
+
+    # Set up Docker's official GPG key and repository
+    sudo install -m 0755 -d /etc/apt/keyrings
+    sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+    sudo chmod a+r /etc/apt/keyrings/docker.asc
+    echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \\
+      $(. /etc/os-release && echo "${UBUNTU_CODENAME:-$VERSION_CODENAME}") stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+    sudo apt-get update -y
+
+    # Install Docker CE, CLI, containerd, and the Docker Compose plugin
+    sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+
+    # Enable and start Docker
+    sudo systemctl enable docker
+    sudo systemctl start docker
   EOF
 }
 

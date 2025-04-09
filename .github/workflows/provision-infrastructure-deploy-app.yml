@@ -79,7 +79,5 @@ jobs:
           key: ${{ secrets.SERVER_SSH_KEY }}
           port: 22
           script: |
-            echo "PATH is: $PATH"
-            ls -la /usr/bin/docker-compose
             cd ~/deploy
-            /usr/bin/docker-compose -f deploy-rp-docker-compose.yml up -d
+            docker compose -f deploy-rp-docker-compose.yml up -d
