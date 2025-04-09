@@ -66,4 +66,4 @@ jobs:
           port: 22
           script: |
             cd ~/deploy
-            /usr/local/bin/docker-compose -f deploy-rp-docker-compose.yml up -d
+            /usr/bin/docker-compose -f deploy-rp-docker-compose.yml up -d
