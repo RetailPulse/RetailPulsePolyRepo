@@ -66,7 +66,4 @@ jobs:
           port: 22
           script: |
             cd ~/deploy
-            # Run the Docker Compose file in detached mode.
-            docker-compose -f deploy-rp-docker-compose.yml up -d
-            # If you’re using Docker Compose V2, you may use:
-            # docker compose -f deploy-rp-docker-compose.yml up -d
+            /usr/local/bin/docker-compose -f deploy-rp-docker-compose.yml up -d
