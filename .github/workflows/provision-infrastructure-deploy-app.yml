@@ -1,0 +1,72 @@
+name: Provision Infrastructure & Deploy App
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      # 1. Checkout the repository so that we have access to the infrastructure code and Docker Compose file.
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # 2. Setup OpenTofu CLI (or Terraform). Replace this with your actual tooling if needed.
+      - name: Setup OpenTofu
+        uses: opentofu/setup-opentofu@v1
+
+      # 3. Configure AWS credentials using secrets stored in GitHub.
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-southeast-1
+
+      # 4. Initialize your OpenTofu project.
+      - name: Initialize OpenTofu
+        run: cd deploy && tofu init -reconfigure
+
+      # 5. Run a plan to review the changes that will be applied.
+      - name: Plan Infrastructure
+        run: cd deploy && tofu plan
+
+      # 6. Apply infrastructure changes to provision your server.
+      - name: Apply Infrastructure
+        id: apply_infra
+        run: cd deploy && tofu apply -auto-approve
+
+      # 7. Retrieve the output (server public IP) from your provisioning tool.
+      - name: Get Server IP
+        id: server_output
+        run: |
+          # Fetch outputs as JSON and extract the server_ip.
+          SERVER_IP=$(cd deploy && tofu output -json | jq -r '.server_ip.value')
+          echo "server_ip=${SERVER_IP}" >> $GITHUB_OUTPUT
+        # Ensure that jq is available in the environment.
+
+      # 8. Copy the Docker Compose file (deploy-rp-docker-compose.yml) to the provisioned server.
+      - name: Copy Docker Compose file to remote host
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ steps.server_output.outputs.server_ip }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          port: 22
+          source: "deploy-rp-docker-compose.yml"
+          target: "/home/${{ secrets.SERVER_USER }}/deploy"
+
+      # 9. Connect via SSH to the server and run Docker Compose to deploy your stack.
+      - name: Run Docker Compose on remote host
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ steps.server_output.outputs.server_ip }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          port: 22
+          script: |
+            cd ~/deploy
+            # Run the Docker Compose file in detached mode.
+            docker-compose -f deploy-rp-docker-compose.yml up -d
+            # If you’re using Docker Compose V2, you may use:
+            # docker compose -f deploy-rp-docker-compose.yml up -d
