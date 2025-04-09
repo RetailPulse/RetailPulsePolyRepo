@@ -55,3 +55,7 @@ resource "aws_instance" "docker_host" {
     systemctl enable docker
   EOF
 }
+
+output "server_ip" {
+  value = aws_instance.docker_host.public_ip
+}
