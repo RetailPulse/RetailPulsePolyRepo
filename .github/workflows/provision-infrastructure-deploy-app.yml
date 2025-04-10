@@ -87,4 +87,4 @@ jobs:
               sleep 5
             done
             echo "Docker is available, starting Docker Compose..."
-            sudo docker-compose -f deploy-rp-docker-compose.yml up -d
+            sudo /usr/local/bin/docker-compose -f deploy-rp-docker-compose.yml up -d
