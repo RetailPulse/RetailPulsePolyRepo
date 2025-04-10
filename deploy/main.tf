@@ -39,7 +39,7 @@ resource "aws_security_group" "docker_sg" {
 
 resource "aws_instance" "docker_host" {
   ami                         = "ami-01938df366ac2d954"  # Use an appropriate Ubuntu AMI
-  instance_type               = "t2.micro"
+  instance_type               = "t2.small"
   key_name                    = "RetailPulse-Sem1"
   vpc_security_group_ids      = [aws_security_group.docker_sg.id]
   associate_public_ip_address = true
