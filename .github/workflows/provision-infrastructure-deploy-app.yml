@@ -80,40 +80,43 @@ jobs:
           port: 22
           script: |
             cd ~/deploy
-            # Wait for Docker to be available
             echo "Waiting for Docker to be available..."
             MAX_RETRIES=20
             RETRY_COUNT=0
             until command -v docker >/dev/null 2>&1; do
               if [ "$RETRY_COUNT" -ge "$MAX_RETRIES" ]; then
                 echo "Docker is not available after $MAX_RETRIES retries, exiting..."
+                exit 1
+              fi
+              sleep 15
+              RETRY_COUNT=$((RETRY_COUNT + 1))
+            done
+            echo "Docker is available!"
+            
+            # Determine whether to run docker-compose with sudo.
             SUDO_CMD=""
             if ! command -v docker-compose >/dev/null 2>&1; then
               SUDO_CMD="sudo"
             fi
-
+            
+            echo "Waiting for docker-compose (--version) to be available..."
             for i in {1..20}; do
               if $SUDO_CMD docker-compose --version >/dev/null 2>&1; then
                 echo "Docker Compose is available!"
                 break
               fi
-              echo "Docker binary not found, retrying in 15 seconds..."
+              echo "docker-compose not available yet, retrying in 15 seconds..."
               sleep 15
             done
             if ! $SUDO_CMD docker-compose --version >/dev/null 2>&1; then
               echo "Docker Compose is not available after waiting"
               exit 1
             fi
+            
             if [ ! -f "deploy-rp-docker-compose.yml" ]; then
               echo "Error: deploy-rp-docker-compose.yml not found in ~/deploy directory."
               exit 1
             fi
+            
+            echo "Starting Docker Compose..."
             $SUDO_CMD docker-compose -f deploy-rp-docker-compose.yml up -d
-            done
-            echo "Docker is available, starting Docker Compose..."
-            until sudo docker-compose --version >/dev/null 2>&1; do
-              echo "docker-compose not available yet, sleeping..."
-              sleep 15
-            done
-            echo "Docker is available, Docker Compose is available!"
-            sudo docker-compose -f deploy-rp-docker-compose.yml up -d
