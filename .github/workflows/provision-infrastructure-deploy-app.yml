@@ -84,7 +84,7 @@ jobs:
             echo "Waiting for Docker to be available..."
             until command -v docker >/dev/null 2>&1; do
               echo "Docker not available yet, sleeping..."
-              sleep 5
+              sleep 15
             done
             echo "Docker is available, starting Docker Compose..."
             sudo /usr/local/bin/docker-compose -f deploy-rp-docker-compose.yml up -d
