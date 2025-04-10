@@ -44,28 +44,28 @@ resource "aws_instance" "docker_host" {
   vpc_security_group_ids      = [aws_security_group.docker_sg.id]
   associate_public_ip_address = true
 
-  user_data = <<-"EOF"
-    #!/bin/bash
-    # Update package lists and install prerequisites
-    apt-get update -y
-    apt-get install -y apt-transport-https ca-certificates curl gnupg-agent software-properties-common
+  user_data = <<EOF
+#!/bin/bash
+# Update package lists and install prerequisites
+apt-get update -y
+apt-get install -y apt-transport-https ca-certificates curl gnupg-agent software-properties-common
 
-    # Add Docker’s official GPG key and set up the stable repository
-    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
-    add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+# Add Docker’s official GPG key and set up the stable repository
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
+add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
 
-    # Update package lists again after adding the Docker repository and install Docker
-    apt-get update -y
-    apt-get install -y docker-ce docker-ce-cli containerd.io
+# Update package lists again after adding the Docker repository and install Docker
+apt-get update -y
+apt-get install -y docker-ce docker-ce-cli containerd.io
 
-    # Add the ubuntu user to the docker group to run docker commands without sudo
-    usermod -aG docker ubuntu
+# Add the ubuntu user to the docker group to run docker commands without sudo
+usermod -aG docker ubuntu
 
-    # Install Docker Compose
-    DOCKER_COMPOSE_VERSION=2.20.2
-    curl -L "https://github.com/docker/compose/releases/download/v${DOCKER_COMPOSE_VERSION}/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-    chmod +x /usr/local/bin/docker-compose
-  EOF
+# Install Docker Compose
+DOCKER_COMPOSE_VERSION=2.20.2
+curl -L "https://github.com/docker/compose/releases/download/v$${DOCKER_COMPOSE_VERSION}/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+chmod +x /usr/local/bin/docker-compose
+EOF
 }
 
 output "server_ip" {
