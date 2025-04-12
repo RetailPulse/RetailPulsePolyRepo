@@ -75,11 +75,11 @@ jobs:
           chmod 600 server_ssh_key.pem
           
           # Copy the root file (deploy-rp-docker-compose.yml) to the remote host's home directory
-          scp -o StrictHostKeyChecking=no -i server_ssh_key.pem $GITHUB_WORKSPACE/deploy-rp-docker-compose.yml ${{ secrets.SERVER_USER }}@${{ steps.server_output.outputs.server_ip }}:~/
-
+          scp -q -o BatchMode=yes -o StrictHostKeyChecking=no -i server_ssh_key.pem $GITHUB_WORKSPACE/deploy-rp-docker-compose.yml ${{ secrets.SERVER_USER }}@${{ steps.server_output.outputs.server_ip }}:~/
+          
           # Copy the deploy directory recursively (which contains identity.init.sql) to the remote host's home directory
-          scp -o StrictHostKeyChecking=no -i server_ssh_key.pem -r $GITHUB_WORKSPACE/deploy ${{ secrets.SERVER_USER }}@${{ steps.server_output.outputs.server_ip }}:~/
-
+          scp -q -o BatchMode=yes -o StrictHostKeyChecking=no -i server_ssh_key.pem -r $GITHUB_WORKSPACE/deploy ${{ secrets.SERVER_USER }}@${{ steps.server_output.outputs.server_ip }}:~/
+          
           # Remove the temporary SSH key file
           rm -f server_ssh_key.pem
           
