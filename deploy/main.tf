@@ -13,7 +13,7 @@ provider "aws" {
 
 resource "aws_security_group" "docker_sg" {
   name        = "docker-sg"
-  description = "Allow SSH and UI access"
+  description = "Allow SSH, UI, and application access"
   
   ingress {
     from_port   = 22
@@ -25,6 +25,13 @@ resource "aws_security_group" "docker_sg" {
   ingress {
     from_port   = 4200
     to_port     = 4200
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    from_port   = 8081
+    to_port     = 8081
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
