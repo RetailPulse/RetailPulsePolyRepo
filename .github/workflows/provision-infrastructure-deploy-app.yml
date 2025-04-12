@@ -72,16 +72,16 @@ jobs:
         run: |
           # Write the SSH private key to a temporary file
           echo "${{ secrets.SERVER_SSH_KEY }}" > server_ssh_key.pem
-          chmod 600 server_ssh_key
+          chmod 600 server_ssh_key.pem
 
           # Create the target directory on the remote host
-          ssh -o StrictHostKeyChecking=no -i server_ssh_key ${{ secrets.SERVER_USER }}@${{ steps.server_output.outputs.server_ip }} "mkdir -p ~/deploy"
+          ssh -o StrictHostKeyChecking=no -i server_ssh_key.pem ${{ secrets.SERVER_USER }}@${{ steps.server_output.outputs.server_ip }} "mkdir -p ~/deploy"
           
           # Copy the files from the workspace to the remote host
-          scp -o StrictHostKeyChecking=no -i server_ssh_key $GITHUB_WORKSPACE/deploy-rp-docker-compose.yml $GITHUB_WORKSPACE/deploy/identity.init.sql ${{ secrets.SERVER_USER }}@${{ steps.server_output.outputs.server_ip }}:~/deploy/
+          scp -o StrictHostKeyChecking=no -i server_ssh_key.epm $GITHUB_WORKSPACE/deploy-rp-docker-compose.yml $GITHUB_WORKSPACE/deploy/identity.init.sql ${{ secrets.SERVER_USER }}@${{ steps.server_output.outputs.server_ip }}:~/deploy/
 
           # Remove the temporary SSH key file
-          rm -f server_ssh_key
+          rm -f server_ssh_key.pem
           
       # 10. Connect via SSH to the server and run Docker Compose to deploy your stack.
       - name: Run Docker Compose on remote host
