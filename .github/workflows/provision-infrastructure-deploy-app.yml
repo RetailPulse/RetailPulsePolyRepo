@@ -45,7 +45,7 @@ jobs:
           echo "server_ip=${SERVER_IP}" >> $GITHUB_OUTPUT
         # Ensure that jq is available in the environment.
 
-    # 8. Wait for SSH to be available
+      # 8. Wait for SSH to be available
       - name: Wait for SSH to be available
         run: |
           for i in {1..30}; do
@@ -70,7 +70,18 @@ jobs:
           source: "deploy-rp-docker-compose.yml"
           target: "/home/${{ secrets.SERVER_USER }}/deploy"
 
-      # 10. Connect via SSH to the server and run Docker Compose to deploy your stack.
+      # 10. Copy the Docker Compose file (deploy-rp-docker-compose.yml) to the provisioned server.
+      - name: Copy app-iam init sql file to remote host
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ steps.server_output.outputs.server_ip }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          port: 22
+          source: "deploy/identity.init.sql"
+          target: "/home/${{ secrets.SERVER_USER }}/deploy"
+
+      # 11. Connect via SSH to the server and run Docker Compose to deploy your stack.
       - name: Run Docker Compose on remote host
         uses: appleboy/ssh-action@master
         with:
