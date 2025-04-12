@@ -75,9 +75,8 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
           port: 22
-          source: "./deploy-rp-docker-compose.yml ./deploy/identity.init.sql"
-          target: "/home/${{ secrets.SERVER_USER }}/deploy"
-
+          source: "deploy-rp-docker-compose.yml\ndeploy/identity.init.sql"
+          
       # 10. Connect via SSH to the server and run Docker Compose to deploy your stack.
       - name: Run Docker Compose on remote host
         uses: appleboy/ssh-action@master
