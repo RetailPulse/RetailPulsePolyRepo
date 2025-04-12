@@ -43,7 +43,14 @@ jobs:
           # Fetch outputs as JSON and extract the server_ip.
           SERVER_IP=$(cd deploy && tofu output -json | jq -r '.server_ip.value')
           echo "server_ip=${SERVER_IP}" >> $GITHUB_OUTPUT
-        # Ensure that jq is available in the environment.
+
+      # 7.1. Update environment.ts with the provisioned server IP
+      - name: Update environment.ts with Server IP
+        run: |
+          echo "Updating environment.ts with SERVER_IP: ${{ steps.server_output.outputs.server_ip }}"
+          sed -i "s|http://localhost:8081|http://$(echo ${{ steps.server_output.outputs.server_ip }}):8081|g" web-app/src/environments/environment.ts
+          sed -i "s|http://localhost:8083|http://$(echo ${{ steps.server_output.outputs.server_ip }}):8083|g" web-app/src/environments/environment.ts
+          sed -i "s|http://localhost:8085|http://$(echo ${{ steps.server_output.outputs.server_ip }}):8085|g" web-app/src/environments/environment.ts
 
       # 8. Wait for SSH to be available
       - name: Wait for SSH to be available
