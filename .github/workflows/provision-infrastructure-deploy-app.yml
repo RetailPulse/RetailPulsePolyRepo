@@ -59,6 +59,14 @@ jobs:
           echo "SSH is not available after waiting"
           exit 1
 
+      # Debugging: list files to verify existence
+      - name: List repository files for debugging
+        run: |
+          echo "Listing repository root files:"
+          ls -la
+          echo "Listing files in deploy directory:"
+          ls -la deploy
+
       # 9. Copy files to the provisioned server.
       - name: Copy files to remote host
         uses: appleboy/scp-action@master
@@ -67,7 +75,7 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
           port: 22
-          source: "deploy-rp-docker-compose.yml deploy/identity.init.sql"
+          source: "deploy-rp-docker-compose.yml,deploy/identity.init.sql"
           target: "/home/${{ secrets.SERVER_USER }}/deploy"
 
       # 10. Connect via SSH to the server and run Docker Compose to deploy your stack.
