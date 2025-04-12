@@ -78,7 +78,7 @@ jobs:
           ssh -o StrictHostKeyChecking=no -i server_ssh_key.pem ${{ secrets.SERVER_USER }}@${{ steps.server_output.outputs.server_ip }} "mkdir -p ~/deploy"
           
           # Copy the files from the workspace to the remote host
-          scp -o StrictHostKeyChecking=no -i server_ssh_key.epm $GITHUB_WORKSPACE/deploy-rp-docker-compose.yml $GITHUB_WORKSPACE/deploy/identity.init.sql ${{ secrets.SERVER_USER }}@${{ steps.server_output.outputs.server_ip }}:~/deploy/
+          scp -o StrictHostKeyChecking=no -i server_ssh_key.pem $GITHUB_WORKSPACE/deploy-rp-docker-compose.yml $GITHUB_WORKSPACE/deploy/identity.init.sql ${{ secrets.SERVER_USER }}@${{ steps.server_output.outputs.server_ip }}:~/deploy/
 
           # Remove the temporary SSH key file
           rm -f server_ssh_key.pem
