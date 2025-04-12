@@ -73,12 +73,12 @@ jobs:
           # Write the SSH private key to a temporary file
           echo "${{ secrets.SERVER_SSH_KEY }}" > server_ssh_key.pem
           chmod 600 server_ssh_key.pem
-
-          # Create the target directory on the remote host
-          ssh -o StrictHostKeyChecking=no -i server_ssh_key.pem ${{ secrets.SERVER_USER }}@${{ steps.server_output.outputs.server_ip }} "mkdir -p ~/deploy"
           
-          # Copy the files from the workspace to the remote host
-          scp -o StrictHostKeyChecking=no -i server_ssh_key.pem $GITHUB_WORKSPACE/deploy-rp-docker-compose.yml $GITHUB_WORKSPACE/deploy/identity.init.sql ${{ secrets.SERVER_USER }}@${{ steps.server_output.outputs.server_ip }}:~/deploy/
+          # Copy the root file (deploy-rp-docker-compose.yml) to the remote host's home directory
+          scp -o StrictHostKeyChecking=no -i server_ssh_key.pem $GITHUB_WORKSPACE/deploy-rp-docker-compose.yml ${{ secrets.SERVER_USER }}@${{ steps.server_output.outputs.server_ip }}:~/
+
+          # Copy the deploy directory recursively (which contains identity.init.sql) to the remote host's home directory
+          scp -o StrictHostKeyChecking=no -i server_ssh_key.pem -r $GITHUB_WORKSPACE/deploy ${{ secrets.SERVER_USER }}@${{ steps.server_output.outputs.server_ip }}:~/
 
           # Remove the temporary SSH key file
           rm -f server_ssh_key.pem
@@ -92,7 +92,7 @@ jobs:
           key: ${{ secrets.SERVER_SSH_KEY }}
           port: 22
           script: |
-            cd ~/deploy
+            cd ~
             echo "Waiting for Docker to be available..."
             MAX_RETRIES=20
             RETRY_COUNT=0
@@ -123,10 +123,17 @@ jobs:
               exit 1
             fi
             
+            # Ensure the docker-compose file is present in the home directory
             if [ ! -f "deploy-rp-docker-compose.yml" ]; then
-              echo "Error: deploy-rp-docker-compose.yml not found in ~/deploy directory."
+              echo "Error: deploy-rp-docker-compose.yml not found in home directory."
               exit 1
             fi
             
+            # Ensure the identify.init.sql file is present in the home directory
+            if [ ! -f "deploy/identity.init.sql" ]; then
+              echo "Error: identity.init.sql not found in deploy directory."
+              exit 1
+            fi
+
             echo "Starting Docker Compose..."
             $SUDO_CMD docker-compose -f deploy-rp-docker-compose.yml up -d
