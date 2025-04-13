@@ -61,6 +61,7 @@ services:
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: password
       SERVER_PORT: 8081
+      SPRING_PROFILES_ACTIVE: prod
     ports:
       - "8081:8081"
     depends_on:
@@ -79,6 +80,7 @@ services:
       SPRING_DATASOURCE_PASSWORD: password
       SERVER_PORT: 8083
       AUTH_SERVER_URL: http://app-iam:8081
+      SPRING_PROFILES_ACTIVE: prod
     ports:
       - "8083:8083"
     depends_on:
@@ -99,6 +101,7 @@ services:
       SPRING_DATASOURCE_PASSWORD: password
       SERVER_PORT: 8085
       AUTH_SERVER_URL: http://app-iam:8081
+      SPRING_PROFILES_ACTIVE: prodSPRING_PROFILES_ACTIVE: prod
     ports:
       - "8085:8085"    
     depends_on:
