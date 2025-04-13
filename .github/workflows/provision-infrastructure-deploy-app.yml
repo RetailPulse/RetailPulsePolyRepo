@@ -1,0 +1,149 @@
+name: Provision Infrastructure & Deploy App
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      # 1. Checkout the repository so that we have access to the infrastructure code and Docker Compose file.
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # 2. Setup OpenTofu CLI (or Terraform). Replace this with your actual tooling if needed.
+      - name: Setup OpenTofu
+        uses: opentofu/setup-opentofu@v1
+
+      # 3. Configure AWS credentials using secrets stored in GitHub.
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-southeast-1
+
+      # 4. Initialize your OpenTofu project.
+      - name: Initialize OpenTofu
+        run: cd deploy && tofu init -reconfigure
+
+      # 5. Run a plan to review the changes that will be applied.
+      - name: Plan Infrastructure
+        run: cd deploy && tofu plan
+
+      # 6. Apply infrastructure changes to provision your server.
+      - name: Apply Infrastructure
+        id: apply_infra
+        run: cd deploy && tofu apply -auto-approve
+
+      # 7. Retrieve the output (server public IP) from your provisioning tool.
+      - name: Get Server IP
+        id: server_output
+        run: |
+          # Fetch outputs as JSON and extract the server_ip.
+          SERVER_IP=$(cd deploy && tofu output -json | jq -r '.server_ip.value')
+          echo "server_ip=${SERVER_IP}" >> $GITHUB_OUTPUT
+
+      # 7.1. Update environment.ts with the provisioned server IP
+      - name: Update environment.ts with Server IP
+        run: |
+          echo "Updating environment.ts with SERVER_IP: ${{ steps.server_output.outputs.server_ip }}"
+          sed -i "s|http://localhost:8081|http://$(echo ${{ steps.server_output.outputs.server_ip }}):8081|g" web-app/src/environments/environment.ts
+          sed -i "s|http://localhost:8083|http://$(echo ${{ steps.server_output.outputs.server_ip }}):8083|g" web-app/src/environments/environment.ts
+          sed -i "s|http://localhost:8085|http://$(echo ${{ steps.server_output.outputs.server_ip }}):8085|g" web-app/src/environments/environment.ts
+
+      # 8. Wait for SSH to be available
+      - name: Wait for SSH to be available
+        run: |
+          for i in {1..30}; do
+            if nc -z -w3 ${{ steps.server_output.outputs.server_ip }} 22; then
+              echo "SSH is available"
+              exit 0
+            fi
+            echo "Waiting for SSH..."
+            sleep 10
+          done
+          echo "SSH is not available after waiting"
+          exit 1
+
+      # Debugging: list files to verify existence
+      - name: List repository files for debugging
+        run: |
+          echo "Listing repository root files:"
+          ls -la
+          echo "Listing files in deploy directory:"
+          ls -la deploy
+
+      # 9. Copy files to remote host using scp
+      - name: Copy files to remote host using scp
+        run: |
+          # Write the SSH private key to a temporary file
+          echo "${{ secrets.SERVER_SSH_KEY }}" > server_ssh_key.pem
+          chmod 600 server_ssh_key.pem
+          
+          # Copy the root file (deploy-rp-docker-compose.yml) to the remote host's home directory
+          scp -q -o BatchMode=yes -o StrictHostKeyChecking=no -i server_ssh_key.pem $GITHUB_WORKSPACE/deploy-rp-docker-compose.yml ${{ secrets.SERVER_USER }}@${{ steps.server_output.outputs.server_ip }}:~/
+          
+          # Create the target directory on the remote host for the identity file
+          ssh -q -o BatchMode=yes -o StrictHostKeyChecking=no -i server_ssh_key.pem ${{ secrets.SERVER_USER }}@${{ steps.server_output.outputs.server_ip }} "mkdir -p ~/deploy"
+          
+          # Copy only the identity.init.sql file to the remote host's deploy directory
+          scp -q -o BatchMode=yes -o StrictHostKeyChecking=no -i server_ssh_key.pem $GITHUB_WORKSPACE/deploy/identity.init.sql ${{ secrets.SERVER_USER }}@${{ steps.server_output.outputs.server_ip }}:~/deploy/
+          
+          # Remove the temporary SSH key file
+          rm -f server_ssh_key.pem
+          
+      # 10. Connect via SSH to the server and run Docker Compose to deploy your stack.
+      - name: Run Docker Compose on remote host
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ steps.server_output.outputs.server_ip }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          port: 22
+          script: |
+            cd ~
+            echo "Waiting for Docker to be available..."
+            MAX_RETRIES=20
+            RETRY_COUNT=0
+            until command -v docker >/dev/null 2>&1; do
+              if [ "$RETRY_COUNT" -ge "$MAX_RETRIES" ]; then
+                echo "Docker is not available after $MAX_RETRIES retries, exiting..."
+                exit 1
+              fi
+              sleep 15
+              RETRY_COUNT=$((RETRY_COUNT + 1))
+            done
+            echo "Docker is available!"
+            
+            # Force the use of sudo for docker-compose commands
+            SUDO_CMD="sudo"
+            
+            echo "Waiting for docker-compose (--version) to be available..."
+            for i in {1..20}; do
+              if $SUDO_CMD docker-compose --version >/dev/null 2>&1; then
+                echo "Docker Compose is available!"
+                break
+              fi
+              echo "docker-compose not available yet, retrying in 15 seconds..."
+              sleep 15
+            done
+            if ! $SUDO_CMD docker-compose --version >/dev/null 2>&1; then
+              echo "Docker Compose is not available after waiting"
+              exit 1
+            fi
+            
+            # Ensure the docker-compose file is present in the home directory
+            if [ ! -f "deploy-rp-docker-compose.yml" ]; then
+              echo "Error: deploy-rp-docker-compose.yml not found in home directory."
+              exit 1
+            fi
+            
+            # Ensure the identify.init.sql file is present in the home directory
+            if [ ! -f "deploy/identity.init.sql" ]; then
+              echo "Error: identity.init.sql not found in deploy directory."
+              exit 1
+            fi
+
+            echo "Starting Docker Compose..."
+            $SUDO_CMD docker-compose -f deploy-rp-docker-compose.yml up -d

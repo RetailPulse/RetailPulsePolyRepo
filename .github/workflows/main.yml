@@ -1,0 +1,39 @@
+name: Build & Push Docker Images
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+      with:
+        submodules: true
+        token: ${{ secrets.SUBMODULES_TOKEN }}
+        persist-credentials: false
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Log in to Docker Hub
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+    - name: Build and push Docker images for all submodules
+      run: |
+        for dir in backend web-app user-management identity-access-management; do
+          if [ -f "$dir/Dockerfile" ]; then
+            echo "📦 Building and pushing $dir..."
+            docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/$dir:latest $dir
+            docker push ${{ secrets.DOCKERHUB_USERNAME }}/$dir:latest
+          else
+            echo "⚠️ Skipping $dir (no Dockerfile found)"
+          fi
+        done
