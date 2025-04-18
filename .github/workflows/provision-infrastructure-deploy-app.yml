@@ -50,7 +50,7 @@ jobs:
         run: |
           API_TOKEN="qpgjckOSAOyBfS52bvDvyXzSgnuQvF1mZf8pI7IU"
           ZONE_ID="dc5903a24c54b7db234308ad624edfb5"
-          RECORD_NAME="api.retailpulse.me"
+          RECORD_NAME="retailpulse.me"
       
           # Get the current server IP from the previous step
           CURRENT_IP="${{ steps.server_output.outputs.server_ip }}"
