@@ -44,13 +44,36 @@ jobs:
           SERVER_IP=$(cd deploy && tofu output -json | jq -r '.server_ip.value')
           echo "server_ip=${SERVER_IP}" >> $GITHUB_OUTPUT
 
-      # 7.1. Update environment.ts with the provisioned server IP
-      - name: Update environment.ts with Server IP
+      # 7.1 Update Cloudflare DNS record with the retrieved server IP
+      - name: Update Cloudflare DNS record
         run: |
-          echo "Updating environment.ts with SERVER_IP: ${{ steps.server_output.outputs.server_ip }}"
-          sed -i "s|http://localhost:8081|http://$(echo ${{ steps.server_output.outputs.server_ip }}):8081|g" web-app/src/environments/environment.ts
-          sed -i "s|http://localhost:8083|http://$(echo ${{ steps.server_output.outputs.server_ip }}):8083|g" web-app/src/environments/environment.ts
-          sed -i "s|http://localhost:8085|http://$(echo ${{ steps.server_output.outputs.server_ip }}):8085|g" web-app/src/environments/environment.ts
+          API_TOKEN="qpgjckOSAOyBfS52bvDvyXzSgnuQvF1mZf8pI7IU"
+          ZONE_ID="dc5903a24c54b7db234308ad624edfb5"
+          RECORD_NAME="api.retailpulse.me"
+      
+          # Get the current server IP from the previous step
+          CURRENT_IP="${{ steps.server_output.outputs.server_ip }}"
+      
+          # Get the DNS record from Cloudflare
+          RECORD=$(curl -s -X GET "https://api.cloudflare.com/client/v4/zones/$ZONE_ID/dns_records?name=$RECORD_NAME" \
+               -H "Authorization: Bearer $API_TOKEN" \
+               -H "Content-Type: application/json")
+      
+          RECORD_ID=$(echo $RECORD | jq -r '.result[0].id')
+      
+          # Update the DNS record with the new IP
+          curl -s -X PUT "https://api.cloudflare.com/client/v4/zones/$ZONE_ID/dns_records/$RECORD_ID" \
+               -H "Authorization: Bearer $API_TOKEN" \
+               -H "Content-Type: application/json" \
+               --data "{\"type\":\"A\",\"name\":\"$RECORD_NAME\",\"content\":\"$CURRENT_IP\",\"ttl\":120,\"proxied\":false}"
+
+      # 7.1. Update environment.ts with the provisioned server IP
+#      - name: Update environment.ts with Server IP
+#        run: |
+#          echo "Updating environment.ts with SERVER_IP: ${{ steps.server_output.outputs.server_ip }}"
+#          sed -i "s|http://localhost:8081|http://$(echo ${{ steps.server_output.outputs.server_ip }}):8081|g" web-app/src/environments/environment.ts
+#          sed -i "s|http://localhost:8083|http://$(echo ${{ steps.server_output.outputs.server_ip }}):8083|g" web-app/src/environments/environment.ts
+#          sed -i "s|http://localhost:8085|http://$(echo ${{ steps.server_output.outputs.server_ip }}):8085|g" web-app/src/environments/environment.ts
 
       # 8. Wait for SSH to be available
       - name: Wait for SSH to be available
