@@ -1,9 +1,11 @@
-name: Build & Push Docker Images
+name: Build & Push Docker Images with Trivy Security Scan
 
 on:
-  push:
-    branches:
-      - main
+  workflow_dispatch:
+
+  # push:
+  #   branches:
+  #     - main
 
 jobs:
   build-and-push:
@@ -26,14 +28,32 @@ jobs:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
 
+    - name: Install Trivy
+      run: |
+        curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin
+
     - name: Build and push Docker images for all submodules
       run: |
         for dir in backend web-app user-management identity-access-management; do
           if [ -f "$dir/Dockerfile" ]; then
             echo "📦 Building and pushing $dir..."
-            docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/$dir:latest $dir
-            docker push ${{ secrets.DOCKERHUB_USERNAME }}/$dir:latest
+            IMAGE_NAME="${{ secrets.DOCKERHUB_USERNAME }}/$dir"
+            docker build -t $IMAGE_NAME:latest $dir
+            
+            # Run Trivy scan
+            echo "🛡️ Scanning $dir with Trivy..."
+            mkdir -p trivy-reports
+            REPORT_PATH="trivy-reports/$dir.sarif"
+            trivy image --format sarif --output $REPORT_PATH $IMAGE_NAME:latest
+            
+            # Push Docker image
+            docker push $IMAGE_NAME:latest
           else
             echo "⚠️ Skipping $dir (no Dockerfile found)"
           fi
         done
+
+    - name: Upload Trivy SARIF reports to GitHub Security tab
+      uses: github/codeql-action/upload-sarif@v2
+      with:
+        sarif_file: trivy-reports/*.sarif
