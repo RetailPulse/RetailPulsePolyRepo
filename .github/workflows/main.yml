@@ -10,7 +10,7 @@ permissions:
   security-events: write
   actions: read
   contents: read
-  
+
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
@@ -45,7 +45,7 @@ jobs:
  
     - name: Build and push Docker images for all submodules
       run: |
-        export TRIVY_REPORT_DIR="$HOME/trivy-reports"
+        export TRIVY_REPORT_DIR="./trivy-reports"
         mkdir -p "$TRIVY_REPORT_DIR"
         for dir in backend; do 
           if [ -f "$dir/Dockerfile" ]; then
@@ -76,4 +76,4 @@ jobs:
     - name: Upload Trivy SARIF reports to GitHub Security tab
       uses: github/codeql-action/upload-sarif@v3
       with:
-        sarif_file: /home/runner/trivy-reports/backend.sarif
+        sarif_file: ./trivy-reports/backend.sarif
