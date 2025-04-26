@@ -13,7 +13,7 @@ jobs:
 
     env:
       TRIVY_CACHE_DIR: ~/.cache/trivy
-      TRIVY_REPORT_DIR: /trivy-reports
+      TRIVY_REPORT_DIR: ~/trivy-reports
 
     steps:
     - name: Checkout code
