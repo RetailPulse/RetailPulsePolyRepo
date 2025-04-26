@@ -34,6 +34,10 @@ jobs:
     - name: Install Trivy
       run: |
         curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin
+      
+    - name: Download Trivy vulnerability database
+      run: |
+        trivy image --cache-dir "${TRIVY_CACHE_DIR}" --download-db-only
  
     - name: Build and push Docker images for all submodules
       run: |
@@ -50,10 +54,10 @@ jobs:
             REPORT_PATH="$TRIVY_REPORT_DIR/$dir.sarif"
             trivy image \
               --cache-dir "${TRIVY_CACHE_DIR}" \
-              --download-db-only \
               --format sarif \
               --output "$REPORT_PATH" \
-              $IMAGE_NAME:latest || echo "Trivy scan failed for $dir"            
+              $IMAGE_NAME:latest || echo "Trivy scan failed for $dir"
+            
             echo "Scanned $dir with Trivy success. Report saved at $REPORT_PATH"            
             cat $REPORT_PATH
             echo "Pushing image..."
