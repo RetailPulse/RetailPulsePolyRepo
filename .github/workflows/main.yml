@@ -12,8 +12,8 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      TRIVY_CACHE_DIR: ~/.cache/trivy
-      TRIVY_REPORT_DIR: ~/trivy-reports
+      TRIVY_CACHE_DIR: $HOME/.cache/trivy
+      TRIVY_REPORT_DIR: $HOME/trivy-reports
 
     steps:
     - name: Checkout code
