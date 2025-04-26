@@ -47,8 +47,12 @@ jobs:
             echo "🛡️ Scanning $dir with Trivy..."
             REPORT_PATH="trivy-reports/$dir.sarif"
             trivy image --format sarif --output $REPORT_PATH ${{ secrets.DOCKERHUB_USERNAME }}/$dir:latest || echo "Trivy scan failed for $dir"
+            echo "Scanned $dir with Trivy success. Report saved at $REPORT_PATH"            
+            cat $REPORT_PATH
+            echo "Pushing image..."
             # Push Docker image
             docker push $IMAGE_NAME:latest
+            echo "Image Pushed."
           else
             echo "⚠️ Skipping $dir (no Dockerfile found)"
           fi
