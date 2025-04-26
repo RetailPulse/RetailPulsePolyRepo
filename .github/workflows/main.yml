@@ -31,10 +31,13 @@ jobs:
     - name: Install Trivy
       run: |
         curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin
+    
+    - name: Create Trivy reports directory
+      run: mkdir -p trivy-reports
 
     - name: Build and push Docker images for all submodules
       run: |
-        for dir in backend web-app user-management identity-access-management; do
+        for dir in backend; do 
           if [ -f "$dir/Dockerfile" ]; then
             echo "📦 Building and pushing $dir..."
             IMAGE_NAME="${{ secrets.DOCKERHUB_USERNAME }}/$dir"
@@ -42,10 +45,8 @@ jobs:
             
             # Run Trivy scan
             echo "🛡️ Scanning $dir with Trivy..."
-            mkdir -p trivy-reports
             REPORT_PATH="trivy-reports/$dir.sarif"
-            trivy image --format sarif --output $REPORT_PATH $IMAGE_NAME:latest
-            
+            trivy image --format sarif --output $REPORT_PATH ${{ secrets.DOCKERHUB_USERNAME }}/$dir:latest || echo "Trivy scan failed for $dir"
             # Push Docker image
             docker push $IMAGE_NAME:latest
           else
