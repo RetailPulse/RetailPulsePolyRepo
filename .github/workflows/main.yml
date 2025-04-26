@@ -92,7 +92,7 @@ jobs:
       run: ls ./trivy-reports/
 
     - name: SonarCloud Scan
-      uses: sonarsource/sonarcloud-github-action@v5.0.0
+      uses: SonarSource/sonarqube-scan-action@v5.1.0
       with:
         args: >
           -Dsonar.organization=${{ secrets.SONAR_ORGANIZATION }}
@@ -101,4 +101,3 @@ jobs:
           -Dsonar.sarifReportPaths=./trivy-reports/backend.sarif
       env:
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        SONAR_SCANNER_OPTS: "-X"
