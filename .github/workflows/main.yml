@@ -63,7 +63,6 @@ jobs:
               $IMAGE_NAME:latest || echo "Trivy scan failed for $dir"
             
             echo "Scanned $dir with Trivy success. Report saved at $REPORT_PATH"            
-            cat $REPORT_PATH
             echo "Pushing image..."
             # Push Docker image
             docker push $IMAGE_NAME:latest
@@ -73,6 +72,12 @@ jobs:
           fi
         done
 
+    - name: Upload Trivy report as artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: trivy-reports
+        path: ./trivy-reports/
+    
     - name: Upload Trivy SARIF reports to GitHub Security tab
       uses: github/codeql-action/upload-sarif@v3
       with:
