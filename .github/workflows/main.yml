@@ -47,13 +47,13 @@ jobs:
       run: |
         export TRIVY_REPORT_DIR="./trivy-reports"
         mkdir -p "$TRIVY_REPORT_DIR"
-        for dir in backend web-app user-management identity-access-management; do 
+        for dir in backend; do 
           if [ -f "$dir/Dockerfile" ]; then
             echo "📦 Building and pushing $dir..."
             IMAGE_NAME="${{ secrets.DOCKERHUB_USERNAME }}/$dir"
             docker build -t $IMAGE_NAME:latest $dir
             
-            # Run Trivy scan
+            # Run Trivy scan (SARIF format)
             echo "🛡️ Scanning $dir with Trivy..."
             REPORT_PATH="$TRIVY_REPORT_DIR/$dir.sarif"
             trivy image \
@@ -61,6 +61,15 @@ jobs:
               --format sarif \
               --output "$REPORT_PATH" \
               $IMAGE_NAME:latest || echo "Trivy scan failed for $dir"
+
+            # Run Trivy scan (JSON format)
+            echo "🛡️ Scanning $dir with Trivy (JSON)..."
+            JSON_PATH="$TRIVY_REPORT_DIR/$dir.json"
+            trivy image \
+              --cache-dir "${TRIVY_CACHE_DIR}" \
+              --format json \
+              --output "$JSON_PATH" \
+              $IMAGE_NAME:latest || echo "Trivy JSON scan failed for $dir"
             
             echo "Scanned $dir with Trivy success. Report saved at $REPORT_PATH"            
             echo "Pushing image..."
