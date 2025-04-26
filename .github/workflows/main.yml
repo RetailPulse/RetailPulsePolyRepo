@@ -78,6 +78,10 @@ jobs:
         name: trivy-reports
         path: ./trivy-reports/
 
+    # Add this step to debug
+    - name: Debug SARIF Report Directory
+      run: ls ./trivy-reports/
+
     - name: SonarCloud Scan
       uses: sonarsource/sonarcloud-github-action@v5.0.0
       with:
@@ -85,6 +89,7 @@ jobs:
           -Dsonar.organization=${{ secrets.SONAR_ORGANIZATION }}
           -Dsonar.projectKey=${{ secrets.SONAR_PROJECT_KEY }}
           -Dsonar.sources=.
-          -Dsonar.sarifReportPaths=trivy-reports/*.sarif
+          -Dsonar.sarifReportPaths=./trivy-reports/*.sarif
       env:
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        SONAR_SCANNER_OPTS: "-X"
