@@ -1,7 +1,7 @@
 terraform {
   backend "s3" {
-    bucket         = "rp-tofu-state-bucket"       # Replace with your S3 bucket name
-    key            = "state/tofu.tfstate"           # Adjust the path as needed
+    bucket = "rp-tofu-state-bucket"       # Replace with your S3 bucket name
+    key = "state/tofu.tfstate"           # Adjust the path as needed
     region         = "ap-southeast-1"
     dynamodb_table = "rp-tofu-state-lock"           # Replace with your DynamoDB table name, if used
   }
@@ -14,41 +14,55 @@ provider "aws" {
 resource "aws_security_group" "docker_sg" {
   name        = "docker-sg"
   description = "Allow SSH, UI, and application access"
-  
+
   ingress {
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
+    from_port = 22
+    to_port   = 22
+    protocol  = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
 
   ingress {
-    from_port   = 4200
-    to_port     = 4200
-    protocol    = "tcp"
+    from_port = 4200
+    to_port   = 4200
+    protocol  = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
 
   ingress {
-    from_port   = 8081
-    to_port     = 8081
-    protocol    = "tcp"
+    from_port = 8081
+    to_port   = 8081
+    protocol  = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
-  
+
+  ingress {
+    from_port = 8083
+    to_port   = 8083
+    protocol  = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    from_port = 8085
+    to_port   = 8085
+    protocol  = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
   egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
+    from_port = 0
+    to_port   = 0
+    protocol  = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
 }
 
 resource "aws_instance" "docker_host" {
-  ami                         = "ami-01938df366ac2d954"  # Use an appropriate Ubuntu AMI
+  ami = "ami-01938df366ac2d954"  # Use an appropriate Ubuntu AMI
   instance_type               = "t2.small"
   key_name                    = "RetailPulse-Sem1"
-  vpc_security_group_ids      = [aws_security_group.docker_sg.id]
+  vpc_security_group_ids = [aws_security_group.docker_sg.id]
   associate_public_ip_address = true
 
   user_data = <<EOF
