@@ -10,9 +10,10 @@ on:
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
-    
+
     env:
       TRIVY_CACHE_DIR: ~/.cache/trivy
+      TRIVY_REPORT_DIR: /trivy-reports
 
     steps:
     - name: Checkout code
@@ -36,7 +37,7 @@ jobs:
         curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin
     
     - name: Create Trivy reports directory
-      run: mkdir -p trivy-reports
+      run: mkdir -p "$TRIVY_REPORT_DIR"
 
     - name: Build and push Docker images for all submodules
       run: |
@@ -48,7 +49,7 @@ jobs:
             
             # Run Trivy scan
             echo "🛡️ Scanning $dir with Trivy..."
-            REPORT_PATH="trivy-reports/$dir.sarif"
+            REPORT_PATH="$TRIVY_REPORT_DIR/$dir.sarif"
             trivy image \
               --cache-dir "${TRIVY_CACHE_DIR}" \
               --download-db-only \
