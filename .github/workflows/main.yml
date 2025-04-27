@@ -94,6 +94,6 @@ jobs:
           -Dsonar.organization=${{ secrets.SONAR_ORGANIZATION }}
           -Dsonar.projectKey=${{ secrets.SONAR_PROJECT_KEY }}
           -Dsonar.sources=.
-          -Dsonar.sarifReportPaths=./trivy-reports/backend.sarif
+          -Dsonar.sarifReportPaths=./trivy-reports/backend.sarif,./trivy-reports/identity-access-management.sarif,./trivy-reports/user-management.sarif,./trivy-reports/web-app.sarif
       env:
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
