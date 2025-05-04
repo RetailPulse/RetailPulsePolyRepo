@@ -118,7 +118,7 @@ services:
     image: galvinlwy/web-app:latest
     container_name: app-web
     ports:
-      - "4200:80"
+      - "4200:8080"
     depends_on:
       app-rp:
         condition: service_started
