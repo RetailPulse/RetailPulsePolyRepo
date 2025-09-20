@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ printf "%s-rp-businessentity-sql-cm" .Release.Name }}
+  namespace: {{ include "business-entity-microservice.namespace" . }}
+  labels:
+    {{- include "business-entity-microservice.labels" . | nindent 4 }}
+data:
+  init.sql: |
+{{ .Values.mysql.initSql | indent 4 }}
