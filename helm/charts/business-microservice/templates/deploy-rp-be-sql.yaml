@@ -1,0 +1,130 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: secret-mysql-businessentity
+  namespace: ns-retailpulse
+type: Opaque
+stringData:
+  MYSQL_ROOT_PASSWORD: password
+  MYSQL_DATABASE: RPBusinessEntityDB
+
+---
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cm-mysql-businessentity-init
+  namespace: ns-retailpulse
+data:
+  init.sql: "-- MySQL dump 10.13  Distrib 9.3.0, for Linux (x86_64)\r\n--\r\n-- Host:
+    localhost    Database: RPBusinessEntityDB\r\n-- ------------------------------------------------------\r\n--
+    Server version\t9.3.0\r\n\r\n/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT
+    */;\r\n/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;\r\n/*!40101
+    SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;\r\n/*!50503 SET NAMES
+    utf8mb4 */;\r\n/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;\r\n/*!40103 SET TIME_ZONE='+00:00'
+    */;\r\n/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;\r\n/*!40014
+    SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;\r\n/*!40101
+    SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;\r\n/*!40111
+    SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;\r\n\r\n--\r\n-- Table structure
+    for table `business_entity`\r\n--\r\n\r\nDROP TABLE IF EXISTS `business_entity`;\r\n/*!40101
+    SET @saved_cs_client     = @@character_set_client */;\r\n/*!50503 SET character_set_client
+    = utf8mb4 */;\r\nCREATE TABLE `business_entity` (\r\n  `id` bigint NOT NULL AUTO_INCREMENT,\r\n
+    \ `active` bit(1) NOT NULL,\r\n  `external` bit(1) NOT NULL,\r\n  `location` varchar(255)
+    NOT NULL,\r\n  `name` varchar(255) NOT NULL,\r\n  `type` varchar(255) NOT NULL,\r\n
+    \ PRIMARY KEY (`id`)\r\n) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4
+    COLLATE=utf8mb4_0900_ai_ci;\r\n/*!40101 SET character_set_client = @saved_cs_client
+    */;\r\n\r\n--\r\n-- Dumping data for table `business_entity`\r\n--\r\n\r\nLOCK
+    TABLES `business_entity` WRITE;\r\n/*!40000 ALTER TABLE `business_entity` DISABLE
+    KEYS */;\r\nINSERT INTO `business_entity` VALUES (1,_binary '\x01',_binary '\\0','Woodlands','CausewayPoint','Shop'),(2,_binary
+    '\x01',_binary '\\0','Punggol','Waterway Point','Shop'),(3,_binary '\x01',_binary
+    '\\0','Tuas','Main Warehouse','CentralInventory'),(4,_binary '\x01',_binary '\x01','Tuas','Ah
+    Hock Pte Ltd','Supplier');\r\n/*!40000 ALTER TABLE `business_entity` ENABLE KEYS
+    */;\r\nUNLOCK TABLES;\r\n"
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mysql-businessentity-pvc
+  namespace: ns-retailpulse
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql-rp-businessentity
+  namespace: ns-retailpulse
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mysql-rp-businessentity
+  template:
+    metadata:
+      labels:
+        app: mysql-rp-businessentity
+    spec:
+      containers:
+        - name: mysql
+          image: mysql:latest
+          ports:
+            - containerPort: 3306
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: secret-mysql-businessentity
+                  key: MYSQL_ROOT_PASSWORD
+            - name: MYSQL_DATABASE
+              valueFrom:
+                secretKeyRef:
+                  name: secret-mysql-businessentity
+                  key: MYSQL_DATABASE
+          volumeMounts:
+            - name: mysql-data
+              mountPath: /var/lib/mysql
+            - name: init-sql-file
+              mountPath: /docker-entrypoint-initdb.d
+          livenessProbe:
+            exec:
+              command: ["mysqladmin", "ping", "-h", "localhost"]
+            initialDelaySeconds: 10
+            periodSeconds: 30
+            timeoutSeconds: 10
+            failureThreshold: 5
+          readinessProbe:
+            exec:
+              command: ["mysqladmin", "ping", "-h", "localhost"]
+            initialDelaySeconds: 10
+            periodSeconds: 30
+            timeoutSeconds: 10
+            failureThreshold: 5
+      volumes:
+        - name: mysql-data
+          persistentVolumeClaim:
+            claimName: mysql-businessentity-pvc
+        - name: init-sql-file
+          configMap:
+            name: cm-mysql-businessentity-init
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql-rp-businessentity 
+  namespace: ns-retailpulse
+spec:
+  selector:
+    app: mysql-rp-businessentity
+  ports:
+    - protocol: TCP
+      port: 3306
+      targetPort: 3306
+      nodePort: 30307 
+  type: NodePort
