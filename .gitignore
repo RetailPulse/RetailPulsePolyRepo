@@ -22,3 +22,8 @@ test-app/
 
 # Node modules
 node_modules/
+
+# Tar files
+*.tgz
+*.tar.gz
+*.tar
