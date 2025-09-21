@@ -46,7 +46,12 @@ mysql:
 
     LOCK TABLES `business_entity` WRITE;
     /*!40000 ALTER TABLE `business_entity` DISABLE KEYS */;
-    INSERT INTO `business_entity` VALUES (1,_binary '\x01',_binary '\\0','Woodlands','CausewayPoint','Shop'),(2,_binary '\x01',_binary '\\0','Punggol','Waterway Point','Shop'),(3,_binary '\x01',_binary '\\0','Tuas','Main Warehouse','CentralInventory'),(4,_binary '\x01',_binary '\x01','Tuas','Ah Hock Pte Ltd','Supplier');
+    INSERT INTO `business_entity` VALUES 
+    (1,b'1',b'0','Woodlands','Causeway Point','Shop'),
+    (2,b'1',b'0','Punggol','Waterway Point','Shop'),
+    (3,b'1',b'0','Tuas','Main Warehouse','CentralInventory'),
+    (4,b'1',b'1','Tuas','Ah Hock Pte Ltd','Supplier');
+    
     /*!40000 ALTER TABLE `business_entity` ENABLE KEYS */;
     UNLOCK TABLES;
 
@@ -70,7 +75,7 @@ app:
 
     auth:
       enabled: false
-      origin: "http://localhost:4200"
+      origin: "http://localhost:30080"
       jwt:
         key:
           set:
@@ -101,10 +106,8 @@ app:
 
     logging:
       level:
-        root: INFO
-        org:
-          springframework:
-            security: TRACE
-        com.retailpulse: DEBUG
+        root: "INFO"
+        org.springframework.security: "INFO"
+        com.retailpulse: "DEBUG"
       file:
         name: logs/rp-businessentity.log

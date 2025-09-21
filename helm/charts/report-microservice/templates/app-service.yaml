@@ -1,0 +1,19 @@
+{{- if .Values.app.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ printf "%s-rp-report-app-svc" .Release.Name }}
+  namespace: {{ include "report.namespace" . }}
+  labels:
+    {{- include "report.labels" . | nindent 4 }}
+    app: {{ printf "%s-rp-report-app-deploy" .Release.Name }}
+spec:
+  selector:
+    app: {{ printf "%s-rp-report-app-deploy" .Release.Name }}
+  ports:
+    - name: http
+      port: {{ .Values.app.port }}
+      targetPort: {{ .Values.app.port }}
+      nodePort: {{ .Values.app.nodePort }}
+  type: NodePort
+{{- end }}

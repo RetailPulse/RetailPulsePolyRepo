@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ printf "%s-rp-web-deploy" .Release.Name }}
+  namespace: {{ include "web.namespace" . }}
+  labels:
+    {{- include "web.labels" . | nindent 4 }}
+    app: {{ printf "%s-rp-web-deploy" .Release.Name }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ printf "%s-rp-web-deploy" .Release.Name }}
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        app: {{ printf "%s-rp-web-deploy" .Release.Name }}
+    spec:
+      containers:
+        - image: {{ .Values.app.image }}
+          name: {{ printf "%s-rp-web-pod" .Release.Name }}
+          imagePullPolicy: {{ .Values.app.imagePullPolicy }}
+          ports:
+            - containerPort: {{ .Values.app.port }}
+          # livenessProbe:
+          #   httpGet:
+          #     path: /
+          #     port: {{ .Values.app.port }}
+          #   initialDelaySeconds: 30
+          #   periodSeconds: 10
+          # readinessProbe:
+          #   httpGet:
+          #     path: /
+          #     port: {{ .Values.app.port }}
+          #   initialDelaySeconds: 20
+          #   periodSeconds: 5
+          resources: {}

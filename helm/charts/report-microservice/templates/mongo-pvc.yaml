@@ -1,0 +1,18 @@
+{{- if .Values.mongodb.enabled }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ printf "%s-rp-report-mongodb-pvc" .Release.Name }}
+  namespace: {{ include "report.namespace" . }}
+  labels:
+    {{- include "report.labels" . | nindent 4 }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ .Values.mongodb.storage }}
+  {{- if .Values.mongodb.storageClassName }}
+  storageClassName: {{ .Values.mongodb.storageClassName | quote }}
+  {{- end }}
+{{- end }}

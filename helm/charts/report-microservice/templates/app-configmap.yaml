@@ -1,0 +1,16 @@
+{{- if .Values.app.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ printf "%s-rp-report-app-cm" .Release.Name }}
+  namespace: {{ include "report.namespace" . }}
+  labels:
+    {{- include "report.labels" . | nindent 4 }}
+data:
+  application.yaml: |
+{{- tpl (.Values.app.configYaml |
+      replace "MONGO_HOST" (include "report.mongodbService" .) |
+      replace "INVENTORY_SVC" (include "report.inventoryService" .) |
+      replace "IAM_SVC" (include "report.iamService" .)
+    ) . | nindent 4 }}
+{{- end }}

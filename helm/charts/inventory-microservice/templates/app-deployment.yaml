@@ -1,21 +1,21 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ printf "%s-rp-businessentity-app-deploy" .Release.Name }} 
-  namespace: {{ include "business-entity-microservice.namespace" . }}
+  name: {{ printf "%s-rp-inventory-app-deploy" .Release.Name }}
+  namespace: {{ include "inventory.namespace" . }}
   labels:
-    {{- include "business-entity-microservice.labels" . | nindent 4 }}
-    app: {{ printf "%s-rp-businessentity-app-deploy" .Release.Name }}
+    {{- include "inventory.labels" . | nindent 4 }}
+    app: {{ printf "%s-rp-inventory-app-deploy" .Release.Name }}
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: {{ printf "%s-rp-businessentity-app-deploy" .Release.Name }}
+      app: {{ printf "%s-rp-inventory-app-deploy" .Release.Name }}
   strategy: {}
   template:
     metadata:
       labels:
-        app: {{ printf "%s-rp-businessentity-app-deploy" .Release.Name }}
+        app: {{ printf "%s-rp-inventory-app-deploy" .Release.Name }}
     spec:
       initContainers:
         # Wait for MySQL Service to be reachable
@@ -25,26 +25,26 @@ spec:
             - sh
             - -c
             - >
-              until nc -z {{ printf "%s-rp-businessentity-sql-svc" .Release.Name }} 3306; do
-                echo "Waiting for MySQL at {{ printf "%s-rp-businessentity-sql-svc" .Release.Name }}:3306...";
+              until nc -z {{ include "inventory.mysqlService" . }} 3306; do
+                echo "Waiting for MySQL at {{ include "inventory.mysqlService" . }}:3306...";
                 sleep 5;
               done;
               echo "MySQL is ready!";
           env:
             - name: MYSQL_HOST
-              value: {{ printf "%s-rp-businessentity-sql-svc" .Release.Name }}
+              value: {{ include "inventory.mysqlService" . }}
             - name: MYSQL_PORT
               value: "3306"
 
         # Wait for Redis Service to be reachable
         - name: wait-for-redis
-          image: redis:7.2
+          image: redis:7.2 # Use redis image for redis-cli
           command:
             - sh
             - -c
             - >
-              until redis-cli -h {{ printf "%s-rp-businessentity-redis-svc" .Release.Name }}  -p 6379 -a $$REDIS_PASSWORD ping; do
-                echo "Waiting for Redis at {{ printf "%s-rp-businessentity-redis-svc" .Release.Name }}:6379...";
+              until redis-cli -h {{ include "inventory.redisService" . }} -p {{ .Values.redis.port }} -a $$REDIS_PASSWORD ping; do
+                echo "Waiting for Redis at {{ include "inventory.redisService" . }}:{{ .Values.redis.port }}...";
                 sleep 5;
               done;
               echo "Redis is ready!";
@@ -52,22 +52,22 @@ spec:
             - name: REDIS_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ printf "%s-rp-businessentity-redis-secret" .Release.Name }}
+                  name: {{ include "inventory.redisSecretName" . }} # Use helper for secret name
                   key: REDIS_PASSWORD
             - name: REDIS_HOST
-              value: {{ printf "%s-rp-businessentity-redis-svc" .Release.Name }}
+              value: {{ include "inventory.redisService" . }}
             - name: REDIS_PORT
-              value: "6379"
+              value: {{ .Values.redis.port | quote }}
 
       containers:
         - image: {{ .Values.app.image }}
-          name: {{ printf "%s-rp-businessentity-app-pod" .Release.Name }}
+          name: {{ printf "%s-rp-inventory-app-pod" .Release.Name }}
           imagePullPolicy: {{ .Values.app.imagePullPolicy }}
           env:
             - name: REDIS_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ printf "%s-rp-businessentity-redis-secret" .Release.Name }}
+                  name: {{ include "inventory.redisSecretName" . }} # Use helper for secret name
                   key: REDIS_PASSWORD
           volumeMounts:
             - name: config-volume
@@ -76,13 +76,13 @@ spec:
             - containerPort: {{ .Values.app.port }}
           # livenessProbe:
           #   httpGet:
-          #     path: /actuator/health
+          #     path: /actuator/health # Adjust path if different
           #     port: {{ .Values.app.port }}
           #   initialDelaySeconds: 30
           #   periodSeconds: 10
           # readinessProbe:
           #   httpGet:
-          #     path: /actuator/health
+          #     path: /actuator/health # Adjust path if different
           #     port: {{ .Values.app.port }}
           #   initialDelaySeconds: 20
           #   periodSeconds: 5
@@ -90,4 +90,4 @@ spec:
       volumes:
         - name: config-volume
           configMap:
-            name: {{ printf "%s-rp-businessentity-app-cm" .Release.Name }}
+            name: {{ printf "%s-rp-inventory-app-cm" .Release.Name }}

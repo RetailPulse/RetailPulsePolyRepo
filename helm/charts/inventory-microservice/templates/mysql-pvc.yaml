@@ -1,0 +1,15 @@
+{{- if .Values.mysql.enabled }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ printf "%s-rp-inventory-sql-pvc" .Release.Name }}
+  namespace: {{ include "inventory.namespace" . }}
+  labels:
+    {{- include "inventory.labels" . | nindent 4 }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ .Values.mysql.storage }}
+{{- end }}

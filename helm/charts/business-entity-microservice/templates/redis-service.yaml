@@ -6,6 +6,7 @@ metadata:
   labels:
     {{- include "business-entity-microservice.labels" . | nindent 4 }}
     name: {{ printf "%s-rp-businessentity-redis-svc" .Release.Name }} 
+    app: {{ printf "%s-rp-businessentity-redis-deploy" .Release.Name }}
 spec:
   selector:
     app: {{ printf "%s-rp-businessentity-redis-deploy" .Release.Name }}

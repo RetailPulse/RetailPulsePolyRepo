@@ -1,0 +1,6 @@
+apiVersion: v2
+name: inventory-microservice
+description: A Helm chart for RetailPulse Inventory Microservice (MySQL + Redis + App)
+type: application
+version: 0.1.0
+appVersion: "v2.0.0"

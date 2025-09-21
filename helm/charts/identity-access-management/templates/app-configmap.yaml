@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ printf "%s-rp-iam-app-cm" .Release.Name }}
+  namespace: {{ include "identity-access-management.namespace" . }}
+  labels:
+    {{- include "identity-access-management.labels" . | nindent 4 }}
+data:
+  application.yaml: |
+{{- tpl (.Values.app.configYaml | replace "MYSQL_HOST" (include "identity-access-management.userMysqlService" .)) . | nindent 4 }}

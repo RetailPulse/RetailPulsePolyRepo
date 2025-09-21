@@ -1,0 +1,17 @@
+{{- if .Values.redis.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ printf "%s-rp-inventory-redis-svc" .Release.Name }}
+  namespace: {{ include "inventory.namespace" . }}
+  labels:
+    {{- include "inventory.labels" . | nindent 4 }}
+    app: {{ printf "%s-rp-inventory-redis-deploy" .Release.Name }}
+spec:
+  selector:
+    app: {{ printf "%s-rp-inventory-redis-deploy" .Release.Name }}
+  ports:
+    - port: {{ .Values.redis.port }}
+      targetPort: {{ .Values.redis.port }}
+  type: ClusterIP
+{{- end }}

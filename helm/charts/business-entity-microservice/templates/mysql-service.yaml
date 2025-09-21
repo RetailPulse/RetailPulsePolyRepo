@@ -5,7 +5,8 @@ metadata:
   namespace: {{ include "business-entity-microservice.namespace" . }}
   labels:
     {{- include "business-entity-microservice.labels" . | nindent 4 }}
-    app: {{ printf "%s-rp-businessentity-sql-svc" .Release.Name }}
+    name: {{ printf "%s-rp-businessentity-sql-svc" .Release.Name }}
+    app: {{ printf "%s-rp-businessentity-sql-deploy" .Release.Name }}
 spec:
   selector:
     app: {{ printf "%s-rp-businessentity-sql-deploy" .Release.Name }}

@@ -1,0 +1,11 @@
+{{- if .Values.mysql.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ printf "%s-rp-inventory-sql-cm" .Release.Name }}
+  namespace: {{ include "inventory.namespace" . }}
+  labels:
+    {{- include "inventory.labels" . | nindent 4 }}
+binaryData:
+  init.sql: {{ .Values.mysql.initSql | quote }} # Ensure correct base64 encoding if needed
+{{- end }}
