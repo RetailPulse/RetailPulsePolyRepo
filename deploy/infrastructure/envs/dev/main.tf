@@ -5,7 +5,7 @@ module "network" {
   env         = var.env
 }
 
-/* Step 2: EKS
+/* Step 2: EKS */
 module "eks_stack" {
   source          = "./eks"
   vpc_id          = module.network.vpc_id
@@ -15,4 +15,3 @@ module "eks_stack" {
   env             = var.env
   cluster_version = "1.29"
 }
-*/

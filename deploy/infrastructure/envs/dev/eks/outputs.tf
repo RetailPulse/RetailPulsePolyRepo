@@ -4,17 +4,17 @@ output "cluster_name" {
 }
 
 output "cluster_endpoint" {
-  description = "API server endpoint"
+  description = "EKS API server endpoint"
   value       = module.eks.cluster_endpoint
 }
 
 output "cluster_ca_certificate" {
-  description = "Base64 CA data for kubectl client"
+  description = "Base64-encoded cluster CA for kubectl"
   value       = module.eks.cluster_certificate_authority_data
 }
 
 output "oidc_provider_arn" {
-  description = "OIDC provider used by IRSA"
+  description = "OIDC provider ARN used by IRSA"
   value       = module.eks.oidc_provider_arn
 }
 
