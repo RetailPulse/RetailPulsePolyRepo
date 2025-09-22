@@ -1,0 +1,21 @@
+Thank you for installing {{ .Chart.Name }}.
+
+Your release is named {{ .Release.Name }}.
+
+To learn more about the release, try:
+
+  $ helm status {{ .Release.Name }} -n {{ include "report.namespace" . }}
+  $ helm get all {{ .Release.Name }} -n {{ include "report.namespace" . }}
+
+The Report microservice should now be accessible within the cluster via the service:
+{{ include "report.fullname" . }}-app-svc:{{ .Values.app.port }}
+
+If exposed via NodePort, it might be accessible at:
+http://<NODE_IP>:{{ .Values.app.nodePort }}
+(Ensure your cloud provider firewall allows traffic to this port if applicable).
+
+MongoDB is available within the cluster at:
+{{ include "report.mongodbService" . }}:27017
+
+Ensure dependent services (Inventory, IAM) are correctly configured and accessible.
+Check pod logs if the application fails to start or connect to dependencies.

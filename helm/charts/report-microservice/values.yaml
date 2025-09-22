@@ -1,0 +1,71 @@
+# Global namespace override (optional)
+# Note: Namespace resources are often managed outside of individual charts.
+# Set this if deploying to a specific namespace via this chart.
+namespace: ns-retailpulse
+
+# MongoDB Configuration
+mongodb:
+  enabled: true
+  image: mongo:7
+  rootUsername: admin
+  rootPassword: secret
+  database: reportsdb
+  webUsername: webuser # For ME_CONFIG_BASICAUTH_USERNAME if needed by web UI
+  webPassword: webpass # For ME_CONFIG_BASICAUTH_PASSWORD if needed by web UI
+  storage: 5Gi
+  # storageClassName: "" # Uncomment/set to your cluster's class if needed, e.g., "standard"
+
+# Report App Configuration
+app:
+  enabled: true
+  image: docker.io/casperyap/rp-report-app:v0.1.0
+  imagePullPolicy: IfNotPresent # Consider IfNotPresent or Always based on tagging strategy
+  port: 8088
+  nodePort: 30088
+  configYaml: |
+    server:
+      port: 8088
+
+    inventory:
+      api:
+        base-url: "http://INVENTORY_SVC:8084" # Dynamically replaced
+
+    auth:
+      enabled: true
+      origin: "http://localhost:30080" # Default web origin, consider making configurable
+      jwt:
+        key:
+          set:
+            uri: "http://IAM_SVC:8081/oauth2/jwks" # Dynamically replaced
+
+    spring:
+      data:
+        mongodb:
+          # URI constructed from secret values and service name
+          # Example: mongodb://admin:secret@mongo-service-name:27017/reportsdb?authSource=admin
+          # This is overridden by env var SPRING_DATA_MONGODB_URI in deployment for clarity
+          uri: "mongodb://MONGO_HOST:27017/reportsdb?authSource=admin"
+          database: reportsdb
+    app:
+      gridfs:
+        bucket: reports # GridFS bucket name (prefixes fs.files/fs.chunks)
+
+    logging:
+      level:
+        root: "INFO"
+        org.springframework.security: "INFO"
+        com.retailpulse: "DEBUG"
+        com.example.report.infrastructure.feign: "INFO"
+        feign: "INFO"
+      file:
+        name: "logs/report-service.log"
+
+# Dependency Service Names (Optional Overrides)
+dependencies:
+  # Name of the Helm release for the Inventory microservice
+  inventoryReleaseName: "retailpulse-inventory" # Default, change if needed
+  # inventoryService: "retailpulse-inventory-rp-inventory-sql-svc"
+
+  # Name of the Helm release for the Identity & Access Management microservice
+  iamReleaseName: "retailpulse-iam" # Default, change if needed
+  # iamService: "retailpulse-iam-rp-iam-app-svc"

@@ -1,0 +1,45 @@
+apiVersion: v2
+name: retailpulse
+description: A Helm chart for the complete RetailPulse application stack
+type: application
+version: 0.1.0
+appVersion: "v2.0.0"
+# Specify dependencies here. These point to the charts in the ./charts directory.
+# The name must match the name inside the Chart.yaml of the subchart.
+# The version should ideally match the version in the subchart's Chart.yaml.
+# alias allows you to reference the subchart with a different name in values.yaml.
+dependencies:
+  - name: business-entity-microservice
+    version: 0.1.0
+    repository: "file://./charts/business-entity-microservice"
+    # alias: be # Optional: use 'be' instead of 'business-entity-microservice' in values.yaml
+
+  - name: identity-access-management
+    version: 0.1.0
+    repository: "file://./charts/identity-access-management"
+    # alias: iam
+
+  - name: inventory-microservice
+    version: 0.1.0
+    repository: "file://./charts/inventory-microservice"
+    # alias: inventory
+
+  - name: report-microservice
+    version: 0.1.0
+    repository: "file://./charts/report-microservice"
+    # alias: report
+
+  - name: sales-microservice
+    version: 0.1.0
+    repository: "file://./charts/sales-microservice"
+    # alias: sales
+
+  - name: user-microservice
+    version: 0.1.0
+    repository: "file://./charts/user-microservice"
+    # alias: user
+
+  - name: web-app
+    version: 0.1.0
+    repository: "file://./charts/web-app"
+    # alias: frontend

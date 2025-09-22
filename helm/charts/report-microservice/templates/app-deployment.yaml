@@ -1,0 +1,58 @@
+{{- if .Values.app.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ printf "%s-rp-report-app-deploy" .Release.Name }}
+  namespace: {{ include "report.namespace" . }}
+  labels:
+    {{- include "report.labels" . | nindent 4 }}
+    app: {{ printf "%s-rp-report-app-deploy" .Release.Name }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ printf "%s-rp-report-app-deploy" .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ printf "%s-rp-report-app-deploy" .Release.Name }}
+    spec:
+      containers:
+        - name: rp-report-service
+          image: {{ .Values.app.image }}
+          imagePullPolicy: {{ .Values.app.imagePullPolicy }}
+          ports:
+            - containerPort: {{ .Values.app.port }}
+          env:
+            # Make Spring read /config/application.yaml
+            - name: SPRING_CONFIG_ADDITIONAL_LOCATION
+              value: "file:/config/"
+            # Override URI from configmap for clarity and direct control
+            - name: SPRING_DATA_MONGODB_URI
+              value: "mongodb://{{ .Values.mongodb.rootUsername }}:{{ .Values.mongodb.rootPassword }}@{{ include "report.mongodbService" . }}:27017/{{ .Values.mongodb.database }}?authSource=admin"
+            - name: SERVER_PORT
+              value: {{ .Values.app.port | quote }}
+            # Consider if AUTH_SERVER_URL is still needed or if configmap uri is sufficient
+            # - name: AUTH_SERVER_URL
+            #   value: "http://{{ include "report.iamService" . }}:8081"
+          volumeMounts:
+            - name: app-config
+              mountPath: /config
+          readinessProbe:
+            tcpSocket:
+              port: {{ .Values.app.port }}
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            tcpSocket:
+              port: {{ .Values.app.port }}
+            initialDelaySeconds: 30
+            periodSeconds: 20
+      volumes:
+        - name: app-config
+          configMap:
+            name: {{ printf "%s-rp-report-app-cm" .Release.Name }}
+            items:
+              - key: application.yaml
+                path: application.yaml
+{{- end }}

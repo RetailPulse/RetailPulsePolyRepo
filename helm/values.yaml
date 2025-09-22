@@ -1,0 +1,44 @@
+# Default global values for the RetailPulse application
+# These can be overridden by subchart-specific values or at install time.
+
+# Global namespace override - This will be used by subcharts if they reference it correctly.
+# Most of your subcharts use `{{ include "xxx.namespace" . }}` which defaults to .Release.Namespace
+# but can be overridden by .Values.namespace. Setting it globally here simplifies things.
+global:
+  namespace: ns-retailpulse # This sets .Values.global.namespace
+  autoReleaseName: 1
+
+# --- Subchart Value Overrides ---
+# You can override specific values for each subchart here.
+# The keys must match the subchart names defined in Chart.yaml (or their aliases).
+
+# Example: Override the NodePort for the Business Entity app service
+# business-entity-microservice:
+#   app:
+#     nodePort: 30183
+
+# Example: Override the MySQL root password for the User microservice
+# user-microservice:
+#   mysql:
+#     rootPassword: "different-user-password"
+
+# Example: Override the image tag for the Web app
+# web:
+#   app:
+#     image: "docker.io/casperyap/rp-web-app:v0.2.0"
+
+# --- Default Subchart Values ---
+# Include default configurations for subcharts here if needed for initial setup.
+# Usually, you'd rely on the defaults within each subchart's values.yaml,
+# but you can set them explicitly here if desired for the parent context.
+
+# --- Web App Specific Configuration ---
+# If you want the web app in a different namespace, you would need to:
+# 1. Modify the web subchart to accept a namespace override via values.
+# 2. Set it here, e.g.:
+# web:
+#   namespace: ns-retailpulse-web
+# 3. Ensure the web app is configured (e.g., via ConfigMap/env vars) to reach backend services
+#    in the `ns-retailpulse` namespace (e.g., using FQDNs like `svc-be.ns-retailpulse.svc.cluster.local`).
+
+# For now, we assume all services are in the same namespace as the release (ns-retailpulse).

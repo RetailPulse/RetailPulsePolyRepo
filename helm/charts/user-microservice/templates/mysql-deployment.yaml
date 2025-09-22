@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ printf "%s-rp-user-sql-deploy" .Release.Name }}
+  namespace: {{ include "user.namespace" . }}
+  labels:
+    {{- include "user.labels" . | nindent 4 }}
+    app: {{ printf "%s-rp-user-sql-deploy" .Release.Name }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ printf "%s-rp-user-sql-deploy" .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ printf "%s-rp-user-sql-deploy" .Release.Name }}
+    spec:
+      containers:
+        - name: mysql
+          image: {{ .Values.mysql.image }}
+          ports:
+            - containerPort: 3306
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ printf "%s-rp-user-sql-secret" .Release.Name }}
+                  key: MYSQL_ROOT_PASSWORD
+            - name: MYSQL_DATABASE
+              valueFrom:
+                secretKeyRef:
+                  name: {{ printf "%s-rp-user-sql-secret" .Release.Name }}
+                  key: MYSQL_DATABASE
+          volumeMounts:
+            - name: mysql-data
+              mountPath: /var/lib/mysql
+            - name: init-sql-file
+              mountPath: /docker-entrypoint-initdb.d
+          livenessProbe:
+            exec:
+              command: ["mysqladmin", "ping", "-h", "localhost"]
+            initialDelaySeconds: 10
+            periodSeconds: 30
+            timeoutSeconds: 10
+            failureThreshold: 5
+          readinessProbe:
+            exec:
+              command: ["mysqladmin", "ping", "-h", "localhost"]
+            initialDelaySeconds: 10
+            periodSeconds: 30
+            timeoutSeconds: 10
+            failureThreshold: 5
+      volumes:
+        - name: mysql-data
+          persistentVolumeClaim:
+            claimName: {{ printf "%s-rp-user-sql-pvc" .Release.Name }}
+        - name: init-sql-file
+          configMap:
+            name: {{ printf "%s-rp-user-sql-cm" .Release.Name }}

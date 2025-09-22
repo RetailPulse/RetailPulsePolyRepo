@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ printf "%s-rp-businessentity-sql-pvc" .Release.Name }}
+  namespace: {{ include "business-entity-microservice.namespace" . }}
+  labels:
+    {{- include "business-entity-microservice.labels" . | nindent 4 }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ .Values.mysql.storage }}

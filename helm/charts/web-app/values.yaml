@@ -1,0 +1,37 @@
+# Global namespace override (optional)
+namespace: ns-retailpulse
+
+# Web App Configuration
+app:
+  enabled: true
+  image: docker.io/casperyap/rp-web-app:v0.1.0
+  imagePullPolicy: Always
+  port: 8080
+  nodePort: 30080
+
+# Optional: Runtime Config (e.g., API URLs, OAuth settings)
+# config:
+#   authEnabled: false
+#   issuer: "http://localhost:30081"
+#   clientId: "client"
+#   api:
+#     user: "http://localhost:30082"
+#     businessEntity: "http://localhost:30083"
+#     inventory: "http://localhost:30084"
+#     sales: "http://localhost:30085"
+#     report: "http://localhost:30086"
+#     payment: "http://localhost:30087"
+
+# Ingress Configuration (Optional)
+ingress:
+  enabled: false
+  className: ""
+  hosts:
+    - host: retailpulse.local
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+  # - secretName: chart-example-tls
+  #   hosts:
+  #     - retailpulse.local
