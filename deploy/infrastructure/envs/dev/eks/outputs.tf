@@ -1,0 +1,24 @@
+output "cluster_name" {
+  description = "EKS cluster name"
+  value       = module.eks.cluster_name
+}
+
+output "cluster_endpoint" {
+  description = "API server endpoint"
+  value       = module.eks.cluster_endpoint
+}
+
+output "cluster_ca_certificate" {
+  description = "Base64 CA data for kubectl client"
+  value       = module.eks.cluster_certificate_authority_data
+}
+
+output "oidc_provider_arn" {
+  description = "OIDC provider used by IRSA"
+  value       = module.eks.oidc_provider_arn
+}
+
+output "node_group_names" {
+  description = "Managed node group names"
+  value       = keys(module.eks.eks_managed_node_groups)
+}
