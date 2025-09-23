@@ -128,12 +128,12 @@ app:
       port: 8082
 
     auth:
-      enabled: false
+      enabled: true
       origin: "http://localhost:30080"
       jwt:
         key:
           set:
-            uri: "http://app-iam:8081/oauth2/jwks"
+            uri: "http://IAM_SVC:8081/oauth2/jwks"
 
     spring:
       datasource:

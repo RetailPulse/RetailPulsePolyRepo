@@ -9,5 +9,6 @@ data:
   application.yaml: |
 {{- tpl (.Values.app.configYaml |
       replace "MYSQL_HOST" (include "sales.mysqlService" .) |
+      replace "IAM_SVC" (include "report.iamService" .) |
       replace "INVENTORY_SVC" (include "sales.inventoryService" .)
     ) . | nindent 4 }}

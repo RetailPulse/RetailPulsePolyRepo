@@ -21,7 +21,7 @@ app:
   image: docker.io/casperyap/rp-report-app:v0.1.0
   imagePullPolicy: IfNotPresent # Consider IfNotPresent or Always based on tagging strategy
   port: 8088
-  nodePort: 30088
+  nodePort: 30086
   configYaml: |
     server:
       port: 8088

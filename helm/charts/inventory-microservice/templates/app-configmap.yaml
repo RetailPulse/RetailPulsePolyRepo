@@ -10,5 +10,6 @@ data:
 {{- tpl (.Values.app.configYaml |
       replace "MYSQL_HOST" (include "inventory.mysqlService" .) |
       replace "REDIS_HOST" (include "inventory.redisService" .) |
+      replace "IAM_SVC" (include "report.iamService" .) |
       replace "BUSINESS_ENTITY_SVC" (include "inventory.businessEntityService" .)
     ) . | nindent 4 }}
