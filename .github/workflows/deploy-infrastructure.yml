@@ -1,4 +1,4 @@
-name: Deploy Infrastructure (OpenTofu)
+name: Plan/Apply/Destroy Infrastructure (OpenTofu)
 
 on:
   workflow_dispatch:
@@ -8,10 +8,10 @@ on:
         type: choice
         options: [plan, apply, destroy]
         default: plan
-      environment:
-        description: "Environment folder under deploy/infrastructure/envs"
-        default: dev
-        required: true
+      # environment:
+      #   description: "Environment folder under deploy/infrastructure/envs"
+      #   default: dev
+      #   required: true
 
 # Use the env folder as working directory so we don't need to `cd` in every step
 defaults:
