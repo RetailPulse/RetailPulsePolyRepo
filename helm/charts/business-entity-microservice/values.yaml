@@ -74,12 +74,12 @@ app:
       port: 8083
 
     auth:
-      enabled: false
-      origin: "http://localhost:30080"
+      enabled: true
+      origin: http://ORIGIN_URL:ORIGIN_PORT
       jwt:
         key:
           set:
-            uri: http://app-iam:8081/oauth2/jwks
+            uri: http://IAM_SVC:IAM_PORT/oauth2/jwks
 
     spring:
       datasource:
@@ -91,7 +91,7 @@ app:
       jpa:
         hibernate:
           ddl-auto: update
-        database-platform: org.hibernate.dialect.MySQL8Dialect
+        database-platform: "org.hibernate.dialect.MySQLDialect"
         show-sql: true
 
       cache:
@@ -111,3 +111,8 @@ app:
         com.retailpulse: "DEBUG"
       file:
         name: logs/rp-businessentity.log
+
+dependencies:
+  iamReleaseName: retailpulse-iam
+  webURL: localhost
+  webPort: 30080

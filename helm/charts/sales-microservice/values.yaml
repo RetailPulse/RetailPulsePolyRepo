@@ -122,12 +122,12 @@ app:
       port: 8085
 
     auth:
-      enabled: false
-      origin: "http://localhost:30080" #"http://localhost:4200"
+      enabled: true
+      origin: http://ORIGIN_URL:ORIGIN_PORT
       jwt:
         key:
           set:
-            uri: "http://app-iam:8081/oauth2/jwks"
+            uri: http://IAM_SVC:IAM_PORT/oauth2/jwks
 
     spring:
       datasource:
@@ -139,23 +139,26 @@ app:
       jpa:
         hibernate:
           ddl-auto: "update"
-        database-platform: "org.hibernate.dialect.MySQL8Dialect" # Consider MySQLDialect
+        database-platform: "org.hibernate.dialect.MySQLDialect"
         show-sql: true
 
-    # Service URL for Inventory - dynamically replaced
     inventory-service:
       url: "http://INVENTORY_SVC:8084"
 
     logging:
       level:
         root: "INFO"
-        org.springframework.security: "TRACE" # Very verbose
+        org.springframework.security: "TRACE"        
         com.retailpulse: "DEBUG"
+        com.retailpulse.client: DEBUG 
+        feign: DEBUG 
+        com.retailpulse.config.FeignConfig: DEBUG 
       file:
         name: "logs/rp-sales.log"
 
-# # Dependency Service Names (Optional Overrides)
+
 dependencies:
-  # Name of the Helm release for the Inventory microservice
-  inventoryReleaseName: "retailpulse-inventory" # Default, change if needed 
-#   inventoryService: "retailpulse-inventory-rp-inventory-app-svc"
+  inventoryReleaseName: retailpulse-inventory
+  iamReleaseName: retailpulse-iam  
+  webURL: localhost
+  webPort: 30080

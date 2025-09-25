@@ -72,31 +72,70 @@ MongoDB Secret Name
 {{- end }}
 
 {{/*
-Inventory Service Name
+Web-App URL
 */}}
-{{- define "report.inventoryService" -}}
-{{- if .Values.global.autoReleaseName }}
-{{- printf "%s-rp-inventory-app-svc" .Release.Name }}
-{{- else if .Values.dependencies.inventoryService }}
-{{- .Values.dependencies.inventoryService }}
-{{- else if .Values.dependencies.inventoryReleaseName }}
-{{- printf "%s-rp-inventory-app-svc" .Values.dependencies.inventoryReleaseName }}
+{{- define "report.webURL" -}}
+{{- if and .Values.global (.Values.global.webURL) (ne .Values.global.webURL "") }}
+  {{- .Values.global.webURL }}
+{{- else if and .Values.dependencies (.Values.dependencies.webURL) (ne .Values.dependencies.webURL "") }}
+  {{- .Values.dependencies.webURL }}
 {{- else }}
-{{- printf "%s-rp-inventory-app-svc" .Release.Name }} # Fallback, might not be correct
+  {{- "localhost"  }}
 {{- end }}
 {{- end }}
 
 {{/*
-IAM Service Name
+Web-App Port
+*/}}
+{{- define "report.webPort" -}}
+{{- if and .Values.global (.Values.global.webPort) (ne .Values.global.webPort nil) }}
+  {{- .Values.global.webPort }}
+{{- else if and .Values.dependencies (.Values.dependencies.webPort) (ne .Values.dependencies.webPort nil) }}
+  {{- .Values.dependencies.webPort }}
+{{- else }}
+  {{- 30080  }}
+{{- end }}
+{{- end }}
+
+{{/*
+Identity Access Management Service Name
 */}}
 {{- define "report.iamService" -}}
-{{- if .Values.global.autoReleaseName }}
-{{- printf "%s-rp-iam-app-svc" .Release.Name }}
-{{- else if .Values.dependencies.iamService }}
-{{- .Values.dependencies.iamService }}
-{{- else if .Values.dependencies.iamReleaseName }}
-{{- printf "%s-rp-iam-app-svc" .Values.dependencies.iamReleaseName }}
+{{- if and .Values.global (.Values.global.autoReleaseName) (ne .Values.global.autoReleaseName nil) }}
+  {{- printf "%s-rp-iam-app-svc" .Values.global.autoReleaseName }}
+{{- else if and .Values.dependencies (.Values.dependencies.iamReleaseName) (ne .Values.dependencies.iamReleaseName "") }}
+  {{- printf "%s-rp-iam-app-svc" .Values.dependencies.iamReleaseName }}
+{{- else if and .Values.dependencies (.Values.dependencies.iamService) (ne .Values.dependencies.iamService "") }}
+  {{- .Values.dependencies.iamService }}
 {{- else }}
-{{- printf "%s-rp-iam-app-svc" .Release.Name }} # Fallback, might not be correct
+  {{- printf "%s-rp-iam-app-svc" .Release.Name }} 
 {{- end }}
 {{- end }}
+
+{{/*
+Identity Access Management Service Port
+*/}}
+{{- define "report.iamPort" -}}
+{{- if and .Values.global (.Values.global.iamPort) (ne .Values.global.iamPort nil) }}
+  {{- .Values.global.iamPort }}
+{{- else if and .Values.dependencies (.Values.dependencies.iamPort) (ne .Values.dependencies.iamPort nil) }}
+  {{- .Values.dependencies.iamPort }}
+{{- else }}
+  {{- 8081  }}
+{{- end }}
+{{- end }}
+
+{{/*
+Inventory Service Name
+*/}}
+{{- define "report.inventoryService" -}}
+{{- if and .Values.global (.Values.global.autoReleaseName) (ne .Values.global.autoReleaseName nil) }}
+  {{- printf "%s-rp-inventory-app-svc" .Release.Name }}
+{{- else if and .Values.dependencies (.Values.dependencies.inventoryService) (ne .Values.dependencies.inventoryService "") }}
+  {{- .Values.dependencies.inventoryService }}
+{{- else if and .Values.dependencies (.Values.dependencies.inventoryReleaseName) (ne .Values.dependencies.inventoryReleaseName "") }}
+  {{- printf "%s-rp-inventory-app-svc" .Values.dependencies.inventoryReleaseName }}
+{{- else }}
+  {{- printf "%s-rp-inventory-app-svc" .Release.Name }}
+{{- end }}
+{{- end }} 

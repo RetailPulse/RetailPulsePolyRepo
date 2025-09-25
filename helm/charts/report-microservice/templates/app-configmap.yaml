@@ -9,8 +9,11 @@ metadata:
 data:
   application.yaml: |
 {{- tpl (.Values.app.configYaml |
-      replace "MONGO_HOST" (include "report.mongodbService" .) |
-      replace "INVENTORY_SVC" (include "report.inventoryService" .) |
-      replace "IAM_SVC" (include "report.iamService" .)
-    ) . | nindent 4 }}
+    replace "MONGO_HOST" (include "report.mongodbService" .) |
+    replace "INVENTORY_SVC" (include "report.inventoryService" .) |
+    replace "ORIGIN_URL" (include "report.webURL" .) |
+    replace "ORIGIN_PORT" (include "report.webPort" .) |
+    replace "IAM_SVC" (include "report.iamService" .) | 
+    replace "IAM_PORT" (include "report.iamPort" .)
+  ) . | nindent 4 }}
 {{- end }}
