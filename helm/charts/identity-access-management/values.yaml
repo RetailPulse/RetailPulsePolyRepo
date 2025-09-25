@@ -36,9 +36,14 @@ app:
 
     logging:
       level:
-        root: "INFO"
-        org.springframework.security: "INFO"
-        com.retailpulse: "DEBUG"
+        com.retailpulse: DEBUG
+        org:
+          springframework:
+            security: INFO
+            security.oauth2:
+              server:
+                authorization: INFO
+            web: INFO
       file:
         name: "logs/rp-iam.log"
 
