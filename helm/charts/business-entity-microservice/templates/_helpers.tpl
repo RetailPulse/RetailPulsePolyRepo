@@ -88,7 +88,7 @@ Identity Access Management Service Name
 */}}
 {{- define "business-entity.iamService" -}}
 {{- if and .Values.global (.Values.global.autoReleaseName) (ne .Values.global.autoReleaseName nil) }}
-  {{- printf "%s-rp-iam-app-svc" .Values.global.autoReleaseName }}
+  {{- printf "%s-rp-iam-app-svc" .Release.Name }}
 {{- else if and .Values.dependencies (.Values.dependencies.iamReleaseName) (ne .Values.dependencies.iamReleaseName "") }}
   {{- printf "%s-rp-iam-app-svc" .Values.dependencies.iamReleaseName }}
 {{- else if and .Values.dependencies (.Values.dependencies.iamService) (ne .Values.dependencies.iamService "") }}
