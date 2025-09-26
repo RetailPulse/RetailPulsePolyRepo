@@ -72,30 +72,77 @@ Redis Service Name
 {{- end }}
 
 {{/*
-Business Entity Service Name
+Redis Secret Name (for App)
 */}}
-{{- define "inventory.businessEntityService" -}}
-{{- if .Values.global.autoReleaseName }}
-{{- printf "%s-rp-businessentity-app-svc" .Release.Name }} 
-{{- else if .Values.dependencies.businessEntityService }}
-{{- .Values.dependencies.businessEntityService }}
-{{- else if .Values.dependencies.businessEntityReleaseName }}
-{{- printf "%s-rp-businessentity-app-svc" .Values.dependencies.businessEntityReleaseName }}
+{{- define "inventory.redisSecretName" -}}
+{{- printf "%s-rp-inventory-redis-secret" .Release.Name }}
+{{- end }}
+
+{{/*
+Web-App URL
+*/}}
+{{- define "inventory.webURL" -}}
+{{- if and .Values.global (.Values.global.webURL) (ne .Values.global.webURL "") }}
+  {{- .Values.global.webURL }}
+{{- else if and .Values.dependencies (.Values.dependencies.webURL) (ne .Values.dependencies.webURL "") }}
+  {{- .Values.dependencies.webURL }}
 {{- else }}
-{{- printf "%s-rp-businessentity-app-svc" .Release.Name }} # Fallback, might not be correct
+  {{- "localhost"  }}
 {{- end }}
 {{- end }}
 
 {{/*
-Redis Secret Name (for App)
-Assumes the secret is either created by this chart's redis or provided by another.
+Web-App Port
 */}}
-{{- define "inventory.redisSecretName" -}}
-{{- if .Values.global.autoReleaseName }}
-{{- printf "%s-rp-inventory-redis-secret" .Release.Name }} 
-{{- else if .Values.dependencies.redisSecretReleaseName }}
-{{- printf "%s-rp-inventory-redis-secret" .Values.dependencies.redisSecretReleaseName }}
+{{- define "inventory.webPort" -}}
+{{- if and .Values.global (.Values.global.webPort) (ne .Values.global.webPort nil) }}
+  {{- .Values.global.webPort }}
+{{- else if and .Values.dependencies (.Values.dependencies.webPort) (ne .Values.dependencies.webPort nil) }}
+  {{- .Values.dependencies.webPort }}
 {{- else }}
-{{- printf "%s-rp-inventory-redis-secret" .Release.Name }} # Default to this chart's Redis secret
+  {{- 30080  }}
+{{- end }}
+{{- end }}
+
+{{/*
+Identity Access Management Service Name
+*/}}
+{{- define "inventory.iamService" -}}
+{{- if and .Values.global (.Values.global.autoReleaseName) (ne .Values.global.autoReleaseName nil) }}
+  {{- printf "%s-rp-iam-app-svc" .Release.Name }}
+{{- else if and .Values.dependencies (.Values.dependencies.iamReleaseName) (ne .Values.dependencies.iamReleaseName "") }}
+  {{- printf "%s-rp-iam-app-svc" .Values.dependencies.iamReleaseName }}
+{{- else if and .Values.dependencies (.Values.dependencies.iamService) (ne .Values.dependencies.iamService "") }}
+  {{- .Values.dependencies.iamService }}
+{{- else }}
+  {{- printf "%s-rp-iam-app-svc" .Release.Name }} 
+{{- end }}
+{{- end }}
+
+{{/*
+Identity Access Management Service Port
+*/}}
+{{- define "inventory.iamPort" -}}
+{{- if and .Values.global (.Values.global.iamPort) (ne .Values.global.iamPort nil) }}
+  {{- .Values.global.iamPort }}
+{{- else if and .Values.dependencies (.Values.dependencies.iamPort) (ne .Values.dependencies.iamPort nil) }}
+  {{- .Values.dependencies.iamPort }}
+{{- else }}
+  {{- 8081  }}
+{{- end }}
+{{- end }}
+
+{{/*
+Business Entity Service Name
+*/}}
+{{- define "inventory.businessEntityService" -}}
+{{- if and .Values.global (.Values.global.autoReleaseName) (ne .Values.global.autoReleaseName nil) }}
+  {{- printf "%s-rp-businessentity-app-svc" .Release.Name }}
+{{- else if and .Values.dependencies (.Values.dependencies.businessEntityService) (ne .Values.dependencies.businessEntityService "") }}
+  {{- .Values.dependencies.businessEntityService }}
+{{- else if and .Values.dependencies (.Values.dependencies.businessEntityReleaseName) (ne .Values.dependencies.businessEntityReleaseName "") }}
+  {{- printf "%s-rp-businessentity-app-svc" .Values.dependencies.businessEntityReleaseName }}
+{{- else }}
+  {{- printf "%s-rp-businessentity-app-svc" .Release.Name }} # Fallback, might not be correct
 {{- end }}
 {{- end }}

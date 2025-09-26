@@ -7,6 +7,12 @@
 global:
   namespace: ns-retailpulse # This sets .Values.global.namespace
   autoReleaseName: 1
+  rootURL: "http://localhost"
+  iamPort: 8081
+  userPort: 8082
+  bePort: 8083
+  inventoryPort: 8084
+  webPort: 30080
 
 # --- Subchart Value Overrides ---
 # You can override specific values for each subchart here.

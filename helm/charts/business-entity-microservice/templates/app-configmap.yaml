@@ -7,8 +7,12 @@ metadata:
 {{- include "business-entity-microservice.labels" . | nindent 4 }}
 data:
   application.yaml: |
-{{- tpl (.Values.app.configYaml |
-      replace "MYSQL_HOST" (printf "%s-rp-businessentity-sql-svc" .Release.Name) |
-      replace "IAM_SVC" (include "report.iamService" .) |
-      replace "REDIS_HOST" (printf "%s-rp-businessentity-redis-svc" .Release.Name)
-  ) . | nindent 4 }}
+{{- tpl (.Values.app.configYaml | 
+    replace "MYSQL_HOST" (printf "%s-rp-businessentity-sql-svc" .Release.Name) | 
+    replace "REDIS_HOST" (printf "%s-rp-businessentity-redis-svc" .Release.Name) |
+    replace "ORIGIN_URL" (include "business-entity.webURL" .) | 
+    replace "ORIGIN_PORT" (include "business-entity.webPort" .) |
+    replace "IAM_SVC" (include "business-entity.iamService" .) | 
+    replace "IAM_PORT" (include "business-entity.iamPort" .)
+  ) . | nindent 4 
+}}

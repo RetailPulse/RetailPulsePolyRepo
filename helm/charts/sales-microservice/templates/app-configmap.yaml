@@ -8,7 +8,11 @@ metadata:
 data:
   application.yaml: |
 {{- tpl (.Values.app.configYaml |
-      replace "MYSQL_HOST" (include "sales.mysqlService" .) |
-      replace "IAM_SVC" (include "report.iamService" .) |
-      replace "INVENTORY_SVC" (include "sales.inventoryService" .)
-    ) . | nindent 4 }}
+    replace "MYSQL_HOST" (include "sales.mysqlService" .) |
+    replace "INVENTORY_SVC" (include "sales.inventoryService" .) |
+    replace "ORIGIN_URL" (include "sales.webURL" .) | 
+    replace "ORIGIN_PORT" (include "sales.webPort" .) |
+    replace "IAM_SVC" (include "sales.iamService" .) | 
+    replace "IAM_PORT" (include "sales.iamPort" .)
+  ) . | nindent 4 
+}}

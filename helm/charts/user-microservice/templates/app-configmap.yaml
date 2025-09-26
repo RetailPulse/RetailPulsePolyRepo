@@ -7,7 +7,11 @@ metadata:
     {{- include "user.labels" . | nindent 4 }}
 data:
   application.yaml: |
-{{- tpl (.Values.app.configYaml |
-      replace "MYSQL_HOST" (printf "%s-rp-user-sql-svc" .Release.Name) |
-      replace "IAM_SVC" (include "report.iamService" .)
-    ) . | nindent 4 }}
+{{- tpl (.Values.app.configYaml | 
+    replace "MYSQL_HOST" (include "user.mysqlService" .) |
+    replace "ORIGIN_URL" (include "user.webURL" .) | 
+    replace "ORIGIN_PORT" (include "user.webPort" .) |
+    replace "IAM_SVC" (include "user.iamService" .) | 
+    replace "IAM_PORT" (include "user.iamPort" .)
+  ) . | nindent 4 
+}}

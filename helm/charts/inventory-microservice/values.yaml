@@ -323,11 +323,11 @@ app:
 
     auth:
       enabled: true
-      origin: "http://localhost:30080" # "http://localhost:4200"
+      origin: http://ORIGIN_URL:ORIGIN_PORT
       jwt:
         key:
           set:
-            uri: "http://IAM_SVC:8081/oauth2/jwks"
+            uri: http://IAM_SVC:IAM_PORT/oauth2/jwks
 
     spring:
       datasource:
@@ -339,7 +339,7 @@ app:
       jpa:
         hibernate:
           ddl-auto: "update"
-        database-platform: "org.hibernate.dialect.MySQL8Dialect" # Consider MySQLDialect
+        database-platform: "org.hibernate.dialect.MySQLDialect" 
         show-sql: true
 
       cache:
@@ -354,9 +354,13 @@ app:
 
     logging:
       level:
-        root: "INFO"
+        root: DEBUG
         org.springframework.security: "INFO" # Less noisy than TRACE
         com.retailpulse: "DEBUG"
+        org.springframework.security.web.FilterChainProxy: TRACE
+        org.springframework.security.oauth2.server.resource.web.BearerTokenAuthenticationFilter: DEBUG
+        org.springframework.security.oauth2.jwt: DEBUG
+        org.springframework.security.authentication.ProviderManager: TRACE
       file:
         name: "logs/rp-inventory.log"
 
@@ -364,11 +368,8 @@ app:
     businessentity-service:
       url: "http://BUSINESS_ENTITY_SVC:8083" # Assuming default BE port
 
-# Dependency Service Names (Optional Overrides)
-# These allow connecting to services from other releases/microservices
 dependencies:
-  # Name of the Helm release for the BusinessEntity microservice
-  businessEntityReleaseName: "retailpulse-be" # Default, change if needed
-  # businessEntityService: "rp-businessentity-app-svc"
-  # Name of the Helm release providing the shared Redis secret (if not this service's own Redis)
-  # redisSecretReleaseName: "" # Default uses this service's Redis secret
+  businessEntityReleaseName: retailpulse-be
+  iamReleaseName: retailpulse-iam  
+  webURL: localhost
+  webPort: 30080
