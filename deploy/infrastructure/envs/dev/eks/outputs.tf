@@ -22,3 +22,8 @@ output "node_group_names" {
   description = "Managed node group names"
   value       = keys(module.eks.eks_managed_node_groups)
 }
+
+output "cluster_oidc_issuer_url" {
+  description = "Cluster OIDC issuer URL"
+  value       = module.eks.cluster_oidc_issuer_url
+}
