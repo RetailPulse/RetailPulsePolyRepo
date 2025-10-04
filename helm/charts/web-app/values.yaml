@@ -3,24 +3,44 @@ namespace: ns-retailpulse
 
 # Web App Configuration
 app:
-  enabled: true
+  enabled: false
   image: docker.io/casperyap/rp-web-app:v0.1.0
   imagePullPolicy: Always
   port: 8080
   nodePort: 30080
 
-# Optional: Runtime Config (e.g., API URLs, OAuth settings)
-# config:
-#   authEnabled: false
-#   issuer: "http://localhost:30081"
-#   clientId: "client"
-#   api:
-#     user: "http://localhost:30082"
-#     businessEntity: "http://localhost:30083"
-#     inventory: "http://localhost:30084"
-#     sales: "http://localhost:30085"
-#     report: "http://localhost:30086"
-#     payment: "http://localhost:30087"
+runtimeConfigYaml: |
+  {
+    "authConfig": {
+      "issuer": "http://localhost:30081", 
+      "requireHttps": false,
+      "redirectUri": "window.location.origin",
+      "clientId": "client",
+      "responseType": "code",
+      "scope": "openid",
+      "useSilentRefresh": true,
+      "useHttpBasicAuth": false,
+      "disablePKCE": false,
+      "showDebugInformation": true
+    },
+    "apiConfig": {
+      "user_api_url": "http://svc-rp-user:8082/",
+      "business_entity_api_url": "http://svc-rp-businessentity:8083/",
+      "inventory_api_url": "http://svc-rp-inventory:8084/",
+      "sales_api_url": "http://svc-rp-sales:8085/",
+      "report_api_url": "http://svc-rp-report:8086/",
+      "payment_api_url": "http://svc-rp-payment:8087/"
+    },
+    "environment": {
+      "production": true,
+      "authEnabled": true,
+      "useRuntimeConfig": true,
+      "devModeUser": "superadmin",
+      "devModeRole": "ADMIN",
+      "defaultPassword": "password1",
+      "stripePublicKey": "pk_test_51Rwa9JCTUDg2faMiUxYG28Di0rDMjD4C5xEPCkn0nv6bPc1Qy8WvivfAhhykVxGlAqfeF2tvILpEd0K9je6WPhLo00bfZAazGS"
+    }
+  }
 
 # Ingress Configuration (Optional)
 ingress:

@@ -1,0 +1,9 @@
+{{- if .Values.app.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name:  {{ printf "%s-rp-web-app-cm" .Release.Name }}
+data:
+  runtime-config.json: |
+{{ .Values.runtimeConfigYaml | indent 4 }}
+{{- end }}

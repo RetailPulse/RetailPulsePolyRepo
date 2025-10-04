@@ -1,0 +1,24 @@
+{{- if .Values.kafka.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ printf "%s-rp-kafka-cm" .Release.Name }}
+  namespace: {{ include "kafka.namespace" . }}
+  labels:
+    {{- include "kafka.labels" . | nindent 4 }}
+    app: {{ printf "%s-rp-kafka" .Release.Name }}
+data:
+  KAFKA_BROKER_ID: {{ .Values.kafka.brokerId | quote }}
+  KAFKA_ZOOKEEPER_CONNECT: {{ include "kafka.resolvedZookeeperConnect" . | quote }}
+  KAFKA_LISTENERS: {{ printf "PLAINTEXT://0.0.0.0:%d,EXTERNAL://0.0.0.0:%d" (int .Values.kafka.listeners.plaintext.port) (int .Values.kafka.listeners.external.port) | quote }}
+  KAFKA_ADVERTISED_LISTENERS: {{ printf "%s,%s" (include "kafka.resolvedAdvertisedListenersPlaintext" .) (include "kafka.resolvedAdvertisedListenersExternal" .) | quote }}
+  KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: "PLAINTEXT:PLAINTEXT,EXTERNAL:PLAINTEXT"
+  KAFKA_INTER_BROKER_LISTENER_NAME: "PLAINTEXT"
+  KAFKA_LOG_DIRS: {{ .Values.kafka.logDirs | quote }}
+  KAFKA_AUTO_CREATE_TOPICS_ENABLE: {{ .Values.kafka.autoCreateTopics | quote }}
+  KAFKA_DELETE_TOPIC_ENABLE: {{ .Values.kafka.deleteTopicEnable | quote }}
+  KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: {{ .Values.kafka.offsetsReplicationFactor | quote }}
+  KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: {{ .Values.kafka.transactionStateReplicationFactor | quote }}
+  KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: {{ .Values.kafka.transactionStateMinIsr | quote }}
+  KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: {{ .Values.kafka.groupInitialRebalanceDelayMs | quote }}
+{{- end }}

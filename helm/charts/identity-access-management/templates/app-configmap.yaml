@@ -1,3 +1,4 @@
+{{- if .Values.app.enabled }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -13,3 +14,4 @@ data:
   replace "ORIGIN_PORT" (include "identity-access-management.webPort" .) 
   ) . | nindent 4 
 }}
+{{- end }}

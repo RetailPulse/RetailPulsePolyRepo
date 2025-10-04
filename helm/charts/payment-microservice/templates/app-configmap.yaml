@@ -1,0 +1,22 @@
+{{- if .Values.app.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ printf "%s-rp-payment-app-cm" .Release.Name }}
+  namespace: {{ .Values.namespace | default "ns-retailpulse" }}
+  labels:
+    {{- include "payment.labels" . | nindent 4 }}
+data:
+  application.yaml: |
+  {{- tpl (.Values.app.configYaml |
+      replace "MYSQL_HOST" (printf "%s-rp-payment-sql-svc" .Release.Name) |
+      replace "SALES_SVC_URL" (include "payment.salesService" .) |
+      replace "KAFKA_BROKER_URL" (include "payment.kafkaService" .) |
+      replace "KAFKA_BROKER_PORT" (include "payment.kafkaPort" .) |
+      replace "KAFKA_PAYMENT_TOPIC" (include "payment.kafkaPaymentTopic" .) |
+      replace "ORIGIN_URL" (include "payment.webURL" .) |
+      replace "ORIGIN_PORT" (include "payment.webPort" .) |
+      replace "IAM_SVC" (include "payment.iamService" .) | 
+      replace "IAM_PORT" (include "payment.iamPort" .)
+    ) . | nindent 4 }}
+{{- end }}

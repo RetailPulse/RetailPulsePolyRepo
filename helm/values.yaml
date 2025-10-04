@@ -8,11 +8,15 @@ global:
   namespace: ns-retailpulse # This sets .Values.global.namespace
   autoReleaseName: 1
   rootURL: "http://localhost"
+  rootHost: "localhost"
   iamPort: 8081
   userPort: 8082
   bePort: 8083
   inventoryPort: 8084
+  paymentPort: 8087
   webPort: 30080
+  kafkaPort: 9092
+  kafkaPaymentTopic: "payment-topic"
 
 # --- Subchart Value Overrides ---
 # You can override specific values for each subchart here.
