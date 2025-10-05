@@ -80,11 +80,11 @@ Web-App URL
 {{/*
 Web-App Port
 */}}
-{{- define "sales.webPort" -}}
-{{- if and .Values.global (.Values.global.webPort) (ne .Values.global.webPort nil) }}
-  {{- .Values.global.webPort }}
-{{- else if and .Values.dependencies (.Values.dependencies.webPort) (ne .Values.dependencies.webPort nil) }}
-  {{- .Values.dependencies.webPort }}
+{{- define "sales.webExternalPort" -}}
+{{- if and .Values.global (.Values.global.webExternalPort) (ne .Values.global.webExternalPort nil) }}
+  {{- .Values.global.webExternalPort }}
+{{- else if and .Values.dependencies (.Values.dependencies.webExternalPort) (ne .Values.dependencies.webExternalPort nil) }}
+  {{- .Values.dependencies.webExternalPort }}
 {{- else }}
   {{- 30080  }}
 {{- end }}
@@ -131,4 +131,60 @@ Inventory Service Name
 {{- else }}
   {{- printf "%s-rp-inventory-app-svc" .Release.Name }}
 {{- end }}
-{{- end }} 
+{{- end }}
+
+{{/*
+Payment Service Name
+*/}}
+{{- define "sales.paymentService" -}}
+{{- if and .Values.global (.Values.global.autoReleaseName) (ne .Values.global.autoReleaseName nil) }}
+  {{- printf "%s-rp-payment-app-svc" .Release.Name }}
+{{- else if and .Values.dependencies (.Values.dependencies.paymentService) (ne .Values.dependencies.paymentService "") }}
+  {{- .Values.dependencies.paymentService }}
+{{- else if and .Values.dependencies (.Values.dependencies.paymentReleaseName) (ne .Values.dependencies.paymentReleaseName "") }}
+  {{- printf "%s-rp-payment-app-svc" .Values.dependencies.paymentReleaseName }}
+{{- else }}
+  {{- printf "%s-rp-payment-app-svc" .Release.Name }}
+{{- end }}
+{{- end }}
+
+{{/*
+Kafka Service Name
+*/}}
+{{- define "sales.kafkaService" -}}
+{{- if and .Values.global (.Values.global.autoReleaseName) (ne .Values.global.autoReleaseName nil) }}
+  {{- printf "%s-rp-kafka-svc.%s.svc.cluster.local" .Release.Name .Release.Namespace }}  
+{{- else if and .Values.dependencies (.Values.dependencies.kafkaService) (ne .Values.dependencies.kafkaService "") }}
+  {{- .Values.dependencies.kafkaService }}
+{{- else if and .Values.dependencies (.Values.dependencies.kafkaReleaseName) (ne .Values.dependencies.kafkaReleaseName "") }}
+  {{- printf "%s-rp-kafka-app-svc" .Values.dependencies.kafkaReleaseName }}
+{{- else }}
+  {{- printf "%s-rp-kafka-app-svc" .Release.Name }}
+{{- end }}
+{{- end }}
+
+{{/*
+Kafka Service Port
+*/}}
+{{- define "sales.kafkaPort" -}}
+{{- if and .Values.global (.Values.global.kafkaPort) (ne .Values.global.kafkaPort nil) }}
+  {{- .Values.global.kafkaPort }}
+{{- else if and .Values.dependencies (.Values.dependencies.kafkaPort) (ne .Values.dependencies.kafkaPort nil) }}
+  {{- .Values.dependencies.kafkaPort }}
+{{- else }}
+  {{- 9092  }}
+{{- end }}
+{{- end }}
+
+{{/*
+Kafka Payment Topic
+*/}}
+{{- define "sales.kafkaPaymentTopic" -}}
+{{- if and .Values.global (.Values.global.kafkaPaymentTopic) (ne .Values.global.kafkaPaymentTopic nil) }}
+  {{- .Values.global.kafkaPaymentTopic }}
+{{- else if and .Values.dependencies (.Values.dependencies.kafkaPaymentTopic) (ne .Values.dependencies.kafkaPaymentTopic nil) }}
+  {{- .Values.dependencies.kafkaPaymentTopic }}
+{{- else }}
+  {{- "payment-topic" }}
+{{- end }}
+{{- end }}

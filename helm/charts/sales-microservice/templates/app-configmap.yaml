@@ -1,3 +1,4 @@
+{{- if .Values.app.enabled }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -10,9 +11,14 @@ data:
 {{- tpl (.Values.app.configYaml |
     replace "MYSQL_HOST" (include "sales.mysqlService" .) |
     replace "INVENTORY_SVC" (include "sales.inventoryService" .) |
+    replace "PAYMENT_SVC" (include "sales.paymentService" .) |
+    replace "KAFKA_BROKER_URL" (include "sales.kafkaService" .) |
+    replace "KAFKA_BROKER_PORT" (include "sales.kafkaPort" .) |
+    replace "KAFKA_PAYMENT_TOPIC" (include "sales.kafkaPaymentTopic" .) |
     replace "ORIGIN_URL" (include "sales.webURL" .) | 
-    replace "ORIGIN_PORT" (include "sales.webPort" .) |
+    replace "ORIGIN_PORT" (include "sales.webExternalPort" .) |
     replace "IAM_SVC" (include "sales.iamService" .) | 
     replace "IAM_PORT" (include "sales.iamPort" .)
   ) . | nindent 4 
 }}
+{{- end }}

@@ -1,3 +1,4 @@
+{{- if .Values.app.enabled }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -23,6 +24,10 @@ spec:
           imagePullPolicy: {{ .Values.app.imagePullPolicy }}
           ports:
             - containerPort: {{ .Values.app.port }}
+          volumeMounts:
+            - name: runtime-config
+              mountPath: /usr/share/nginx/html/assets/runtime-config.json
+              subPath: runtime-config.json
           # livenessProbe:
           #   httpGet:
           #     path: /
@@ -36,3 +41,8 @@ spec:
           #   initialDelaySeconds: 20
           #   periodSeconds: 5
           resources: {}
+      volumes:
+        - name: runtime-config
+          configMap:
+            name: {{ printf "%s-rp-web-app-cm" .Release.Name }}
+{{- end }}            

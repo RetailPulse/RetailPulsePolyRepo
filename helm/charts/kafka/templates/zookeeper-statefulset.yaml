@@ -1,0 +1,31 @@
+{{- if .Values.zookeeper.enabled }}
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ printf "%s-rp-kafka-zookeeper" .Release.Name }}
+  namespace: {{ include "kafka.namespace" . }}
+  labels:
+    {{- include "kafka.labels" . | nindent 4 }}
+    app: {{ printf "%s-rp-kafka-zookeeper" .Release.Name }}
+spec:
+  serviceName: {{ include "kafka.zookeeperService" . }}
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ printf "%s-rp-kafka-zookeeper" .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ printf "%s-rp-kafka-zookeeper" .Release.Name }}
+    spec:
+      containers:
+        - name: zookeeper
+          image: {{ .Values.zookeeper.image }}
+          ports:
+            - containerPort: {{ .Values.zookeeper.clientPort }}
+          env:
+            - name: ZOOKEEPER_CLIENT_PORT
+              value: {{ .Values.zookeeper.clientPort | quote }}
+            - name: ZOOKEEPER_TICK_TIME
+              value: {{ .Values.zookeeper.tickTime | quote }}
+{{- end }}

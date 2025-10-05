@@ -1,3 +1,4 @@
+# {{- if .Values.app.enabled }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -61,3 +62,4 @@ spec:
         - name: config-volume
           configMap:
             name: {{ printf "%s-rp-iam-app-cm" .Release.Name }}
+# {{- end }}
