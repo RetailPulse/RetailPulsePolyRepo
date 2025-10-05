@@ -1,3 +1,4 @@
+{{- if .Values.app.enabled }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -10,8 +11,9 @@ data:
 {{- tpl (.Values.app.configYaml | 
     replace "MYSQL_HOST" (include "user.mysqlService" .) |
     replace "ORIGIN_URL" (include "user.webURL" .) | 
-    replace "ORIGIN_PORT" (include "user.webPort" .) |
+    replace "ORIGIN_PORT" (include "user.webExternalPort" .) |
     replace "IAM_SVC" (include "user.iamService" .) | 
     replace "IAM_PORT" (include "user.iamPort" .)
   ) . | nindent 4 
 }}
+{{- end }}

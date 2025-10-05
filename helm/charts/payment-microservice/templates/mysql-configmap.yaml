@@ -1,0 +1,15 @@
+{{- if .Values.mysql.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ printf "%s-rp-payment-sql-cm" .Release.Name }}
+  namespace: {{ .Values.namespace | default "ns-retailpulse" }}
+  labels:
+    {{- include "payment.labels" . | nindent 4 }}
+data:
+  # Placeholder for init.sql if needed. Add content if you have DB schema/scripts.
+  init.sql: |
+    -- Add your MySQL initialization script here if needed.
+    -- Example: Create tables, insert initial data.
+    -- SELECT 'MySQL init script placeholder' AS info;
+{{- end }}

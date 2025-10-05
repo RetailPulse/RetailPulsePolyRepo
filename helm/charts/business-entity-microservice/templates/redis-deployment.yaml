@@ -1,3 +1,4 @@
+{{- if .Values.redis.enabled }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -38,3 +39,4 @@ spec:
               port: {{ .Values.redis.port }}
             initialDelaySeconds: 10
             periodSeconds: 20
+{{- end }}

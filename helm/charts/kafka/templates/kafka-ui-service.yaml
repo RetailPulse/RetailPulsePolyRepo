@@ -1,0 +1,19 @@
+{{- if .Values.ui.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "kafka.uiService" . }}
+  namespace: {{ include "kafka.namespace" . }}
+  labels:
+    {{- include "kafka.labels" . | nindent 4 }}
+    app: {{ printf "%s-rp-kafka-ui" .Release.Name }}
+spec:
+  selector:
+    app: {{ printf "%s-rp-kafka-ui" .Release.Name }}
+  ports:
+    - protocol: TCP
+      port: {{ .Values.ui.port }}
+      targetPort: {{ .Values.ui.port }}
+      nodePort: {{ .Values.ui.nodePort }}
+  type: NodePort
+{{- end }}

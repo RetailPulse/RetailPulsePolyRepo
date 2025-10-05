@@ -1,0 +1,118 @@
+# Global namespace override (optional)
+namespace: ns-retailpulse
+
+# MySQL Configuration for Payment Microservice
+mysql:
+  enabled: true
+  image: mysql:latest
+  rootPassword: password
+  database: RPPaymentDB
+  storage: 1Gi
+  nodePort: 30310 
+
+# Payment App Configuration
+app:
+  enabled: true
+  image: docker.io/casperyap/rp-payment-app:v0.1.0
+  imagePullPolicy: Always
+  port: 8087
+  nodePort: 30087
+  configYaml: |
+    server:
+      port: 8087
+
+    auth:
+      enabled: false
+      origin: http://ORIGIN_URL:ORIGIN_PORT
+      jwt:
+        key:
+          set:
+            uri: "http://app-iam:8081/oauth2/jwks" # Or use IAM_SVC placeholder
+
+    stripe:
+      apiKey: ${STRIPE_API_KEY}
+      webhookSecret: ${STRIPE_WEBHOOK_SECRET}
+
+    spring:
+      application:
+        name: Payment
+
+      datasource:
+        url: "jdbc:mysql://MYSQL_HOST:3306/RPPaymentDB" # Placeholder to be replaced
+        username: root
+        password: password
+        driver-class-name: com.mysql.cj.jdbc.Driver
+        hikari: # HikariCP Configuration
+          minimum-idle: 5
+          maximum-pool-size: 20
+          auto-commit: true
+          idle-timeout: 30000
+          max-lifetime: 1800000
+          connection-timeout: 30000
+
+      jpa:
+        hibernate:
+          ddl-auto: update
+          naming:
+            physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+        show-sql: true
+        properties:
+          hibernate:
+            jdbc:
+              time_zone: UTC
+
+      security:
+        user:
+          name: admin
+          password: admin
+      
+      kafka:
+        bootstrap-servers: KAFKA_BROKER_URL:KAFKA_BROKER_PORT
+        template:
+          default-topic: KAFKA_PAYMENT_TOPIC
+        producer:
+          key-serializer: org.apache.kafka.common.serialization.StringSerializer
+          value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+          properties:
+            acks: all
+            retries: 10
+            enable.idempotence: true
+            spring.json.add.type.headers: false
+
+    # Actuator
+    management:
+      endpoints:
+        web:
+          exposure:
+            include: health, info, prometheus
+
+    sales-service:
+      url: "http://SALES_SVC:8085"
+
+    logging:
+      level:
+        root: INFO
+        org:
+          springframework:
+            security: TRACE
+        com.retailpulse: DEBUG
+      file:
+        name: logs/rp-payment.log
+
+    kafka:
+      # Topic names used by the Payment service
+      topics:
+        paymentEvents: "KAFKA_PAYMENT_TOPIC"
+        paymentEventsDlt: "KAFKA_PAYMENT_TOPIC-dlt"
+
+stripe:
+  apiKey: sk_test_51Rwa98Fo0IYXjs5fnTRUlbpN0TwKCHV2GhVI1hfCM1oI8bMYfP1aYetD8hC9vYazOAoR9fd6AvxV9dn9eanK98Wo00voU4Crd8
+  webhookSecret: whsec_53d63261913c1329c7f48c310297ac40b4d0ef6bb1f6bc3f541af4b6114cf3a7
+
+# Dependencies (if needed for dynamic service name resolution)
+dependencies:
+  salesReleaseName: retailpulse-sales
+  iamReleaseName: retailpulse-iam
+  kafkaReleaseName: retailpulse-kafka
+  webURL: localhost
+  webExternalPort: 30080

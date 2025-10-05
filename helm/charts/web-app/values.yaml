@@ -9,18 +9,38 @@ app:
   port: 8080
   nodePort: 30080
 
-# Optional: Runtime Config (e.g., API URLs, OAuth settings)
-# config:
-#   authEnabled: false
-#   issuer: "http://localhost:30081"
-#   clientId: "client"
-#   api:
-#     user: "http://localhost:30082"
-#     businessEntity: "http://localhost:30083"
-#     inventory: "http://localhost:30084"
-#     sales: "http://localhost:30085"
-#     report: "http://localhost:30086"
-#     payment: "http://localhost:30087"
+runtimeConfigYaml: |
+  {
+    "authConfig": {
+      "issuer": "http://IAM_SVC:IAM_PORT",
+      "requireHttps": false,
+      "redirectUri": "http://WEB_SVC:WEB_PORT",
+      "clientId": "client",
+      "responseType": "code",
+      "scope": "openid",
+      "useSilentRefresh": true,
+      "useHttpBasicAuth": false,
+      "disablePKCE": false,
+      "showDebugInformation": true
+    },
+    "apiConfig": {
+      "user_api_url": "http://USER_SVC:USER_PORT/",
+      "business_entity_api_url": "http://BUSINESS_ENTITY_SVC:BUSINESS_ENTITY_PORT/",
+      "inventory_api_url": "http://INVENTORY_SVC:INVENTORY_PORT/",
+      "sales_api_url": "http://SALES_SVC:SALES_PORT/",
+      "report_api_url": "http://REPORT_SVC:REPORT_PORT/",
+      "payment_api_url": "http://PAYMENT_SVC:PAYMENT_PORT/"
+    },
+    "environment": {
+      "production": true,
+      "authEnabled": true,
+      "useRuntimeConfig": true,
+      "devModeUser": "superadmin",
+      "devModeRole": "ADMIN",
+      "defaultPassword": "password1",
+      "stripePublicKey": "pk_test_51Rwa98Fo0IYXjs5f0dEGfpQ9SuGE4NnsYHl5XvWMHq9o47V94yfNELzq5lnszDjJT8Yn8XTn2JoW5imJDJQfhLjq00EYYg7VPM"
+    }
+  }
 
 # Ingress Configuration (Optional)
 ingress:
@@ -35,3 +55,13 @@ ingress:
   # - secretName: chart-example-tls
   #   hosts:
   #     - retailpulse.local
+
+dependencies:
+  iamReleaseName: retailpulse-iam  
+  userReleaseName: retailpulse-user
+  businessEntityReleaseName: retailpulse-businessentity
+  inventoryReleaseName: retailpulse-inventory
+  salesReleaseName: retailpulse-sales
+  reportReleaseName: retailpulse-report
+  paymentReleaseName: retailpulse-payment
+  

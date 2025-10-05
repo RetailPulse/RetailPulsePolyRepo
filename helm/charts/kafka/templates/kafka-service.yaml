@@ -1,0 +1,24 @@
+{{- if .Values.kafka.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "kafka.kafkaService" . }}
+  namespace: {{ include "kafka.namespace" . }}
+  labels:
+    {{- include "kafka.labels" . | nindent 4 }}
+    app: {{ printf "%s-rp-kafka" .Release.Name }}
+spec:
+  selector:
+    app: {{ printf "%s-rp-kafka" .Release.Name }}
+  ports:
+    - name: plaintext
+      port: {{ .Values.kafka.listeners.plaintext.port }}
+      targetPort: {{ .Values.kafka.listeners.plaintext.port }}
+      protocol: TCP
+    - name: external
+      port: {{ .Values.kafka.listeners.external.port }}
+      targetPort: {{ .Values.kafka.listeners.external.port }}
+      nodePort: {{ .Values.kafka.listeners.external.nodePort }}
+      protocol: TCP
+  type: NodePort
+{{- end }}
