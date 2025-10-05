@@ -111,6 +111,12 @@ app:
         com.retailpulse: "DEBUG"
       file:
         name: logs/rp-businessentity.log
+    
+    management:
+      tracing:
+        enabled: true
+        sampling:
+          probability: 1.0
 
 dependencies:
   iamReleaseName: retailpulse-iam

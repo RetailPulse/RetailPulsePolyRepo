@@ -184,7 +184,13 @@ app:
         feign: INFO
         com.retailpulse.config.FeignConfig: INFO
       file:
-        name: "logs/rp-sales.log"  
+        name: "logs/rp-sales.log"
+
+    management:
+      tracing:
+        enabled: true
+        sampling:
+          probability: 1.0
 
 dependencies:
   inventoryReleaseName: retailpulse-inventory

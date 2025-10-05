@@ -54,9 +54,16 @@ app:
         org.springframework.security: "INFO"
         com.retailpulse: "DEBUG"
         com.example.report.infrastructure.feign: "INFO"
-        feign: "INFO"
+        org.springframework.cloud.openfeign: DEBUG
+        feign: DEBUG
       file:
         name: "logs/report-service.log"
+    
+    management:
+      tracing:
+        enabled: true
+        sampling:
+          probability: 1.0
 
 dependencies:
   inventoryReleaseName: "retailpulse-inventory" 
