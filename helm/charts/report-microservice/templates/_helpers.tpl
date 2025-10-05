@@ -87,11 +87,11 @@ Web-App URL
 {{/*
 Web-App Port
 */}}
-{{- define "report.webPort" -}}
-{{- if and .Values.global (.Values.global.webPort) (ne .Values.global.webPort nil) }}
-  {{- .Values.global.webPort }}
-{{- else if and .Values.dependencies (.Values.dependencies.webPort) (ne .Values.dependencies.webPort nil) }}
-  {{- .Values.dependencies.webPort }}
+{{- define "report.webExternalPort" -}}
+{{- if and .Values.global (.Values.global.webExternalPort) (ne .Values.global.webExternalPort nil) }}
+  {{- .Values.global.webExternalPort }}
+{{- else if and .Values.dependencies (.Values.dependencies.webExternalPort) (ne .Values.dependencies.webExternalPort nil) }}
+  {{- .Values.dependencies.webExternalPort }}
 {{- else }}
   {{- 30080  }}
 {{- end }}

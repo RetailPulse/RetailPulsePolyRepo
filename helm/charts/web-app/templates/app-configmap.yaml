@@ -5,5 +5,23 @@ metadata:
   name:  {{ printf "%s-rp-web-app-cm" .Release.Name }}
 data:
   runtime-config.json: |
-{{ .Values.runtimeConfigYaml | indent 4 }}
+{{- tpl (.Values.runtimeConfigYaml  |
+    replace "IAM_SVC" (include "web.iamExternalService" .) |
+    replace "IAM_PORT" (include "web.iamExternalPort" .) |
+    replace "USER_SVC" (include "web.userExternalService" .) |
+    replace "USER_PORT" (include "web.userExternalPort" .) |
+    replace "BUSINESS_ENTITY_SVC" (include "web.businessEntityExternalService" .) |
+    replace "BUSINESS_ENTITY_PORT" (include "web.businessEntityExternalPort" .) |
+    replace "INVENTORY_SVC" (include "web.inventoryExternalService" .) |
+    replace "INVENTORY_PORT" (include "web.inventoryExternalPort" .) |
+    replace "SALES_SVC" (include "web.salesExternalService" .) |
+    replace "SALES_PORT" (include "web.salesExternalPort" .) |
+    replace "REPORT_SVC" (include "web.reportExternalService" .) |
+    replace "REPORT_PORT" (include "web.reportExternalPort" .) |
+    replace "PAYMENT_SVC" (include "web.paymentExternalService" .) |
+    replace "PAYMENT_PORT" (include "web.paymentExternalPort" .) |
+    replace "WEB_SVC" (include "web.webURL" .) |
+    replace "WEB_PORT" (include "web.webExternalPort" .)
+  ) . | nindent 4 
+}}
 {{- end }}

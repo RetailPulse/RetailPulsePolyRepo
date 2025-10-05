@@ -3,7 +3,7 @@ namespace: ns-retailpulse
 
 # Web App Configuration
 app:
-  enabled: false
+  enabled: true
   image: docker.io/casperyap/rp-web-app:v0.1.0
   imagePullPolicy: Always
   port: 8080
@@ -12,9 +12,9 @@ app:
 runtimeConfigYaml: |
   {
     "authConfig": {
-      "issuer": "http://localhost:30081", 
+      "issuer": "http://IAM_SVC:IAM_PORT",
       "requireHttps": false,
-      "redirectUri": "window.location.origin",
+      "redirectUri": "http://WEB_SVC:WEB_PORT",
       "clientId": "client",
       "responseType": "code",
       "scope": "openid",
@@ -24,12 +24,12 @@ runtimeConfigYaml: |
       "showDebugInformation": true
     },
     "apiConfig": {
-      "user_api_url": "http://svc-rp-user:8082/",
-      "business_entity_api_url": "http://svc-rp-businessentity:8083/",
-      "inventory_api_url": "http://svc-rp-inventory:8084/",
-      "sales_api_url": "http://svc-rp-sales:8085/",
-      "report_api_url": "http://svc-rp-report:8086/",
-      "payment_api_url": "http://svc-rp-payment:8087/"
+      "user_api_url": "http://USER_SVC:USER_PORT/",
+      "business_entity_api_url": "http://BUSINESS_ENTITY_SVC:BUSINESS_ENTITY_PORT/",
+      "inventory_api_url": "http://INVENTORY_SVC:INVENTORY_PORT/",
+      "sales_api_url": "http://SALES_SVC:SALES_PORT/",
+      "report_api_url": "http://REPORT_SVC:REPORT_PORT/",
+      "payment_api_url": "http://PAYMENT_SVC:PAYMENT_PORT/"
     },
     "environment": {
       "production": true,
@@ -38,7 +38,7 @@ runtimeConfigYaml: |
       "devModeUser": "superadmin",
       "devModeRole": "ADMIN",
       "defaultPassword": "password1",
-      "stripePublicKey": "pk_test_51Rwa9JCTUDg2faMiUxYG28Di0rDMjD4C5xEPCkn0nv6bPc1Qy8WvivfAhhykVxGlAqfeF2tvILpEd0K9je6WPhLo00bfZAazGS"
+      "stripePublicKey": "pk_test_51Rwa98Fo0IYXjs5f0dEGfpQ9SuGE4NnsYHl5XvWMHq9o47V94yfNELzq5lnszDjJT8Yn8XTn2JoW5imJDJQfhLjq00EYYg7VPM"
     }
   }
 
@@ -55,3 +55,13 @@ ingress:
   # - secretName: chart-example-tls
   #   hosts:
   #     - retailpulse.local
+
+dependencies:
+  iamReleaseName: retailpulse-iam  
+  userReleaseName: retailpulse-user
+  businessEntityReleaseName: retailpulse-businessentity
+  inventoryReleaseName: retailpulse-inventory
+  salesReleaseName: retailpulse-sales
+  reportReleaseName: retailpulse-report
+  paymentReleaseName: retailpulse-payment
+  

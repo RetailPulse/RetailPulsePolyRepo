@@ -50,4 +50,4 @@ app:
 dependencies:
   userReleaseName: retailpulse-user
   webURL: localhost
-  webPort: 30080
+  webExternalPort: 30080

@@ -12,7 +12,7 @@ data:
     replace "MYSQL_HOST" (printf "%s-rp-businessentity-sql-svc" .Release.Name) | 
     replace "REDIS_HOST" (printf "%s-rp-businessentity-redis-svc" .Release.Name) |
     replace "ORIGIN_URL" (include "business-entity.webURL" .) | 
-    replace "ORIGIN_PORT" (include "business-entity.webPort" .) |
+    replace "ORIGIN_PORT" (include "business-entity.webExternalPort" .) |
     replace "IAM_SVC" (include "business-entity.iamService" .) | 
     replace "IAM_PORT" (include "business-entity.iamPort" .)
   ) . | nindent 4 

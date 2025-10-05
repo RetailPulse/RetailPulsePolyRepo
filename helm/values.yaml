@@ -14,9 +14,26 @@ global:
   bePort: 8083
   inventoryPort: 8084
   paymentPort: 8087
-  webPort: 30080
+  iamExternalPort: 30081
+  userExternalPort: 30082
+  businessEntityExternalPort: 30083
+  inventoryExternalPort: 30084
+  salesExternalPort: 30085
+  reportExternalPort: 30086
+  paymentExternalPort: 30087
+  webExternalPort: 30080
   kafkaPort: 9092
-  kafkaPaymentTopic: "payment-topic"
+  kafkaPaymentTopic: "payment-events"
+
+  ## --- If using reverse proxy to route service instead ---
+  # iamExternalService: "localhost/iam"
+  # userExternalService: "localhost/user"
+  # businessEntityExternalService: "localhost/be"
+  # inventoryExternalService: "localhost/inventory"
+  # salesExternalService: "localhost/sales"
+  # reportExternalService: "localhost/report"
+  # paymentExternalService: "localhost/payment"
+  # webURL: "localhost"
 
 # --- Subchart Value Overrides ---
 # You can override specific values for each subchart here.

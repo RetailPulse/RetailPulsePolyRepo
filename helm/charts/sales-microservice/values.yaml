@@ -193,4 +193,4 @@ dependencies:
   kafkaReleaseName: retailpulse-kafka
   kafkaPort: 9092
   webURL: localhost
-  webPort: 30080
+  webExternalPort: 30080

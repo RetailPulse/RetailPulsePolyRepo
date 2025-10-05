@@ -372,4 +372,4 @@ dependencies:
   businessEntityReleaseName: retailpulse-be
   iamReleaseName: retailpulse-iam  
   webURL: localhost
-  webPort: 30080
+  webExternalPort: 30080

@@ -69,7 +69,7 @@ app:
       kafka:
         bootstrap-servers: KAFKA_BROKER_URL:KAFKA_BROKER_PORT
         template:
-          default-topic: payment-events
+          default-topic: KAFKA_PAYMENT_TOPIC
         producer:
           key-serializer: org.apache.kafka.common.serialization.StringSerializer
           value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
@@ -99,16 +99,15 @@ app:
       file:
         name: logs/rp-payment.log
 
-# Stripe Credentials (Ideally managed securely)
-stripe:
-  apiKey: sk_test_51SBx0NH1LGmpXQLTMttHXOrB9QNPYnWRT5bIzS5W33eDJsX836XTfHKSkwmXFNd4Crnbqwh6XKm8Lu0yoeqdSPBt00evCK3s0C
-  webhookSecret: whsec_a4f1e7714e26b32a81c5fdf030687e926f18b2ef7b73df35b76ec12731efd43a
+    kafka:
+      # Topic names used by the Payment service
+      topics:
+        paymentEvents: "KAFKA_PAYMENT_TOPIC"
+        paymentEventsDlt: "KAFKA_PAYMENT_TOPIC-dlt"
 
-kafka:
-  # Topic names used by the Payment service
-  topics:
-    paymentEvents: "payment-events"
-    paymentEventsDlt: "payment-events-dlt"
+stripe:
+  apiKey: sk_test_51Rwa98Fo0IYXjs5fnTRUlbpN0TwKCHV2GhVI1hfCM1oI8bMYfP1aYetD8hC9vYazOAoR9fd6AvxV9dn9eanK98Wo00voU4Crd8
+  webhookSecret: whsec_53d63261913c1329c7f48c310297ac40b4d0ef6bb1f6bc3f541af4b6114cf3a7
 
 # Dependencies (if needed for dynamic service name resolution)
 dependencies:
@@ -116,4 +115,4 @@ dependencies:
   iamReleaseName: retailpulse-iam
   kafkaReleaseName: retailpulse-kafka
   webURL: localhost
-  webPort: 30080
+  webExternalPort: 30080

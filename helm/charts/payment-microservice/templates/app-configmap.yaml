@@ -15,7 +15,7 @@ data:
       replace "KAFKA_BROKER_PORT" (include "payment.kafkaPort" .) |
       replace "KAFKA_PAYMENT_TOPIC" (include "payment.kafkaPaymentTopic" .) |
       replace "ORIGIN_URL" (include "payment.webURL" .) |
-      replace "ORIGIN_PORT" (include "payment.webPort" .) |
+      replace "ORIGIN_PORT" (include "payment.webExternalPort" .) |
       replace "IAM_SVC" (include "payment.iamService" .) | 
       replace "IAM_PORT" (include "payment.iamPort" .)
     ) . | nindent 4 }}
