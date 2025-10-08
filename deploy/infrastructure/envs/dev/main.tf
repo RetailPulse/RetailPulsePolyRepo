@@ -19,12 +19,52 @@ module "eks_stack" {
 /* Step 3: Infra Helm */
 module "helm_addons" {
   source = "./helm"
-  name_prefix           = local.name_prefix
-  cluster_name          = module.eks_stack.cluster_name
-  cluster_endpoint      = module.eks_stack.cluster_endpoint
-  cluster_ca_certificate= module.eks_stack.cluster_ca_certificate
-  oidc_provider_arn     = module.eks_stack.oidc_provider_arn
+
+  cluster_name            = module.eks_stack.cluster_name
+  cluster_endpoint        = module.eks_stack.cluster_endpoint
+  cluster_ca_certificate  = module.eks_stack.cluster_ca_certificate
+  oidc_provider_arn       = module.eks_stack.oidc_provider_arn
   cluster_oidc_issuer_url = module.eks_stack.cluster_oidc_issuer_url
-  region = var.region
-  vpc_id = module.network.vpc_id
+  name_prefix             = local.name_prefix
+  region                  = var.region
+  vpc_id                  = module.network.vpc_id
+}
+
+/* Step 4a: MySQL  */
+module "mysql" {
+  source           = "./db/mysql"
+  name_prefix      = local.name_prefix
+  vpc_id           = module.network.vpc_id
+  database_subnets = module.network.database_subnets
+  eks_node_sg_id   = module.eks_stack.node_security_group_id
+
+  # optional overrides:
+  # instance_class     = "db.t4g.medium"
+  # multi_az           = true
+}
+
+/* Step 4b: DocumentDB  */
+module "docdb" {
+  source           = "./db/docdb"
+  name_prefix      = local.name_prefix
+  vpc_id           = module.network.vpc_id
+  database_subnets = module.network.database_subnets
+  eks_node_sg_id   = module.eks_stack.node_security_group_id
+  # instances = 2
+}
+
+/* Step 4c: Secret Store */
+module "k8s" {
+  source = "./k8s"
+
+  region           = var.region
+  name_prefix      = local.name_prefix
+  sample_namespace = "sample"
+
+  providers = {
+    kubernetes = kubernetes
+  }
+
+  # Wait for Helm add-ons (External Secrets CRDs, etc.)
+  depends_on = [ module.helm_addons ]
 }

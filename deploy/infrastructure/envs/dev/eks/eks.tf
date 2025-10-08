@@ -14,7 +14,7 @@ module "eks" {
   cluster_endpoint_private_access = true
   cluster_endpoint_public_access  = true
   cluster_endpoint_public_access_cidrs = [
-    "0.0.0.0/0"  # for quick testing; tighten to your IP when confirmed; "YOUR.PUBLIC.IP.ADDR/32"
+    "0.0.0.0/0" # TODO: tighten to your IP/CIDR before prod  # for quick testing; tighten to your IP when confirmed; "YOUR.PUBLIC.IP.ADDR/32"
   ]
 
   authentication_mode = "API_AND_CONFIG_MAP"  # optional but helpful
@@ -36,7 +36,7 @@ module "eks" {
 
     workload_spot = {
       ami_type       = "AL2_ARM_64"
-      instance_types = ["m6g.large","m6g.xlarge"]  # a mix improves Spot availability
+      instance_types = ["m6g.medium","m6g.large"]  # a mix improves Spot availability
       capacity_type  = "SPOT"
 
       desired_size   = 2

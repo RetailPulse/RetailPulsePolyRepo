@@ -7,6 +7,12 @@ resource "helm_release" "aws_load_balancer_controller" {
   namespace        = "kube-system"
   create_namespace = false
 
+    wait    = true
+    timeout = 900  # 15m; cluster may need time to pull images/webhooks
+
+    # (Optional but nice) make chart installs atomic
+    atomic = true
+
   set {
       name = "clusterName"
       value = var.cluster_name

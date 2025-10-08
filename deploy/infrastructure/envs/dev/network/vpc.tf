@@ -70,3 +70,29 @@ resource "aws_security_group" "alb" {
   description = "Public ALB"
   vpc_id      = module.vpc.vpc_id
 }
+
+# ALB security group rules (if you choose to reuse this SG from Ingress annotations)
+resource "aws_security_group_rule" "alb_in_80" {
+  type              = "ingress"
+  from_port         = 80
+  to_port           = 80
+  protocol          = "tcp"
+  cidr_blocks       = ["0.0.0.0/0"]
+  security_group_id = aws_security_group.alb.id
+}
+resource "aws_security_group_rule" "alb_in_443" {
+  type              = "ingress"
+  from_port         = 443
+  to_port           = 443
+  protocol          = "tcp"
+  cidr_blocks       = ["0.0.0.0/0"]
+  security_group_id = aws_security_group.alb.id
+}
+resource "aws_security_group_rule" "alb_eg_all" {
+  type              = "egress"
+  from_port         = 0
+  to_port           = 0
+  protocol          = "-1"
+  cidr_blocks       = ["0.0.0.0/0"]
+  security_group_id = aws_security_group.alb.id
+}

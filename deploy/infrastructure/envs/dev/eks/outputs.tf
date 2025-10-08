@@ -27,3 +27,13 @@ output "cluster_oidc_issuer_url" {
   description = "Cluster OIDC issuer URL"
   value       = module.eks.cluster_oidc_issuer_url
 }
+
+output "node_security_group_id" {
+  description = "Security Group used by EKS managed node groups"
+  value       = module.eks.node_security_group_id
+}
+
+output "cluster_security_group_id" {
+  description = "EKS cluster security group (control plane managed)"
+  value       = module.eks.cluster_security_group_id
+}
