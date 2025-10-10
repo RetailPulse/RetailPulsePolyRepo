@@ -13,7 +13,7 @@ module "eks_stack" {
   name_prefix     = local.name_prefix
   project         = var.project
   env             = var.env
-  cluster_version = "1.29"
+  cluster_version = "1.33"
 }
 
 /* Step 3: Infra Helm */
