@@ -62,6 +62,24 @@ module "eks" {
         policy_arn  = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
         access_scope = { type = "cluster" }
       }]
+    },
+    retailpulse_admin = {
+      principal_arn = "arn:aws:iam::051826728851:user/RetailPulse"
+
+      policy_associations = [
+        {
+          policy_arn  = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSAdminPolicy"
+          access_scope = {
+            type = "cluster"
+          }
+        },
+        {
+          policy_arn  = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
+          access_scope = {
+            type = "cluster"
+          }
+        }
+      ]
     }
   }
 }
