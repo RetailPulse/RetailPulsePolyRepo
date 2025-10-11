@@ -5,7 +5,7 @@ variable "eks_node_sg_id"    { type = string }
 
 variable "engine_version"    {
     type = string
-    default = "5.0"
+    default = "5.0.0"
 }
 variable "instance_class"    {
     type = string

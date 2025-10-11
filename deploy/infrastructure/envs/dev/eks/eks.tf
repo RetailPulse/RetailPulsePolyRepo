@@ -22,8 +22,8 @@ module "eks" {
   # Two managed node groups: on-demand (critical/system) and spot (stateless)
   eks_managed_node_groups = {
     general_ondemand = {
-      ami_type       = "AL2_ARM_64"       # switch to AL2_x86_64 if you don't build ARM images
-      instance_types = ["m6g.large"]
+      ami_type       = "AL2023_x86_64_STANDARD"
+      instance_types = ["t3.large"]
       capacity_type  = "ON_DEMAND"
 
       desired_size   = 3
@@ -35,13 +35,13 @@ module "eks" {
     }
 
     workload_spot = {
-      ami_type       = "AL2_ARM_64"
-      instance_types = ["m6g.medium","m6g.large"]  # a mix improves Spot availability
+      ami_type       = "AL2023_x86_64_STANDARD"
+      instance_types = ["t3.large","m5.large"]  # a mix improves Spot availability
       capacity_type  = "SPOT"
 
-      desired_size   = 2
+      desired_size   = 3
       min_size       = 1
-      max_size       = 10
+      max_size       = 9
 
       labels         = { pool = "spot" }
       tags           = { Name = "${var.name_prefix}-spot" }
@@ -62,6 +62,24 @@ module "eks" {
         policy_arn  = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
         access_scope = { type = "cluster" }
       }]
+    },
+    retailpulse_admin = {
+      principal_arn = "arn:aws:iam::051826728851:user/RetailPulse"
+
+      policy_associations = [
+        {
+          policy_arn  = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSAdminPolicy"
+          access_scope = {
+            type = "cluster"
+          }
+        },
+        {
+          policy_arn  = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
+          access_scope = {
+            type = "cluster"
+          }
+        }
+      ]
     }
   }
 }

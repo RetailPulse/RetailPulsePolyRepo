@@ -27,6 +27,7 @@ kafka:
       port: ""
     external:
       port: 30094
+  dataDir: "/var/lib/kafka"
   logDirs: "/var/lib/kafka/data"
   storage: 2Gi
   autoCreateTopics: true

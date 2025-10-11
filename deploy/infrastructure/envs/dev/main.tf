@@ -13,7 +13,7 @@ module "eks_stack" {
   name_prefix     = local.name_prefix
   project         = var.project
   env             = var.env
-  cluster_version = "1.29"
+  cluster_version = "1.34"
 }
 
 /* Step 3: Infra Helm */
@@ -28,6 +28,13 @@ module "helm_addons" {
   name_prefix             = local.name_prefix
   region                  = var.region
   vpc_id                  = module.network.vpc_id
+
+  providers = {
+    helm       = helm
+    kubernetes = kubernetes
+  }
+
+  depends_on = [module.eks_stack]
 }
 
 /* Step 4a: MySQL  */
