@@ -18,6 +18,9 @@ spec:
       labels:
         app: {{ printf "%s-rp-web-deploy" .Release.Name }}
     spec:
+      securityContext:
+        runAsUser: 1001
+        fsGroup: 1001
       containers:
         - image: {{ .Values.app.image }}
           name: {{ printf "%s-rp-web-pod" .Release.Name }}
@@ -28,6 +31,8 @@ spec:
             - name: runtime-config
               mountPath: /usr/share/nginx/html/assets/runtime-config.json
               subPath: runtime-config.json
+            - name: logs
+              mountPath: /var/log/nginx
           # livenessProbe:
           #   httpGet:
           #     path: /
@@ -45,4 +50,7 @@ spec:
         - name: runtime-config
           configMap:
             name: {{ printf "%s-rp-web-app-cm" .Release.Name }}
+        - name: logs
+          persistentVolumeClaim:
+            claimName: {{ printf "%s-rp-web-app-pvc" .Release.Name }}
 {{- end }}            

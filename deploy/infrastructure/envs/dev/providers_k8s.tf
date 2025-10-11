@@ -1,4 +1,4 @@
-# dev/k8s/providers_k8s.tf
+# dev/providers_k8s.tf
 provider "kubernetes" {
   host                   = module.eks_stack.cluster_endpoint
   cluster_ca_certificate = base64decode(module.eks_stack.cluster_ca_certificate)
