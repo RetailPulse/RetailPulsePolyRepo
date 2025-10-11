@@ -1,37 +1,86 @@
-name: Deploy Infrastructure
+name: Plan/Apply/Destroy Infrastructure (OpenTofu)
 
-# Trigger the workflow manually from the GitHub Actions tab
 on:
   workflow_dispatch:
+    inputs:
+      action:
+        description: "What to do"
+        type: choice
+        options: [plan, apply, destroy]
+        default: plan
+      # environment:
+      #   description: "Environment folder under deploy/infrastructure/envs"
+      #   default: dev
+      #   required: true
+
+# Use the env folder as working directory so we don't need to `cd` in every step
+defaults:
+  run:
+    shell: bash
+    working-directory: deploy/infrastructure/envs/dev
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
+
+    # If you later switch to OIDC (recommended), uncomment permissions and the role step
+    # permissions:
+    #   id-token: write   # required for OIDC
+    #   contents: read
+
     steps:
-      # Checkout the repository to access your main.tf file
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
-      # Install OpenTofu CLI
       - name: Setup OpenTofu
-        uses: opentofu/setup-opentofu@v1  # Replace with the actual action you find
+        uses: opentofu/setup-opentofu@v1
+        # with:
+        #   tofu_version: latest # optional; pin a version if you prefer
 
-      # Configure AWS credentials using secrets stored in GitHub
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v2
+      # --- AWS credentials ---
+      # OPTION A (current): Access keys from repo/org secrets
+      - name: Configure AWS credentials (access keys)
+        # if: ${{ !env.AWS_ROLE_TO_ASSUME }}
+        uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ap-southeast-1
 
-      # Initialize your OpenTofu project (fetch providers, etc.)
-      - name: Initialize OpenTofu
-        run: cd deploy && tofu init -reconfigure
+      # OPTION B (recommended): OIDC to assume a role (set AWS_ROLE_TO_ASSUME in repo secrets)
+      # - name: Configure AWS credentials (OIDC assume-role)
+      #   if: ${{ env.AWS_ROLE_TO_ASSUME }}
+      #   uses: aws-actions/configure-aws-credentials@v4
+      #   with:
+      #     role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+      #     aws-region: ap-southeast-1
 
-      # Run a plan to review the changes that will be applied
-      - name: Plan Infrastructure
-        run: cd deploy && tofu plan
+      - name: Print OpenTofu version
+        run: tofu version
 
-      # Apply the infrastructure changes to provision resources
-      - name: Apply Infrastructure
-        run: cd deploy && tofu apply -auto-approve
+      - name: Initialize OpenTofu (reconfigure backend)
+        env:
+          TF_IN_AUTOMATION: "true"
+        run: |
+          tofu init -reconfigure
+
+      - name: Tofu plan
+        if: ${{ github.event.inputs.action == 'plan' || github.event.inputs.action == '' }}
+        env:
+          TF_IN_AUTOMATION: "true"
+        run: |
+          tofu plan -input=false -no-color
+
+      - name: Tofu apply
+        if: ${{ github.event.inputs.action == 'apply' }}
+        env:
+          TF_IN_AUTOMATION: "true"
+        run: |
+          tofu apply -auto-approve -input=false -no-color
+
+      - name: Tofu destroy (teardown)
+        if: ${{ github.event.inputs.action == 'destroy' }}
+        env:
+          TF_IN_AUTOMATION: "true"
+        run: |
+          tofu destroy -auto-approve -input=false -no-color

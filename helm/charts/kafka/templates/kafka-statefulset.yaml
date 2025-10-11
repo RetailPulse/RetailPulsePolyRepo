@@ -18,6 +18,9 @@ spec:
       labels:
         app: {{ printf "%s-rp-kafka" .Release.Name }}
     spec:
+      securityContext:
+        runAsUser: 1000
+        fsGroup: 1000
       # --- INIT CONTAINER TO WAIT FOR ZOOKEEPER ---
       initContainers:
         - name: wait-for-zookeeper
@@ -52,7 +55,7 @@ spec:
                 name: {{ printf "%s-rp-kafka-cm" .Release.Name }}
           volumeMounts:
             - name: kafka-data
-              mountPath: {{ .Values.kafka.logDirs }}
+              mountPath: {{ .Values.kafka.dataDir }}
           command:
             - sh
             - -c
