@@ -25,6 +25,18 @@ entryPoints:
   websecure:  
     address: ":443"
 
+# # Configure logging level
+# logs:
+#   general:
+#     level: DEBUG # Change to DEBUG for more verbose output
+#   access:
+#     enabled: true # Optional: Enable access logs
+
+# # Add the environment variable for log level (alternative to logs.general.level)
+# env:
+#   - name: TRAEFIK_LOG_LEVEL
+#     value: "DEBUG"
+
 # Enable Kubernetes CRD and Ingress support
 additionalArguments:
   - "--providers.kubernetescrd"
