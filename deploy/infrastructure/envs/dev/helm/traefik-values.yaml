@@ -5,6 +5,7 @@ service:
   type: LoadBalancer
   annotations:
     service.beta.kubernetes.io/aws-load-balancer-type: "external"
+    service.beta.kubernetes.io/aws-load-balancer-scheme: "internet-facing"
 
 # Enable Traefik dashboard
 dashboard:
@@ -28,8 +29,8 @@ entryPoints:
 additionalArguments:
   - "--providers.kubernetescrd"
   - "--providers.kubernetesingress"
-  - "--entrypoints.web.http.redirections.entryPoint.to=websecure"
-  - "--entrypoints.web.http.redirections.entryPoint.scheme=https"
+  # - "--entrypoints.web.http.redirections.entryPoint.to=websecure"
+  # - "--entrypoints.web.http.redirections.entryPoint.scheme=https"
 
 # # Enable Let's Encrypt with Route 53 DNS challenge
 # certificatesResolvers:
