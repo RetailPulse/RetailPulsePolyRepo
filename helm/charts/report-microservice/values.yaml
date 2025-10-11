@@ -19,36 +19,34 @@ mongodb:
 app:
   enabled: true
   image: docker.io/casperyap/rp-report-app:v0.1.0
-  imagePullPolicy: IfNotPresent # Consider IfNotPresent or Always based on tagging strategy
-  port: 8088
-  nodePort: 30088
+  imagePullPolicy: Always
+  port: 8086
+  nodePort: 30086
   configYaml: |
     server:
-      port: 8088
-
-    inventory:
-      api:
-        base-url: "http://INVENTORY_SVC:8084" # Dynamically replaced
+      port: 8086
 
     auth:
       enabled: true
-      origin: "http://localhost:30080" # Default web origin, consider making configurable
+      origin: http://ORIGIN_URL:ORIGIN_PORT
       jwt:
         key:
           set:
-            uri: "http://IAM_SVC:8081/oauth2/jwks" # Dynamically replaced
+            uri: http://IAM_SVC:IAM_PORT/oauth2/jwks
 
     spring:
       data:
         mongodb:
-          # URI constructed from secret values and service name
-          # Example: mongodb://admin:secret@mongo-service-name:27017/reportsdb?authSource=admin
-          # This is overridden by env var SPRING_DATA_MONGODB_URI in deployment for clarity
           uri: "mongodb://MONGO_HOST:27017/reportsdb?authSource=admin"
           database: reportsdb
+          
     app:
       gridfs:
         bucket: reports # GridFS bucket name (prefixes fs.files/fs.chunks)
+        
+    inventory:
+      api:
+        base-url: "http://INVENTORY_SVC:8084" # Dynamically replaced
 
     logging:
       level:
@@ -56,16 +54,19 @@ app:
         org.springframework.security: "INFO"
         com.retailpulse: "DEBUG"
         com.example.report.infrastructure.feign: "INFO"
-        feign: "INFO"
+        org.springframework.cloud.openfeign: DEBUG
+        feign: DEBUG
       file:
         name: "logs/report-service.log"
+    
+    management:
+      tracing:
+        enabled: true
+        sampling:
+          probability: 1.0
 
-# Dependency Service Names (Optional Overrides)
 dependencies:
-  # Name of the Helm release for the Inventory microservice
-  inventoryReleaseName: "retailpulse-inventory" # Default, change if needed
-  # inventoryService: "retailpulse-inventory-rp-inventory-sql-svc"
-
-  # Name of the Helm release for the Identity & Access Management microservice
-  iamReleaseName: "retailpulse-iam" # Default, change if needed
-  # iamService: "retailpulse-iam-rp-iam-app-svc"
+  inventoryReleaseName: "retailpulse-inventory" 
+  iamReleaseName: "retailpulse-iam" 
+  webURL: localhost
+  webExternalPort: 30080

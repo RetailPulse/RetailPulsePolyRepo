@@ -1,3 +1,4 @@
+{{- if .Values.app.enabled }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -7,4 +8,10 @@ metadata:
     {{- include "identity-access-management.labels" . | nindent 4 }}
 data:
   application.yaml: |
-{{- tpl (.Values.app.configYaml | replace "MYSQL_HOST" (include "identity-access-management.userMysqlService" .)) . | nindent 4 }}
+{{- tpl (.Values.app.configYaml | 
+  replace "MYSQL_HOST" (include "identity-access-management.userMysqlService" .) |
+  replace "ORIGIN_URL" (include "identity-access-management.webURL" .) |
+  replace "ORIGIN_PORT" (include "identity-access-management.webExternalPort" .) 
+  ) . | nindent 4 
+}}
+{{- end }}

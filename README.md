@@ -22,9 +22,9 @@ To clone the repo with the submodules, please follow the steps below:
 To deploy to local k8s using helm, please follow the steps below:
 1. From Parent directory RetailPulsePolyRepo/
 2. cd helm
-3. helm dependencies update
+3. ```helm dependencies update```
 2. Run the following command to start deployment while in RetailPulsePolyRepo/helm
-    helm install retailpulse . --create-namespace --namespace ns-retailpulse
+    ```helm install retailpulse . --create-namespace --namespace ns-retailpulse```
 
 To run the **server-side applications**, please follow the steps below:
 1. From Parent directory RetailPulsePolyRepo/

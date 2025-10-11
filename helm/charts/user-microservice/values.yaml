@@ -128,12 +128,12 @@ app:
       port: 8082
 
     auth:
-      enabled: false
-      origin: "http://localhost:30080"
+      enabled: true
+      origin: http://ORIGIN_URL:ORIGIN_PORT
       jwt:
         key:
           set:
-            uri: "http://app-iam:8081/oauth2/jwks"
+            uri: http://IAM_SVC:IAM_PORT/oauth2/jwks
 
     spring:
       datasource:
@@ -155,3 +155,14 @@ app:
         com.retailpulse: "DEBUG"
       file:
         name: "logs/rp-user.log"
+    
+    management:
+      tracing:
+        enabled: true
+        sampling:
+          probability: 1.0
+
+dependencies:
+  iamReleaseName: retailpulse-iam
+  webURL: localhost
+  webExternalPort: 30080

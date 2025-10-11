@@ -13,7 +13,7 @@ app:
       port: 8081
 
     auth:
-      origin: "http://localhost:30080"
+      origin: http://ORIGIN_URL:ORIGIN_PORT
 
     spring:
       datasource:
@@ -31,17 +31,29 @@ app:
     client:
       id: client
       name: retail-pulse
-      redirect-uri: "http://localhost:30080"
-      post-logout-redirect-uri: "http://localhost:30080"
+      redirect-uri: http://ORIGIN_URL:ORIGIN_PORT
+      post-logout-redirect-uri: http://ORIGIN_URL:ORIGIN_PORT
 
     logging:
       level:
-        root: "INFO"
-        org.springframework.security: "INFO"
-        com.retailpulse: "DEBUG"
+        com.retailpulse: DEBUG
+        org:
+          springframework:
+            security: INFO
+            security.oauth2:
+              server:
+                authorization: INFO
+            web: INFO
       file:
         name: "logs/rp-iam.log"
 
-# # Dependency: User Microservice MySQL Service Name
+    management:
+      tracing:
+        enabled: true
+        sampling:
+          probability: 1.0
+
 dependencies:
-  userReleaseName: "retailpulse-user"
+  userReleaseName: retailpulse-user
+  webURL: localhost
+  webExternalPort: 30080

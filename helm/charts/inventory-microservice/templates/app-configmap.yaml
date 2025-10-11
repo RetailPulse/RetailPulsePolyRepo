@@ -1,3 +1,4 @@
+{{- if .Values.app.enabled }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -8,7 +9,13 @@ metadata:
 data:
   application.yaml: |
 {{- tpl (.Values.app.configYaml |
-      replace "MYSQL_HOST" (include "inventory.mysqlService" .) |
-      replace "REDIS_HOST" (include "inventory.redisService" .) |
-      replace "BUSINESS_ENTITY_SVC" (include "inventory.businessEntityService" .)
-    ) . | nindent 4 }}
+    replace "MYSQL_HOST" (include "inventory.mysqlService" .) |
+    replace "REDIS_HOST" (include "inventory.redisService" .) |
+    replace "BUSINESS_ENTITY_SVC" (include "inventory.businessEntityService" .) |
+    replace "ORIGIN_URL" (include "inventory.webURL" .) | 
+    replace "ORIGIN_PORT" (include "inventory.webExternalPort" .) |
+    replace "IAM_SVC" (include "inventory.iamService" .) | 
+    replace "IAM_PORT" (include "inventory.iamPort" .)
+  ) . | nindent 4 
+}}
+{{- end }}

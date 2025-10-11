@@ -1,0 +1,19 @@
+{{- if .Values.mysql.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ printf "%s-rp-payment-sql-svc" .Release.Name }}
+  namespace: {{ .Values.namespace | default "ns-retailpulse" }}
+  labels:
+    {{- include "payment.labels" . | nindent 4 }}
+    app: {{ printf "%s-rp-payment-sql-deploy" .Release.Name }}
+spec:
+  selector:
+    app: {{ printf "%s-rp-payment-sql-deploy" .Release.Name }}
+  ports:
+    - protocol: TCP
+      port: 3306
+      targetPort: 3306
+      nodePort: {{ .Values.mysql.nodePort | default 30310 }}
+  type: NodePort
+{{- end }}

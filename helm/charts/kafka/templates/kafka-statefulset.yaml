@@ -1,0 +1,80 @@
+{{- if .Values.kafka.enabled }}
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ printf "%s-rp-kafka" .Release.Name }}
+  namespace: {{ include "kafka.namespace" . }}
+  labels:
+    {{- include "kafka.labels" . | nindent 4 }}
+    app: {{ printf "%s-rp-kafka" .Release.Name }}
+spec:
+  serviceName: {{ include "kafka.kafkaService" . }}
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ printf "%s-rp-kafka" .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ printf "%s-rp-kafka" .Release.Name }}
+    spec:
+      # --- INIT CONTAINER TO WAIT FOR ZOOKEEPER ---
+      initContainers:
+        - name: wait-for-zookeeper
+          image: busybox:1.35
+          command:
+            - sh
+            - -c
+            - >
+              echo "Waiting for Zookeeper at {{ include "kafka.zookeeperService" . }}:{{ .Values.zookeeper.clientPort }}...";
+              until nc -z {{ include "kafka.zookeeperService" . }} {{ .Values.zookeeper.clientPort }}; do
+                echo "Zookeeper not ready yet, waiting...";
+                sleep 5;
+              done;
+              echo "Zookeeper is ready!";
+          env:
+            - name: ZOOKEEPER_HOST
+              value: {{ include "kafka.zookeeperService" . }}
+            - name: ZOOKEEPER_PORT
+              value: {{ .Values.zookeeper.clientPort | quote }}
+      # --- END INIT CONTAINER ---
+      containers:
+        - name: kafka
+          image: {{ .Values.kafka.image }}
+          imagePullPolicy: {{ .Values.kafka.imagePullPolicy }}
+          ports:
+            - containerPort: {{ .Values.kafka.listeners.plaintext.port }}
+              name: plaintext
+            - containerPort: {{ .Values.kafka.listeners.external.port }}
+              name: external
+          envFrom:
+            - configMapRef:
+                name: {{ printf "%s-rp-kafka-cm" .Release.Name }}
+          volumeMounts:
+            - name: kafka-data
+              mountPath: {{ .Values.kafka.logDirs }}
+          command:
+            - sh
+            - -c
+            - |
+              echo "Starting Kafka broker in Zookeeper mode..."
+              exec /etc/confluent/docker/run
+          livenessProbe:
+            tcpSocket:
+              port: {{ .Values.kafka.listeners.plaintext.port }}
+            initialDelaySeconds: 60
+            periodSeconds: 30
+            timeoutSeconds: 10
+            failureThreshold: 3
+          readinessProbe:
+            tcpSocket:
+              port: {{ .Values.kafka.listeners.plaintext.port }}
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+      volumes:
+        - name: kafka-data
+          persistentVolumeClaim:
+            claimName: {{ printf "%s-rp-kafka-pvc" .Release.Name }}
+{{- end }}

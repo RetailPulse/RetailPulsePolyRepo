@@ -1,0 +1,18 @@
+{{- if .Values.zookeeper.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "kafka.zookeeperService" . }}
+  namespace: {{ include "kafka.namespace" . }}
+  labels:
+    {{- include "kafka.labels" . | nindent 4 }}
+    app: {{ printf "%s-rp-kafka-zookeeper" .Release.Name }}
+spec:
+  selector:
+    app: {{ printf "%s-rp-kafka-zookeeper" .Release.Name }}
+  ports:
+    - port: {{ .Values.zookeeper.clientPort }}
+      targetPort: {{ .Values.zookeeper.clientPort }}
+      protocol: TCP
+  type: ClusterIP
+{{- end }}

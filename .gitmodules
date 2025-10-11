@@ -19,3 +19,6 @@
 [submodule "ReportMicroservice"]
 	path = ReportMicroservice
 	url = https://github.com/RetailPulse/ReportMicroservice.git
+[submodule "PaymentService"]
+	path = PaymentService
+	url = https://github.com/RetailPulse/PaymentService

@@ -1,0 +1,46 @@
+# Global namespace override (optional)
+namespace: ns-retailpulse
+
+# Zookeeper Configuration
+zookeeper:
+  enabled: true
+  image: confluentinc/cp-zookeeper:7.7.5
+  clientPort: 2181
+  tickTime: 2000
+
+# Kafka Configuration
+kafka:
+  enabled: true
+  image: confluentinc/cp-kafka:7.7.5
+  imagePullPolicy: IfNotPresent
+  brokerId: 1
+  # Zookeeper Service Name - dynamically resolved
+  zookeeperConnect: "" # Will be auto-resolved if empty
+  listeners:
+    plaintext:
+      port: 9092
+    external:
+      port: 9094
+      nodePort: 30094
+  advertisedListeners:
+    plaintext:
+      port: ""
+    external:
+      port: 30094
+  logDirs: "/var/lib/kafka/data"
+  storage: 2Gi
+  autoCreateTopics: true
+  deleteTopicEnable: true
+  offsetsReplicationFactor: 1
+  transactionStateReplicationFactor: 1
+  transactionStateMinIsr: 1
+  groupInitialRebalanceDelayMs: 0
+
+# Kafka UI Configuration
+ui:
+  enabled: true
+  image: provectuslabs/kafka-ui:latest
+  imagePullPolicy: Always
+  port: 8080
+  nodePort: 30095
+  clusterName: "retailpulse-local"

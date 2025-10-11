@@ -1,0 +1,16 @@
+{{- if .Values.kafka.enabled }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ printf "%s-rp-kafka-pvc" .Release.Name }}
+  namespace: {{ include "kafka.namespace" . }}
+  labels:
+    {{- include "kafka.labels" . | nindent 4 }}
+    app: {{ printf "%s-rp-kafka" .Release.Name }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ .Values.kafka.storage }}
+{{- end }}

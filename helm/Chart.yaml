@@ -39,6 +39,11 @@ dependencies:
     repository: "file://./charts/user-microservice"
     # alias: user
 
+  - name: payment-microservice
+    version: 0.1.0
+    repository: "file://./charts/payment-microservice"
+    # alias: payment
+
   - name: web-app
     version: 0.1.0
     repository: "file://./charts/web-app"

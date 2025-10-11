@@ -55,14 +55,40 @@ Namespace
 {{- default .Release.Namespace .Values.namespace }}
 {{- end }}
 
-{{- define "identity-access-management.userMysqlService" -}}
-{{- if .Values.global.autoReleaseName }}
-{{- printf "%s-rp-user-sql-svc" .Release.Name }}
-{{- else if .Values.dependencies.userMysqlService }}
-{{- .Values.dependencies.userMysqlService }}
-{{- else if .Values.dependencies.userReleaseName }}
-{{- printf "%s-rp-user-sql-svc" .Values.dependencies.userReleaseName }}
+{{/*
+Web-App URL
+*/}}
+{{- define "identity-access-management.webURL" -}}
+{{- if and .Values.global (.Values.global.webURL) (ne .Values.global.webURL "") }}
+  {{- .Values.global.webURL }}
+{{- else if and .Values.dependencies (.Values.dependencies.webURL) (ne .Values.dependencies.webURL "") }}
+  {{- .Values.dependencies.webURL }}
 {{- else }}
-{{- printf "%s-rp-user-sql-svc" .Release.Name }}
+  {{- "localhost"  }}
+{{- end }}
+{{- end }}
+
+{{/*
+Web-App Port
+*/}}
+{{- define "identity-access-management.webExternalPort" -}}
+{{- if and .Values.global (.Values.global.webExternalPort) (ne .Values.global.webExternalPort nil) }}
+  {{- .Values.global.webExternalPort }}
+{{- else if and .Values.dependencies (.Values.dependencies.webExternalPort) (ne .Values.dependencies.webExternalPort nil) }}
+  {{- .Values.dependencies.webExternalPort }}
+{{- else }}
+  {{- 30080  }}
+{{- end }}
+{{- end }}
+
+{{- define "identity-access-management.userMysqlService" -}}
+{{- if and .Values.global (.Values.global.autoReleaseName) (ne .Values.global.autoReleaseName nil) }}
+  {{- printf "%s-rp-user-sql-svc" .Release.Name }}
+{{- else if and .Values.dependencies (.Values.dependencies.userMysqlService) (ne .Values.dependencies.userMysqlService "") }}
+  {{- .Values.dependencies.userMysqlService }}
+{{- else if and .Values.dependencies (.Values.dependencies.userReleaseName) (ne .Values.dependencies.userReleaseName "") }}
+  {{- printf "%s-rp-user-sql-svc" .Values.dependencies.userReleaseName }}
+{{- else }}
+  {{- printf "%s-rp-user-sql-svc" .Release.Name }}
 {{- end }}
 {{- end }}
