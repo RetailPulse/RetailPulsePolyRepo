@@ -96,3 +96,12 @@ resource "aws_security_group_rule" "alb_eg_all" {
   cidr_blocks       = ["0.0.0.0/0"]
   security_group_id = aws_security_group.alb.id
 }
+resource "aws_security_group_rule" "allow_alb_to_pod" {
+  type              = "ingress"
+  from_port         = 8080
+  to_port           = 8100
+  protocol          = "tcp"
+  security_group_id        = aws_security_group.eks_nodes.id
+  source_security_group_id = aws_security_group.alb.id
+  description               = "Allow ALB to access EKS pods on port 8080 to 8100"
+}

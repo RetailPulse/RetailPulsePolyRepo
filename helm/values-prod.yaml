@@ -1,0 +1,53 @@
+global:
+  namespace: ns-retailpulse
+  autoReleaseName: 1
+  rootURL: "http://localhost"
+  rootHost: "localhost"
+  iamPort: 8081
+  userPort: 8082
+  bePort: 8083
+  inventoryPort: 8084
+  paymentPort: 8087
+  iamExternalPort: 30081
+  userExternalPort: 30082
+  businessEntityExternalPort: 30083
+  inventoryExternalPort: 30084
+  salesExternalPort: 30085
+  reportExternalPort: 30086
+  paymentExternalPort: 30087
+  webExternalPort: 30080
+  kafkaPort: 9092
+  kafkaPaymentTopic: "payment-events"
+  publicSubnets: "subnet-009e5cb7a24774421,subnet-0c2b554dac5721830,subnet-08834ab2631a99577"
+  albSecurityGroup: "sg-0c217c2d889c0f9be"
+
+web-app:
+  app:
+    enabled: true
+    image: docker.io/casperyap/rp-web-app:v0.2.0
+    imagePullPolicy: Always
+    storage: 1Gi
+    portType: ClusterIP
+    port: 8080
+
+  ingress:
+    enabled: true
+    className: alb
+    annotations:
+      helm.sh/resource-policy: keep
+      kubernetes.io/ingress.class: alb
+      alb.ingress.kubernetes.io/healthcheck-path: /healthz
+      alb.ingress.kubernetes.io/scheme: internet-facing
+      alb.ingress.kubernetes.io/target-type: ip
+      alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}]'
+      alb.ingress.kubernetes.io/backend-protocol: HTTP
+      alb.ingress.kubernetes.io/group.name: retailpulse-frontend
+      alb.ingress.kubernetes.io/group.order: "1"
+      alb.ingress.kubernetes.io/subnets: "subnet-009e5cb7a24774421,subnet-0c2b554dac5721830,subnet-08834ab2631a99577"
+      alb.ingress.kubernetes.io/security-groups: "sg-0c217c2d889c0f9be"
+    hosts:
+      - host: retailpulse.yourdomain.com
+        paths:
+          - path: /
+            pathType: Prefix
+    tls: []                     # Optional: add ACM certs if needed
