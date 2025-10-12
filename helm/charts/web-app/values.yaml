@@ -7,6 +7,7 @@ app:
   image: docker.io/casperyap/rp-web-app:v0.2.0
   imagePullPolicy: Always
   storage: 1Gi
+  portType: NodePort # Options: ClusterIP, NodePort, LoadBalancer
   port: 8080
   nodePort: 30080
 

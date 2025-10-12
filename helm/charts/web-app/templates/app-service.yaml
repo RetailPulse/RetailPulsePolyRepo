@@ -14,6 +14,8 @@ spec:
     - port: {{ .Values.app.port }}
       protocol: TCP
       targetPort: {{ .Values.app.port }}
+      {{- if eq .Values.app.portType "NodePort" }}
       nodePort: {{ .Values.app.nodePort }}
-  type: NodePort
+      {{- end }}
+  type: {{ .Values.app.portType }}
 {{- end }}
