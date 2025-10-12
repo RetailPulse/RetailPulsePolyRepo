@@ -1,53 +1,47 @@
 global:
   namespace: ns-retailpulse
-  autoReleaseName: 1
-  rootURL: "http://localhost"
-  rootHost: "localhost"
+  webURL: "https://app.retailpulse.dev"   # final public URL
+  rootHost: "app.retailpulse.dev"
+
   iamPort: 8081
   userPort: 8082
   bePort: 8083
   inventoryPort: 8084
+  salesPort: 8085
+  reportPort: 8086
   paymentPort: 8087
-  iamExternalPort: 30081
-  userExternalPort: 30082
-  businessEntityExternalPort: 30083
-  inventoryExternalPort: 30084
-  salesExternalPort: 30085
-  reportExternalPort: 30086
-  paymentExternalPort: 30087
-  webExternalPort: 30080
-  kafkaPort: 9092
-  kafkaPaymentTopic: "payment-events"
-  publicSubnets: "subnet-009e5cb7a24774421,subnet-0c2b554dac5721830,subnet-08834ab2631a99577"
-  albSecurityGroup: "sg-0c217c2d889c0f9be"
+
+  # Backend service DNS (internal)
+  iamExternalService: "retailpulse-iam-rp-iam-app-svc.ns-retailpulse.svc.cluster.local"
+  userExternalService: "retailpulse-user-rp-user-app-svc.ns-retailpulse.svc.cluster.local"
+  businessEntityExternalService: "retailpulse-businessentity-rp-businessentity-app-svc.ns-retailpulse.svc.cluster.local"
+  inventoryExternalService: "retailpulse-inventory-rp-inventory-app-svc.ns-retailpulse.svc.cluster.local"
+  salesExternalService: "retailpulse-sales-rp-sales-app-svc.ns-retailpulse.svc.cluster.local"
+  reportExternalService: "retailpulse-report-rp-report-app-svc.ns-retailpulse.svc.cluster.local"
+  paymentExternalService: "retailpulse-payment-rp-payment-app-svc.ns-retailpulse.svc.cluster.local"
 
 web-app:
   app:
     enabled: true
-    image: docker.io/casperyap/rp-web-app:v0.2.0
-    imagePullPolicy: Always
-    storage: 1Gi
     portType: ClusterIP
-    port: 8080
 
   ingress:
     enabled: true
     className: alb
     annotations:
-      helm.sh/resource-policy: keep
-      kubernetes.io/ingress.class: alb
-      alb.ingress.kubernetes.io/healthcheck-path: /healthz
       alb.ingress.kubernetes.io/scheme: internet-facing
       alb.ingress.kubernetes.io/target-type: ip
-      alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}]'
+      alb.ingress.kubernetes.io/listen-ports: '[{"HTTP":80},{"HTTPS":443}]'
       alb.ingress.kubernetes.io/backend-protocol: HTTP
       alb.ingress.kubernetes.io/group.name: retailpulse-frontend
       alb.ingress.kubernetes.io/group.order: "1"
-      alb.ingress.kubernetes.io/subnets: "subnet-009e5cb7a24774421,subnet-0c2b554dac5721830,subnet-08834ab2631a99577"
-      alb.ingress.kubernetes.io/security-groups: "sg-0c217c2d889c0f9be"
+      # If your app has /health, uncomment next line
+      # alb.ingress.kubernetes.io/healthcheck-path: /health
+      alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:ap-southeast-1:051826728851:certificate/6012df97-d861-4a1a-80a9-3675ecbf269d
+      external-dns.alpha.kubernetes.io/hostname: app.retailpulse.dev
     hosts:
-      - host: retailpulse.yourdomain.com
+      - host: app.retailpulse.dev
         paths:
           - path: /
             pathType: Prefix
-    tls: []                     # Optional: add ACM certs if needed
+    tls: []
