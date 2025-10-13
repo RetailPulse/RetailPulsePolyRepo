@@ -96,39 +96,6 @@ jobs:
           name: trivy-reports
           path: ./trivy-reports/
 
-      - name: SonarCloud Scan BusinessEntityMicroservice
-        uses: SonarSource/sonarqube-scan-action@v5.1.0
-        with:
-          args: >
-            -Dsonar.organization=${{ secrets.SONAR_ORGANIZATION }}
-            -Dsonar.projectKey=RetailPulse_BusinessEntityMicroservice
-            -Dsonar.sources=./BusinessEntityMicroservice
-            -Dsonar.sarifReportPaths=./trivy-reports/business-entity.sarif
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-
-      - name: SonarCloud Scan InventoryMicroservice
-        uses: SonarSource/sonarqube-scan-action@v5.1.0
-        with:
-          args: >
-            -Dsonar.organization=${{ secrets.SONAR_ORGANIZATION }}
-            -Dsonar.projectKey=RetailPulse_InventoryMicroservice
-            -Dsonar.sources=./InventoryMicroservice
-            -Dsonar.sarifReportPaths=./trivy-reports/inventory.sarif
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-
-      - name: SonarCloud Scan PaymentService
-        uses: SonarSource/sonarqube-scan-action@v5.1.0
-        with:
-          args: >
-            -Dsonar.organization=${{ secrets.SONAR_ORGANIZATION }}
-            -Dsonar.projectKey=RetailPulse_PaymentService
-            -Dsonar.sources=./PaymentService
-            -Dsonar.sarifReportPaths=./trivy-reports/payment.sarif
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-
       - name: SonarCloud Scan ReportMicroservice
         uses: SonarSource/sonarqube-scan-action@v5.1.0
         with:
@@ -137,49 +104,5 @@ jobs:
             -Dsonar.projectKey=RetailPulse_ReportMicroservice
             -Dsonar.sources=./ReportMicroservice
             -Dsonar.sarifReportPaths=./trivy-reports/report.sarif
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-
-      - name: SonarCloud Scan SalesMicroservice
-        uses: SonarSource/sonarqube-scan-action@v5.1.0
-        with:
-          args: >
-            -Dsonar.organization=${{ secrets.SONAR_ORGANIZATION }}
-            -Dsonar.projectKey=RetailPulse_SalesMicroservice
-            -Dsonar.sources=./SalesMicroservice
-            -Dsonar.sarifReportPaths=./trivy-reports/sales.sarif
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-
-      - name: SonarCloud Scan identity-access-management
-        uses: SonarSource/sonarqube-scan-action@v5.1.0
-        with:
-          args: >
-            -Dsonar.organization=${{ secrets.SONAR_ORGANIZATION }}
-            -Dsonar.projectKey=RetailPulse_identity-access-management
-            -Dsonar.sources=./identity-access-management
-            -Dsonar.sarifReportPaths=./trivy-reports/identity-access-management.sarif
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-
-      - name: SonarCloud Scan user-management
-        uses: SonarSource/sonarqube-scan-action@v5.1.0
-        with:
-          args: >
-            -Dsonar.organization=${{ secrets.SONAR_ORGANIZATION }}
-            -Dsonar.projectKey=RetailPulse_user-management
-            -Dsonar.sources=./user-management
-            -Dsonar.sarifReportPaths=./trivy-reports/user-management.sarif
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-
-      - name: SonarCloud Scan web-app
-        uses: SonarSource/sonarqube-scan-action@v5.1.0
-        with:
-          args: >
-            -Dsonar.organization=${{ secrets.SONAR_ORGANIZATION }}
-            -Dsonar.projectKey=RetailPulse_web-app
-            -Dsonar.sources=./web-app
-            -Dsonar.sarifReportPaths=./trivy-reports/web-app.sarif
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
