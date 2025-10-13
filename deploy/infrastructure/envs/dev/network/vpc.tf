@@ -88,6 +88,7 @@ resource "aws_security_group_rule" "alb_in_443" {
   cidr_blocks       = ["0.0.0.0/0"]
   security_group_id = aws_security_group.alb.id
 }
+
 resource "aws_security_group_rule" "alb_eg_all" {
   type              = "egress"
   from_port         = 0

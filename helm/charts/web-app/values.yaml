@@ -14,9 +14,9 @@ app:
 runtimeConfigYaml: |
   {
     "authConfig": {
-      "issuer": "http://IAM_SVC:IAM_PORT",
+      "issuer": "IAM_SVC",
       "requireHttps": false,
-      "redirectUri": "http://WEB_SVC:WEB_PORT",
+      "redirectUri": "WEB_SVC",
       "clientId": "client",
       "responseType": "code",
       "scope": "openid",
@@ -26,12 +26,12 @@ runtimeConfigYaml: |
       "showDebugInformation": true
     },
     "apiConfig": {
-      "user_api_url": "http://USER_SVC:USER_PORT/",
-      "business_entity_api_url": "http://BUSINESS_ENTITY_SVC:BUSINESS_ENTITY_PORT/",
-      "inventory_api_url": "http://INVENTORY_SVC:INVENTORY_PORT/",
-      "sales_api_url": "http://SALES_SVC:SALES_PORT/",
-      "report_api_url": "http://REPORT_SVC:REPORT_PORT/",
-      "payment_api_url": "http://PAYMENT_SVC:PAYMENT_PORT/"
+      "user_api_url": "USER_SVC:USER_PORT/",
+      "business_entity_api_url": "BUSINESS_ENTITY_SVC:BUSINESS_ENTITY_PORT/",
+      "inventory_api_url": "INVENTORY_SVC:INVENTORY_PORT/",
+      "sales_api_url": "SALES_SVC:SALES_PORT/",
+      "report_api_url": "REPORT_SVC:REPORT_PORT/",
+      "payment_api_url": "PAYMENT_SVC:PAYMENT_PORT/"
     },
     "environment": {
       "production": true,

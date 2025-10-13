@@ -75,3 +75,35 @@ module "k8s" {
   # Wait for Helm add-ons (External Secrets CRDs, etc.)
   depends_on = [ module.helm_addons ]
 }
+
+/* Step 5: Setup API Gateway */
+module "api_gateway" {
+  source = "./api-gateway"
+
+  name_prefix        = "retailpulse"
+  project            = "retailpulse"
+  env                = "dev"
+
+  vpc_id             = module.network.vpc_id
+  private_subnet_ids = module.network.private_app_subnets
+  alb_sg_id          = module.network.alb_sg_id
+
+  services = [
+    {
+      name         = "iam"
+      path_prefix  = "/auth"
+      listener_arn = "arn:aws:elasticloadbalancing:ap-southeast-1:051826728851:listener/app/k8s-retailpulseapi-8cb0989ca5/0cfdd45244a40e2a/153863d6f4470788"
+    },
+    {
+      name         = "user"
+      path_prefix  = "/user"
+      listener_arn = "arn:aws:elasticloadbalancing:ap-southeast-1:051826728851:listener/app/k8s-retailpulseapi-8cb0989ca5/0cfdd45244a40e2a/153863d6f4470788"
+    },
+    {
+      name         = "inventory"
+      path_prefix  = "/inventory"
+      listener_arn = "arn:aws:elasticloadbalancing:ap-southeast-1:051826728851:listener/app/k8s-retailpulseapi-8cb0989ca5/0cfdd45244a40e2a/153863d6f4470788"
+    }
+  ]
+}
+
