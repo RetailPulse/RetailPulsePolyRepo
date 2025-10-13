@@ -48,7 +48,7 @@ jobs:
       run: |
         export TRIVY_REPORT_DIR="./trivy-reports"
         mkdir -p "$TRIVY_REPORT_DIR"
-        for dir in BusinessEntityMicroservice InventoryMicroservice PaymentService ReportMicroservice SalesMicroservice web-app user-management identity-access-management; do 
+        for dir in businessentitymicroservice inventorymicroservice paymentservice reportmicroservice salesmicroservice web-app user-management identity-access-management; do 
           if [ -f "$dir/Dockerfile" ]; then
             echo "📦 Building and pushing $dir..."
             IMAGE_NAME="${{ secrets.DOCKERHUB_USERNAME }}/$dir"
