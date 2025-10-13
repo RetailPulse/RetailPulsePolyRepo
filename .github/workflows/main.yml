@@ -6,7 +6,7 @@ on:
   push:
     branches:
       - main
-      
+
 permissions:
   security-events: write
   actions: read
@@ -20,89 +20,90 @@ jobs:
       TRIVY_CACHE_DIR: ./.cache/trivy
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
-      with:
-        submodules: true
-        token: ${{ secrets.SUBMODULES_TOKEN }}
-        persist-credentials: false
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          submodules: true
+          token: ${{ secrets.SUBMODULES_TOKEN }}
+          persist-credentials: false
 
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v3
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
-    - name: Log in to Docker Hub
-      uses: docker/login-action@v3
-      with:
-        username: ${{ secrets.DOCKERHUB_USERNAME }}
-        password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-    - name: Install Trivy
-      run: |
-        curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin
-      
-    - name: Download Trivy vulnerability database
-      run: |
-        trivy image --cache-dir "${TRIVY_CACHE_DIR}" --download-db-only
- 
-    - name: Build and push Docker images for all submodules
-      run: |
-        export TRIVY_REPORT_DIR="./trivy-reports"
-        mkdir -p "$TRIVY_REPORT_DIR"
-        for dir in BusinessEntityMicroservice InventoryMicroservice PaymentService ReportMicroservice SalesMicroservice web-app user-management identity-access-management; do 
-          if [ -f "$dir/Dockerfile" ]; then
-            echo "📦 Building and pushing $dir..."
-            IMAGE_NAME="${{ secrets.DOCKERHUB_USERNAME }}/$dir"
-            docker build -t $IMAGE_NAME:latest $dir
-            
-            # Run Trivy scan (SARIF format)
-            echo "🛡️ Scanning $dir with Trivy..."
-            REPORT_PATH="$TRIVY_REPORT_DIR/$dir.sarif"
-            trivy image \
-              --cache-dir "${TRIVY_CACHE_DIR}" \
-              --format sarif \
-              --output "$REPORT_PATH" \
-              $IMAGE_NAME:latest || echo "Trivy scan failed for $dir"
+      - name: Install Trivy
+        run: |
+          curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin
 
-            # Run Trivy scan (JSON format)
-            echo "🛡️ Scanning $dir with Trivy (JSON)..."
-            JSON_PATH="$TRIVY_REPORT_DIR/$dir.json"
-            trivy image \
-              --cache-dir "${TRIVY_CACHE_DIR}" \
-              --format json \
-              --output "$JSON_PATH" \
-              $IMAGE_NAME:latest || echo "Trivy JSON scan failed for $dir"
-            
-            echo "Scanned $dir with Trivy success. Report saved at $REPORT_PATH"            
-            echo "Pushing image..."
-            # Push Docker image
-            docker push $IMAGE_NAME:latest
-            echo "Image Pushed."
-          else
-            echo "⚠️ Skipping $dir (no Dockerfile found)"
-          fi
-        done
+      - name: Download Trivy vulnerability database
+        run: |
+          trivy image --cache-dir "${TRIVY_CACHE_DIR}" --download-db-only
 
-    - name: Run Trivy IaC Scan
-      run: |
-        echo "🛡️ Scanning OpenTofu IaC with Trivy..."
-        trivy config ./deploy \
-          --cache-dir "${TRIVY_CACHE_DIR}" \
-          --format sarif \
-          --output ./trivy-reports/opentofu.sarif || echo "Trivy IaC scan failed"
+      - name: Build and push Docker images for all submodules
+        run: |
+          export TRIVY_REPORT_DIR="./trivy-reports"
+          mkdir -p "$TRIVY_REPORT_DIR"
+          for dir in BusinessEntityMicroservice InventoryMicroservice PaymentService ReportMicroservice SalesMicroservice web-app user-management identity-access-management; do 
+            if [ -f "$dir/Dockerfile" ]; then
+              echo "📦 Building and pushing $dir..."
+              lower_dir=$(echo "$dir" | tr '[:upper:]' '[:lower:]')
+              IMAGE_NAME="${{ secrets.DOCKERHUB_USERNAME }}/${lower_dir}"
+              docker build -t $IMAGE_NAME:latest $dir
+          
+              # Run Trivy scan (SARIF format)
+              echo "🛡️ Scanning $dir with Trivy..."
+              REPORT_PATH="$TRIVY_REPORT_DIR/$dir.sarif"
+              trivy image \
+                --cache-dir "${TRIVY_CACHE_DIR}" \
+                --format sarif \
+                --output "$REPORT_PATH" \
+                $IMAGE_NAME:latest || echo "Trivy scan failed for $dir"
+          
+              # Run Trivy scan (JSON format)
+              echo "🛡️ Scanning $dir with Trivy (JSON)..."
+              JSON_PATH="$TRIVY_REPORT_DIR/$dir.json"
+              trivy image \
+                --cache-dir "${TRIVY_CACHE_DIR}" \
+                --format json \
+                --output "$JSON_PATH" \
+                $IMAGE_NAME:latest || echo "Trivy JSON scan failed for $dir"
+          
+              echo "Scanned $dir with Trivy success. Report saved at $REPORT_PATH"            
+              echo "Pushing image..."
+              # Push Docker image
+              docker push $IMAGE_NAME:latest
+              echo "Image Pushed."
+            else
+              echo "⚠️ Skipping $dir (no Dockerfile found)"
+            fi
+          done
 
-    - name: Upload Trivy report as artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: trivy-reports
-        path: ./trivy-reports/
+      - name: Run Trivy IaC Scan
+        run: |
+          echo "🛡️ Scanning OpenTofu IaC with Trivy..."
+          trivy config ./deploy \
+            --cache-dir "${TRIVY_CACHE_DIR}" \
+            --format sarif \
+            --output ./trivy-reports/opentofu.sarif || echo "Trivy IaC scan failed"
 
-    - name: SonarCloud Scan
-      uses: SonarSource/sonarqube-scan-action@v5.1.0
-      with:
-        args: >
-          -Dsonar.organization=${{ secrets.SONAR_ORGANIZATION }}
-          -Dsonar.projectKey=${{ secrets.SONAR_PROJECT_KEY }}
-          -Dsonar.sources=.
-          -Dsonar.sarifReportPaths=./trivy-reports/backend.sarif,./trivy-reports/identity-access-management.sarif,./trivy-reports/user-management.sarif,./trivy-reports/web-app.sarif,./trivy-reports/opentofu.sarif
-      env:
-        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      - name: Upload Trivy report as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: trivy-reports
+          path: ./trivy-reports/
+
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarqube-scan-action@v5.1.0
+        with:
+          args: >
+            -Dsonar.organization=${{ secrets.SONAR_ORGANIZATION }}
+            -Dsonar.projectKey=${{ secrets.SONAR_PROJECT_KEY }}
+            -Dsonar.sources=.
+            -Dsonar.sarifReportPaths=./trivy-reports/backend.sarif,./trivy-reports/identity-access-management.sarif,./trivy-reports/user-management.sarif,./trivy-reports/web-app.sarif,./trivy-reports/opentofu.sarif
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
