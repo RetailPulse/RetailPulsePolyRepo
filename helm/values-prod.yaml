@@ -12,7 +12,7 @@ global:
   paymentPort: 8087
 
   # Backend service DNS (internal)
-  iamExternalService: "https://api.retailpulse.internal/iam/" # "retailpulse-iam-rp-iam-app-svc.ns-retailpulse.svc.cluster.local"
+  iamExternalService: "https://app.retailpulse.dev/auth" # "retailpulse-iam-rp-iam-app-svc.ns-retailpulse.svc.cluster.local"
   userExternalService: "retailpulse-user-rp-user-app-svc.ns-retailpulse.svc.cluster.local"
   businessEntityExternalService: "retailpulse-businessentity-rp-businessentity-app-svc.ns-retailpulse.svc.cluster.local"
   inventoryExternalService: "retailpulse-inventory-rp-inventory-app-svc.ns-retailpulse.svc.cluster.local"
@@ -20,36 +20,41 @@ global:
   reportExternalService: "retailpulse-report-rp-report-app-svc.ns-retailpulse.svc.cluster.local"
   paymentExternalService: "retailpulse-payment-rp-payment-app-svc.ns-retailpulse.svc.cluster.local"
 
-internalIngress:
-  enabled: true
-  className: alb
-  host: api.retailpulse.internal
-  annotations:
-    helm.sh/resource-policy: keep
-    kubernetes.io/ingress.class: alb
-    alb.ingress.kubernetes.io/scheme: internal
-    alb.ingress.kubernetes.io/target-type: ip
-    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP":80},{"HTTPS":443}]'
-    alb.ingress.kubernetes.io/backend-protocol: HTTP
-    alb.ingress.kubernetes.io/group.name: retailpulse-api
-    alb.ingress.kubernetes.io/group.order: "10"
-    alb.ingress.kubernetes.io/certificate-arn:  arn:aws:acm:ap-southeast-1:051826728851:certificate/298e9909-8850-4eb5-858b-696ef4353b97
-    external-dns.alpha.kubernetes.io/hostname: api.retailpulse.internal
-  hosts:
-    - path: /iam
-      pathType: Prefix
-      backend:
-        service:
-          name: retailpulse-rp-iam-app-svc
-          port:
-            number: 8081
-  tls: []
-
 web-app:
   app:
     enabled: true
     portType: ClusterIP
+  ingress:
+    enabled: true
+    className: alb
+    annotations:
+      helm.sh/resource-policy: keep
+      alb.ingress.kubernetes.io/scheme: internet-facing
+      alb.ingress.kubernetes.io/target-type:  ip
+      alb.ingress.kubernetes.io/listen-ports: '[{"HTTP":80},{"HTTPS":443}]'
+      alb.ingress.kubernetes.io/backend-protocol: HTTP
+      alb.ingress.kubernetes.io/group.name: retailpulse-iam
+      alb.ingress.kubernetes.io/group.order: "10"
+      alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:ap-southeast-1:051826728851:certificate/6012df97-d861-4a1a-80a9-3675ecbf269d
+    hosts:
+    - host: app.retailpulse.dev
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: retailpulse-rp-web-svc
+            port:
+              number: "8080"
+    tls: []
 
+identity-access-management:
+  app:
+    enabled: true
+    image: docker.io/casperyap/rp-iam-app:v0.2.0
+    port: 8081
+    urlPrefix: /auth
+    serviceType: ClusterIP
   ingress:
     enabled: true
     className: alb
@@ -59,21 +64,58 @@ web-app:
       alb.ingress.kubernetes.io/target-type: ip
       alb.ingress.kubernetes.io/listen-ports: '[{"HTTP":80},{"HTTPS":443}]'
       alb.ingress.kubernetes.io/backend-protocol: HTTP
-      alb.ingress.kubernetes.io/group.name: retailpulse-frontend
+      alb.ingress.kubernetes.io/group.name: retailpulse-iam
       alb.ingress.kubernetes.io/group.order: "1"
-      # If your app has /health, uncomment next line
-      # alb.ingress.kubernetes.io/healthcheck-path: /health
-      alb.ingress.kubernetes.io/certificate-arn: arn:aws:elasticloadbalancing:ap-southeast-1:051826728851:listener/app/k8s-retailpulseapi-8cb0989ca5/0cfdd45244a40e2a/153863d6f4470788
-      external-dns.alpha.kubernetes.io/hostname: app.retailpulse.dev
+      alb.ingress.kubernetes.io/healthcheck-path: /actuator/health
+      alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:ap-southeast-1:051826728851:certificate/6012df97-d861-4a1a-80a9-3675ecbf269d
     hosts:
     - host: app.retailpulse.dev
       paths:
-        - path: /
-          pathType: Prefix
-    tls: []
+      - path: /auth
+        pathType: Prefix
+        backend:
+          service:
+            name: retailpulse-rp-iam-app-svc
+            port:
+              number: 8081
+      - path: /auth/.well-known
+        pathType: Prefix
+        backend:
+          service:
+            name: retailpulse-rp-iam-app-svc
+            port:
+              number: 8081
+    tls: []    
 
-iam:
-  app:
-    enabled: true
-    port: 8081
-    serviceType: ClusterIP
+internalIngress:
+  enabled: false
+#   className: alb
+#   host: api.retailpulse.internal
+#   annotations:
+#     helm.sh/resource-policy: keep
+#     kubernetes.io/ingress.class: alb
+#     alb.ingress.kubernetes.io/scheme: internal
+#     alb.ingress.kubernetes.io/target-type: ip
+#     alb.ingress.kubernetes.io/listen-ports: '[{"HTTP":80},{"HTTPS":443}]'
+#     alb.ingress.kubernetes.io/backend-protocol: HTTP
+#     alb.ingress.kubernetes.io/group.name: retailpulse-api
+#     alb.ingress.kubernetes.io/group.order: "1"
+#     alb.ingress.kubernetes.io/healthcheck-path: /actuator/health
+#     alb.ingress.kubernetes.io/certificate-arn:  arn:aws:elasticloadbalancing:ap-southeast-1:051826728851:listener/app/k8s-retailpulseapi-8cb0989ca5/0cfdd45244a40e2a/153863d6f4470788 # arn:aws:acm:ap-southeast-1:051826728851:certificate/298e9909-8850-4eb5-858b-696ef4353b97
+#     external-dns.alpha.kubernetes.io/hostname: api.retailpulse.internal
+#   hosts:
+#     - path: /auth
+#       pathType: Prefix
+#       backend:
+#         service:
+#           name: retailpulse-rp-iam-app-svc
+#           port:
+#             number: 8081
+#     - path: /.well-known
+#       pathType: Prefix
+#       backend:
+#         service:
+#           name: retailpulse-rp-iam-app-svc
+#           port:
+#             number: 8081
+#   tls: []

@@ -3,10 +3,10 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: {{ printf "%s-rp-web-ingress" .Release.Name }}
-  namespace: {{ include "web.namespace" . }}
+  name: {{ printf "%s-rp-iam-ingress" .Release.Name }}
+  namespace: {{ include "identity-access-management.namespace" . }}
   labels:
-    {{- include "web.labels" . | nindent 4 }}
+    {{- include "identity-access-management.labels" . | nindent 4 }}
   {{- with .Values.ingress.annotations }}
   annotations:
     {{- toYaml . | nindent 4 }}

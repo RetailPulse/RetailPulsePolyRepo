@@ -15,7 +15,7 @@ runtimeConfigYaml: |
   {
     "authConfig": {
       "issuer": "IAM_SVC",
-      "requireHttps": false,
+      "requireHttps": true,
       "redirectUri": "WEB_SVC",
       "clientId": "client",
       "responseType": "code",
