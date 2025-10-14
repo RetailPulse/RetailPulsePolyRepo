@@ -8,17 +8,17 @@
   path = web-app
   url = https://github.com/RetailPulse/web-app.git
 [submodule "BusinessEntityMicroservice"]
-	path = BusinessEntityMicroservice
-	url = https://github.com/RetailPulse/BusinessEntityMicroservice.git
+  path = BusinessEntityMicroservice
+  url = https://github.com/RetailPulse/BusinessEntityMicroservice.git
 [submodule "InventoryMicroservice"]
-	path = InventoryMicroservice
-	url = https://github.com/RetailPulse/InventoryMicroservice.git
+  path = InventoryMicroservice
+  url = https://github.com/RetailPulse/InventoryMicroservice.git
 [submodule "SalesMicroservice"]
-	path = SalesMicroservice
-	url = https://github.com/RetailPulse/SalesMicroservice.git
+  path = SalesMicroservice
+  url = https://github.com/RetailPulse/SalesMicroservice.git
 [submodule "ReportMicroservice"]
-	path = ReportMicroservice
-	url = https://github.com/RetailPulse/ReportMicroservice.git
+  path = ReportMicroservice
+  url = https://github.com/RetailPulse/ReportMicroservice.git
 [submodule "PaymentService"]
-	path = PaymentService
-	url = https://github.com/RetailPulse/PaymentService
+  path = PaymentService
+  url = https://github.com/RetailPulse/PaymentService.git
