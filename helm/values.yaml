@@ -5,6 +5,7 @@
 # Most of your subcharts use `{{ include "xxx.namespace" . }}` which defaults to .Release.Namespace
 # but can be overridden by .Values.namespace. Setting it globally here simplifies things.
 global:
+  webURL: "http://localhost:30080" # This sets .Values.global.webURL
   namespace: ns-retailpulse # This sets .Values.global.namespace
   autoReleaseName: 1
   rootURL: "http://localhost"
@@ -24,16 +25,16 @@ global:
   webExternalPort: 30080
   kafkaPort: 9092
   kafkaPaymentTopic: "payment-events"
-
+    
   ## --- If using reverse proxy to route service instead ---
-  # iamExternalService: "localhost/iam"
+  iamExternalService: "http://localhost:30081/auth"
   # userExternalService: "localhost/user"
   # businessEntityExternalService: "localhost/be"
   # inventoryExternalService: "localhost/inventory"
   # salesExternalService: "localhost/sales"
   # reportExternalService: "localhost/report"
   # paymentExternalService: "localhost/payment"
-  # webURL: "localhost"
+  
 
 # --- Subchart Value Overrides ---
 # You can override specific values for each subchart here.

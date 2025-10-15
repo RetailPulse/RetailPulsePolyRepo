@@ -13,34 +13,33 @@ app:
 
 runtimeConfigYaml: |
   {
-    "authConfig": {
-      "issuer": "IAM_SVC",
-      "requireHttps": true,
-      "redirectUri": "WEB_SVC",
-      "clientId": "client",
-      "responseType": "code",
-      "scope": "openid",
-      "useSilentRefresh": true,
-      "useHttpBasicAuth": false,
-      "disablePKCE": false,
-      "showDebugInformation": true
+    authConfig: {
+      issuer: 'IAM_SVC',
+      redirectUri: 'WEB_SVC', #window.location.origin,
+      clientId: 'client',
+      responseType: 'code',
+      scope: 'openid',
+      useSilentRefresh: true,
+      useHttpBasicAuth: false,
+      disablePKCE: false,
+      showDebugInformation: true
     },
-    "apiConfig": {
-      "user_api_url": "USER_SVC:USER_PORT/",
-      "business_entity_api_url": "BUSINESS_ENTITY_SVC:BUSINESS_ENTITY_PORT/",
-      "inventory_api_url": "INVENTORY_SVC:INVENTORY_PORT/",
-      "sales_api_url": "SALES_SVC:SALES_PORT/",
-      "report_api_url": "REPORT_SVC:REPORT_PORT/",
-      "payment_api_url": "PAYMENT_SVC:PAYMENT_PORT/"
+    apiConfig: {
+      user_api_url: 'retailpulse-rp-user-app-svc:8082/'
+      business_entity_api_url: 'BUSINESS_ENTITY_SVC:BUSINESS_ENTITY_PORT/',
+      inventory_api_url: 'INVENTORY_SVC:INVENTORY_PORT/',
+      sales_api_url: 'SALES_SVC:SALES_PORT/',
+      report_api_url: 'REPORT_SVC:REPORT_PORT/',
+      payment_api_url: 'PAYMENT_SVC:PAYMENT_PORT/'
     },
-    "environment": {
-      "production": true,
-      "authEnabled": true,
-      "useRuntimeConfig": true,
-      "devModeUser": "superadmin",
-      "devModeRole": "ADMIN",
-      "defaultPassword": "password1",
-      "stripePublicKey": "pk_test_51Rwa98Fo0IYXjs5f0dEGfpQ9SuGE4NnsYHl5XvWMHq9o47V94yfNELzq5lnszDjJT8Yn8XTn2JoW5imJDJQfhLjq00EYYg7VPM"
+    environment: {
+      production: true,
+      authEnabled: true,
+      useRuntimeConfig: true,
+      devModeUser: 'superadmin',
+      devModeRole: 'ADMIN',
+      defaultPassword: 'password1',
+      stripePublicKey: 'pk_test_51Rwa98Fo0IYXjs5f0dEGfpQ9SuGE4NnsYHl5XvWMHq9o47V94yfNELzq5lnszDjJT8Yn8XTn2JoW5imJDJQfhLjq00EYYg7VPM'
     }
   }
 

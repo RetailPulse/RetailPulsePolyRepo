@@ -8,13 +8,15 @@ app:
   imagePullPolicy: Always
   port: 8081
   nodePort: 30081
+  portType: NodePort
   urlPrefix: /auth
   configYaml: |
     server:
       port: 8081
-      urlPrefix: URL_PREFIX
+      servlet:
+        context-path: /auth
     auth:
-      origin: ORIGIN_URL
+      origin: ORIGIN_URL:ORIGIN_PORT
       issuer: IAM_SVC
 
     spring:
@@ -33,18 +35,18 @@ app:
     client:
       id: client
       name: retail-pulse
-      redirect-uri: ORIGIN_URL
-      post-logout-redirect-uri: ORIGIN_URL
+      redirect-uri: ORIGIN_URL:ORIGIN_PORT
+      post-logout-redirect-uri: ORIGIN_URL:ORIGIN_PORT
 
     logging:
       level:
         com.retailpulse: DEBUG
         org:
           springframework:
-            security: INFO
+            security: DEBUG
             security.oauth2:
               server:
-                authorization: INFO
+                authorization: DEBUG
             web: INFO
       file:
         name: "logs/rp-iam.log"
@@ -54,7 +56,9 @@ app:
         enabled: true
         sampling:
           probability: 1.0
-
+ingress:
+    enabled: false
+    
 dependencies:
   userReleaseName: retailpulse-user
   webURL: localhost

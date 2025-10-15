@@ -7,6 +7,11 @@ metadata:
   labels:
     {{- include "report.labels" . | nindent 4 }}
 spec:
+  {{- if and (hasKey .Values "global") (hasKey .Values.global "storageClass") (ne .Values.global.storageClass "") }}
+  storageClassName: {{ .Values.global.storageClass }}
+  {{- else if and (hasKey .Values.mongodb "storageClass") (ne .Values.mongodb.storageClass "") }}
+  storageClassName: {{ .Values.mongodb.storageClass }}
+  {{- end }}
   accessModes:
     - ReadWriteOnce
   resources:

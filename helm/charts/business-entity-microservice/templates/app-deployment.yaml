@@ -59,7 +59,6 @@ spec:
               value: {{ printf "%s-rp-businessentity-redis-svc" .Release.Name }}
             - name: REDIS_PORT
               value: "6379"
-
       containers:
         - image: {{ .Values.app.image }}
           name: {{ printf "%s-rp-businessentity-app-pod" .Release.Name }}
