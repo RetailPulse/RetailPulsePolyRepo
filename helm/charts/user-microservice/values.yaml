@@ -161,6 +161,14 @@ app:
         enabled: true
         sampling:
           probability: 1.0
+      endpoints:
+        web:
+          exposure:
+            include: "health"
+        health:
+          probes:
+            enabled: true
+          show-details: "never"
 
 dependencies:
   iamService: http://localhost:30081/auth

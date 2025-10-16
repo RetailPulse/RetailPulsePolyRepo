@@ -1,5 +1,5 @@
 global:  
-  protocol: "https"
+  protocol: "http"
   rootHost: "app.retailpulse.dev"
   rootURL: "https://app.retailpulse.dev"
   webURL: "https://app.retailpulse.dev"   
