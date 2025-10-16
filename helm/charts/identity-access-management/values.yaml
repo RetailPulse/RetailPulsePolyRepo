@@ -16,7 +16,7 @@ app:
       servlet:
         context-path: /auth
     auth:
-      origin: ORIGIN_URL:ORIGIN_PORT
+      origin: ORIGIN_URL
       issuer: IAM_SVC
 
     spring:
@@ -35,8 +35,8 @@ app:
     client:
       id: client
       name: retail-pulse
-      redirect-uri: ORIGIN_URL:ORIGIN_PORT
-      post-logout-redirect-uri: ORIGIN_URL:ORIGIN_PORT
+      redirect-uri: ORIGIN_URL
+      post-logout-redirect-uri: ORIGIN_URL
 
     logging:
       level:

@@ -12,8 +12,7 @@ data:
     replace "MYSQL_HOST" (include "user.mysqlService" .) |
     replace "ORIGIN_URL" (include "user.webURL" .) | 
     replace "ORIGIN_PORT" (include "user.webExternalPort" .) |
-    replace "IAM_SVC" (include "user.iamService" .) | 
-    replace "IAM_PORT" (include "user.iamPort" .)
+    replace "IAM_SVC" (include "user.iamService" .) 
   ) . | nindent 4 
 }}
 {{- end }}

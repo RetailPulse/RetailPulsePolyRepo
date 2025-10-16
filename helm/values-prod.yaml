@@ -1,25 +1,38 @@
-global:
-  namespace: ns-retailpulse
-  webURL: "https://app.retailpulse.dev"   # final public URL
+global:  
+  protocol: "https"
   rootHost: "app.retailpulse.dev"
+  rootURL: "https://app.retailpulse.dev"
+  webURL: "https://app.retailpulse.dev"   
+  namespace: ns-retailpulse
 
+  autoReleaseName: 1
   iamPort: 8081
   userPort: 8082
   bePort: 8083
   inventoryPort: 8084
-  salesPort: 8085
-  reportPort: 8086
   paymentPort: 8087
+  kafkaPort: 9092
+  kafkaPaymentTopic: "payment-events"
 
   # Backend service DNS (internal)
-  iamExternalService: "https://app.retailpulse.dev/auth" # "retailpulse-iam-rp-iam-app-svc.ns-retailpulse.svc.cluster.local"
-  userExternalService: "retailpulse-user-rp-user-app-svc.ns-retailpulse.svc.cluster.local"
-  businessEntityExternalService: "retailpulse-businessentity-rp-businessentity-app-svc.ns-retailpulse.svc.cluster.local"
-  inventoryExternalService: "retailpulse-inventory-rp-inventory-app-svc.ns-retailpulse.svc.cluster.local"
-  salesExternalService: "retailpulse-sales-rp-sales-app-svc.ns-retailpulse.svc.cluster.local"
-  reportExternalService: "retailpulse-report-rp-report-app-svc.ns-retailpulse.svc.cluster.local"
-  paymentExternalService: "retailpulse-payment-rp-payment-app-svc.ns-retailpulse.svc.cluster.local"
+  iamInternalService: "-rp-iam-app-svc:8081/auth" 
+  userInternalService: "-rp-user-app-svc:8082/"
+  businessEntityInternalService: "-rp-business-entity-app-svc:8083/"
+  inventoryInternalService: "-rp-inventory-app-svc:8084/"
+  salesInternalService: "-rp-sales-app-svc:8085/"
+  reportInternalService: "-rp-report-app-svc:8086/"
+  paymentInternalService: "-rp-payment-app-svc:8087/"
 
+
+  # Backend service DNS (external)
+  iamExternalService: "https://app.retailpulse.dev/auth" 
+  userExternalService: "https://app.retailpulse.dev/" 
+  businessEntityExternalService: "https://app.retailpulse.dev/api/businessEntity/"
+  inventoryExternalService: "https://app.retailpulse.dev/api/inventory/"
+  salesExternalService: "https://app.retailpulse.dev/api/sales/"
+  reportExternalService: "https://app.retailpulse.dev/api/report/" 
+  paymentExternalService: "https://app.retailpulse.dev/api/payment/"
+    
 web-app:
   app:
     enabled: true
@@ -33,7 +46,7 @@ web-app:
       alb.ingress.kubernetes.io/target-type:  ip
       alb.ingress.kubernetes.io/listen-ports: '[{"HTTP":80},{"HTTPS":443}]'
       alb.ingress.kubernetes.io/backend-protocol: HTTP
-      alb.ingress.kubernetes.io/group.name: retailpulse-iam
+      alb.ingress.kubernetes.io/group.name: retailpulse-api
       alb.ingress.kubernetes.io/group.order: "10"
       alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:ap-southeast-1:051826728851:certificate/6012df97-d861-4a1a-80a9-3675ecbf269d
     hosts:
@@ -64,7 +77,7 @@ identity-access-management:
       alb.ingress.kubernetes.io/target-type: ip
       alb.ingress.kubernetes.io/listen-ports: '[{"HTTP":80},{"HTTPS":443}]'
       alb.ingress.kubernetes.io/backend-protocol: HTTP
-      alb.ingress.kubernetes.io/group.name: retailpulse-iam
+      alb.ingress.kubernetes.io/group.name: retailpulse-api
       alb.ingress.kubernetes.io/group.order: "1"
       alb.ingress.kubernetes.io/healthcheck-path: /actuator/health
       alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:ap-southeast-1:051826728851:certificate/6012df97-d861-4a1a-80a9-3675ecbf269d
@@ -85,37 +98,37 @@ identity-access-management:
             name: retailpulse-rp-iam-app-svc
             port:
               number: 8081
-    tls: []    
+    tls: []
 
-internalIngress:
-  enabled: false
-#   className: alb
-#   host: api.retailpulse.internal
-#   annotations:
-#     helm.sh/resource-policy: keep
-#     kubernetes.io/ingress.class: alb
-#     alb.ingress.kubernetes.io/scheme: internal
-#     alb.ingress.kubernetes.io/target-type: ip
-#     alb.ingress.kubernetes.io/listen-ports: '[{"HTTP":80},{"HTTPS":443}]'
-#     alb.ingress.kubernetes.io/backend-protocol: HTTP
-#     alb.ingress.kubernetes.io/group.name: retailpulse-api
-#     alb.ingress.kubernetes.io/group.order: "1"
-#     alb.ingress.kubernetes.io/healthcheck-path: /actuator/health
-#     alb.ingress.kubernetes.io/certificate-arn:  arn:aws:elasticloadbalancing:ap-southeast-1:051826728851:listener/app/k8s-retailpulseapi-8cb0989ca5/0cfdd45244a40e2a/153863d6f4470788 # arn:aws:acm:ap-southeast-1:051826728851:certificate/298e9909-8850-4eb5-858b-696ef4353b97
-#     external-dns.alpha.kubernetes.io/hostname: api.retailpulse.internal
-#   hosts:
-#     - path: /auth
-#       pathType: Prefix
-#       backend:
-#         service:
-#           name: retailpulse-rp-iam-app-svc
-#           port:
-#             number: 8081
-#     - path: /.well-known
-#       pathType: Prefix
-#       backend:
-#         service:
-#           name: retailpulse-rp-iam-app-svc
-#           port:
-#             number: 8081
-#   tls: []
+user-service:  
+  app:
+    enabled: true
+    image: docker.io/casperyap/rp-user-app:v0.1.0
+    port: 8082
+    serviceType: ClusterIP
+
+
+apiIngress:
+  enabled: true
+  className: alb
+  annotations:
+    helm.sh/resource-policy: keep
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP":80},{"HTTPS":443}]'
+    alb.ingress.kubernetes.io/backend-protocol: HTTP
+    alb.ingress.kubernetes.io/group.name: retailpulse-api
+    alb.ingress.kubernetes.io/group.order: "2"
+    alb.ingress.kubernetes.io/healthcheck-path: /actuator/health
+    alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:ap-southeast-1:051826728851:certificate/6012df97-d861-4a1a-80a9-3675ecbf269d
+  hosts:
+  - host: app.retailpulse.dev
+    paths:
+    - path: /api/users
+      pathType: Prefix
+      backend:
+        service:
+          name: retailpulse-rp-user-app-svc
+          port:
+            number: 8082
+  tls: []

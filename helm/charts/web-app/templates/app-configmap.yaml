@@ -6,6 +6,7 @@ metadata:
 data:
   runtime-config.json: |
 {{- tpl (.Values.runtimeConfigYaml  |
+    replace "PROTOCOL_HTTPS" ((include "web.protocol" .)) |
     replace "IAM_SVC" (include "web.iamExternalService" .) |
     replace "IAM_PORT" (include "web.iamExternalPort" .) |
     replace "USER_SVC" (include "web.userExternalService" .) |

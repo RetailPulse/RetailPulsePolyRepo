@@ -129,11 +129,11 @@ app:
 
     auth:
       enabled: true
-      origin: ORIGIN_URL:ORIGIN_PORT
+      origin: ORIGIN_URL
       jwt:
         key:
           set:
-            uri: http://IAM_SVC:IAM_PORT/auth/oauth2/jwks
+            uri: IAM_SVC/oauth2/jwks
 
     spring:
       datasource:
@@ -163,7 +163,7 @@ app:
           probability: 1.0
 
 dependencies:
-  iamService: http://localhost
+  iamService: http://localhost:30081/auth
   iamReleaseName: retailpulse-iam
   webURL: localhost
   webExternalPort: 30080

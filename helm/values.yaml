@@ -1,72 +1,37 @@
-# Default global values for the RetailPulse application
-# These can be overridden by subchart-specific values or at install time.
-
-# Global namespace override - This will be used by subcharts if they reference it correctly.
-# Most of your subcharts use `{{ include "xxx.namespace" . }}` which defaults to .Release.Namespace
-# but can be overridden by .Values.namespace. Setting it globally here simplifies things.
 global:
+  protocol: "http"
+  rootHost: "localhost"
+  rootURL: "http://localhost"
   webURL: "http://localhost:30080" # This sets .Values.global.webURL
   namespace: ns-retailpulse # This sets .Values.global.namespace
+    
   autoReleaseName: 1
-  rootURL: "http://localhost"
-  rootHost: "localhost"
   iamPort: 8081
   userPort: 8082
   bePort: 8083
   inventoryPort: 8084
   paymentPort: 8087
-  iamExternalPort: 30081
-  userExternalPort: 30082
-  businessEntityExternalPort: 30083
-  inventoryExternalPort: 30084
-  salesExternalPort: 30085
-  reportExternalPort: 30086
-  paymentExternalPort: 30087
-  webExternalPort: 30080
   kafkaPort: 9092
   kafkaPaymentTopic: "payment-events"
-    
-  ## --- If using reverse proxy to route service instead ---
-  iamExternalService: "http://localhost:30081/auth"
-  # userExternalService: "localhost/user"
-  # businessEntityExternalService: "localhost/be"
-  # inventoryExternalService: "localhost/inventory"
-  # salesExternalService: "localhost/sales"
-  # reportExternalService: "localhost/report"
-  # paymentExternalService: "localhost/payment"
-  
 
-# --- Subchart Value Overrides ---
-# You can override specific values for each subchart here.
-# The keys must match the subchart names defined in Chart.yaml (or their aliases).
+  # Backend service DNS (internal)
+  iamInternalService: "-rp-iam-app-svc:8081/auth" 
+  userInternalService: "-rp-user-app-svc:8082/"
+  businessEntityInternalService: "-rp-business-entity-app-svc:8083/"
+  inventoryInternalService: "-rp-inventory-app-svc:8084/"
+  salesInternalService: "-rp-sales-app-svc:8085/"
+  reportInternalService: "-rp-report-app-svc:8086/"
+  paymentInternalService: "-rp-payment-app-svc:8087/"
 
-# Example: Override the NodePort for the Business Entity app service
-# business-entity-microservice:
-#   app:
-#     nodePort: 30183
 
-# Example: Override the MySQL root password for the User microservice
-# user-microservice:
-#   mysql:
-#     rootPassword: "different-user-password"
+  # Backend service DNS (external)
+  iamExternalService: "http://localhost:30081/auth" 
+  userExternalService: "http://localhost:30082/"
+  businessEntityExternalService: "http://localhost:30083/"
+  inventoryExternalService: "http://localhost:30084/"
+  salesExternalService: "http://localhost:30085/"
+  reportExternalService: "http://localhost:30086/"
+  paymentExternalService: "http://localhost:30087/"
 
-# Example: Override the image tag for the Web app
-# web:
-#   app:
-#     image: "docker.io/casperyap/rp-web-app:v0.2.0"
-
-# --- Default Subchart Values ---
-# Include default configurations for subcharts here if needed for initial setup.
-# Usually, you'd rely on the defaults within each subchart's values.yaml,
-# but you can set them explicitly here if desired for the parent context.
-
-# --- Web App Specific Configuration ---
-# If you want the web app in a different namespace, you would need to:
-# 1. Modify the web subchart to accept a namespace override via values.
-# 2. Set it here, e.g.:
-# web:
-#   namespace: ns-retailpulse-web
-# 3. Ensure the web app is configured (e.g., via ConfigMap/env vars) to reach backend services
-#    in the `ns-retailpulse` namespace (e.g., using FQDNs like `svc-be.ns-retailpulse.svc.cluster.local`).
-
-# For now, we assume all services are in the same namespace as the release (ns-retailpulse).
+internalIngress:
+  enabled: false

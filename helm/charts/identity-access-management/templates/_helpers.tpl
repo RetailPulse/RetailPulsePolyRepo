@@ -62,7 +62,6 @@ URL API Prefix
   {{- .Values.app.urlPrefix }}
 {{- end }}
 
-
 {{/*
 Identity Access Management Service Name
 */}}
