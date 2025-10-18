@@ -66,7 +66,7 @@ module "k8s" {
 
   region           = var.region
   name_prefix      = local.name_prefix
-  sample_namespace = "sample"
+  workload_namespace = "ns-retailpulse"
 
   providers = {
     kubernetes = kubernetes

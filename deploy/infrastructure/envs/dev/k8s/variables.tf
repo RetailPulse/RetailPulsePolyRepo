@@ -8,8 +8,8 @@ variable "name_prefix" {
   type        = string
 }
 
-variable "sample_namespace" {
-  description = "Namespace used by the sample ExternalSecrets"
+variable "workload_namespace" {
+  description = "Namespace for RetailPulse workloads"
   type        = string
-  default     = "sample"
+  default     = "ns-retailpulse"
 }

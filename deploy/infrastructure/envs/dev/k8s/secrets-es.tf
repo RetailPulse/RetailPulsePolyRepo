@@ -24,7 +24,7 @@ resource "kubernetes_manifest" "core_db_extsec" {
   manifest = {
     apiVersion = "external-secrets.io/v1beta1"
     kind       = "ExternalSecret"
-    metadata   = { name = "core-db", namespace = "sample" }
+    metadata   = { name = "core-db", namespace = var.workload_namespace }
     spec = {
       refreshInterval = "1h"
       secretStoreRef  = { name = "aws-secrets", kind = "ClusterSecretStore" } # <- change
@@ -61,7 +61,7 @@ resource "kubernetes_manifest" "auth_db_extsec" {
   manifest = {
     apiVersion = "external-secrets.io/v1beta1"
     kind       = "ExternalSecret"
-    metadata   = { name = "auth-db", namespace = "sample" }
+    metadata   = { name = "auth-db", namespace = var.workload_namespace }
     spec = {
       refreshInterval = "1h"
       secretStoreRef  = { name = "aws-secrets", kind = "ClusterSecretStore" }
@@ -98,7 +98,7 @@ resource "kubernetes_manifest" "docdb_extsec" {
   manifest = {
     apiVersion = "external-secrets.io/v1beta1"
     kind       = "ExternalSecret"
-    metadata   = { name = "docdb", namespace = "sample" }
+    metadata   = { name = "docdb", namespace = var.workload_namespace }
     spec = {
       refreshInterval = "1h"
       secretStoreRef  = { name = "aws-secrets", kind = "ClusterSecretStore" }

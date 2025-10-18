@@ -74,6 +74,9 @@ spec:
               mountPath: /app/config
           ports:
             - containerPort: {{ .Values.app.port }}
+          envFrom:
+            - secretRef:
+                name: core-db
           # livenessProbe:
           #   httpGet:
           #     path: /actuator/health

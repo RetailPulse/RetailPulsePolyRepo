@@ -5,7 +5,7 @@ namespace: ns-retailpulse
 
 # MongoDB Configuration
 mongodb:
-  enabled: true
+  enabled: false
   image: mongo:7
   rootUsername: admin
   rootPassword: secret
@@ -37,7 +37,7 @@ app:
     spring:
       data:
         mongodb:
-          uri: "mongodb://MONGO_HOST:27017/reportsdb?authSource=admin"
+          uri: "mongodb://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}?ssl=true&replicaSet=rs0&readPreference=secondaryPreferred&retryWrites=false&tlsAllowInvalidHostnames=true"
           database: reportsdb
           
     app:

@@ -25,14 +25,14 @@ spec:
             - sh
             - -c
             - >
-              until nc -z {{ include "identity-access-management.userMysqlService" . }} 3306; do
-                echo "Waiting for MySQL at {{ include "identity-access-management.userMysqlService" . }}:3306...";
+              until nc -z retailpulse-dev-auth-mysql.cl62ae2senvp.ap-southeast-1.rds.amazonaws.com 3306; do
+                echo "Waiting for MySQL at retailpulse-dev-auth-mysql.cl62ae2senvp.ap-southeast-1.rds.amazonaws.com:3306...";
                 sleep 5;
               done;
               echo "MySQL is ready!";
           env:
             - name: MYSQL_HOST
-              value: {{ include "identity-access-management.userMysqlService" . }}
+              value: retailpulse-dev-auth-mysql.cl62ae2senvp.ap-southeast-1.rds.amazonaws.com
             - name: MYSQL_PORT
               value: "3306"
 
@@ -45,6 +45,9 @@ spec:
               mountPath: /app/config
           ports:
             - containerPort: {{ .Values.app.port }}
+          envFrom:
+            - secretRef:
+                name: auth-db
           # livenessProbe:
           #   httpGet:
           #     path: /actuator/health

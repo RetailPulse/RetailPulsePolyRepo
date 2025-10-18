@@ -23,6 +23,9 @@ spec:
           imagePullPolicy: {{ .Values.app.imagePullPolicy }}
           ports:
             - containerPort: {{ .Values.app.port }}
+          envFrom:
+            - secretRef:
+                name: docdb
           env:
             # Make Spring read /config/application.yaml
             - name: SPRING_CONFIG_ADDITIONAL_LOCATION
