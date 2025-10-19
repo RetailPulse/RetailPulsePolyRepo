@@ -50,7 +50,7 @@ app:
             web: INFO
       file:
         name: "logs/rp-iam.log"
-
+    
     management:
       tracing:
         enabled: true
@@ -59,7 +59,7 @@ app:
       endpoints:
         web:
           exposure:
-            include: "health"
+            include: health, info, prometheus
         health:
           probes:
             enabled: true

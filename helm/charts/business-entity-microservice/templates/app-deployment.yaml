@@ -79,7 +79,7 @@ spec:
           #     path: /actuator/health
           #     port: {{ .Values.app.port }}
           #   initialDelaySeconds: 30
-          #   periodSeconds: 10
+          #   periodSeconds: 120
           # readinessProbe:
           #   httpGet:
           #     path: /actuator/health

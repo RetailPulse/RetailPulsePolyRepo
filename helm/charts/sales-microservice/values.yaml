@@ -100,21 +100,22 @@ mysql:
 # Sales App Configuration
 app:
   enabled: true
-  image: docker.io/casperyap/rp-sales-app:v0.1.0
+  image: docker.io/casperyap/rp-sales-app:v0.2.0
   imagePullPolicy: Always
   port: 8085
   nodePort: 30085
+  portType: NodePort
   configYaml: |
     server:
       port: 8085
 
     auth:
       enabled: true
-      origin: ORIGIN_URL:ORIGIN_PORT
+      origin: ORIGIN_URL
       jwt:
         key:
           set:
-            uri: /IAM_SVC:IAM_PORT/auth/oauth2/jwks
+            uri: IAM_SVC/oauth2/jwks
 
     spring:
       datasource:
@@ -155,20 +156,26 @@ app:
         #     # --- END Existing Backoff Settings ---
 
       # --- Actuator Health Configuration ---
-      # Ensure Kafka health check is enabled so you can monitor its status.
+      # Ensure Kafka health check is enabled so you can monitor its status.      
       management:
-        endpoint:
+        tracing:
+          enabled: true
+          sampling:
+            probability: 1.0
+        endpoints:
+          web:
+            exposure:
+              include: health, info, prometheus
           health:
-            show-details: always
-        health:
-          kafka:
-            enabled: true
+            probes:
+              enabled: true
+            show-details: "never"
 
     inventory-service:
-      url: "http://INVENTORY_SVC:8084"
+      url: "INVENTORY_SVC"
     
     payment-service:
-      url: "http://PAYMENT_SVC:8087"
+      url: "PAYMENT_SVC"
 
     logging:
       level:

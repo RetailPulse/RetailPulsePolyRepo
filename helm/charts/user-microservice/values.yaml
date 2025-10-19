@@ -119,10 +119,11 @@ mysql:
 # User App Configuration
 app:
   enabled: true
-  image: docker.io/casperyap/rp-user-app:v0.1.0
+  image: docker.io/casperyap/rp-user-app:v0.2.0
   imagePullPolicy: Always
   port: 8082
   nodePort: 30082
+  portType: NodePort
   configYaml: |
     server:
       port: 8082
@@ -151,8 +152,10 @@ app:
     logging:
       level:
         root: "INFO"
-        org.springframework.security: "INFO"
         com.retailpulse: "DEBUG"
+        org.springframework.security: "TRACE"
+        org.springframework.boot.actuate.endpoint.web.servlet.AbstractWebMvcEndpointHandlerMapping: "WARN"
+        org.springframework.security.oauth2: "TRACE"
       file:
         name: "logs/rp-user.log"
     
@@ -164,7 +167,7 @@ app:
       endpoints:
         web:
           exposure:
-            include: "health"
+            include: health, info, prometheus
         health:
           probes:
             enabled: true

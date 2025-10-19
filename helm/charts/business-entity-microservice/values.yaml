@@ -65,21 +65,22 @@ redis:
 # BusinessEntity App Configuration
 app:
   enabled: true
-  image: docker.io/casperyap/rp-businessentity-app:v0.1.0
+  image: docker.io/casperyap/rp-businessentity-app:v0.2.0
   imagePullPolicy: Always
   port: 8083
   nodePort: 30083
+  portType: NodePort
   configYaml: |    
     server:
       port: 8083
 
     auth:
       enabled: true
-      origin: ORIGIN_URL:ORIGIN_PORT
+      origin: ORIGIN_URL
       jwt:
         key:
           set:
-            uri: /IAM_SVC:IAM_PORT/auth/oauth2/jwks
+            uri: IAM_SVC/oauth2/jwks
 
     spring:
       datasource:
@@ -107,8 +108,10 @@ app:
     logging:
       level:
         root: "INFO"
-        org.springframework.security: "INFO"
         com.retailpulse: "DEBUG"
+        org.springframework.security: "TRACE"
+        org.springframework.boot.actuate.endpoint.web.servlet.AbstractWebMvcEndpointHandlerMapping: "WARN"
+        org.springframework.security.oauth2: "TRACE"
       file:
         name: logs/rp-businessentity.log
     
@@ -117,6 +120,14 @@ app:
         enabled: true
         sampling:
           probability: 1.0
+      endpoints:
+        web:
+          exposure:
+            include: health, info, prometheus
+        health:
+          probes:
+            enabled: true
+          show-details: "never"
 
 dependencies:
   iamReleaseName: retailpulse-iam

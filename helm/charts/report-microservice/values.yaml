@@ -18,21 +18,22 @@ mongodb:
 # Report App Configuration
 app:
   enabled: true
-  image: docker.io/casperyap/rp-report-app:v0.1.0 
+  image: docker.io/casperyap/rp-report-app:v0.2.0 
   imagePullPolicy: Always
   port: 8086
   nodePort: 30086
+  portType: NodePort
   configYaml: |
     server:
       port: 8086
 
     auth:
       enabled: true
-      origin: ORIGIN_URL:ORIGIN_PORT
+      origin: ORIGIN_URL
       jwt:
         key:
           set:
-            uri: /IAM_SVC:IAM_PORT/auth/oauth2/jwks
+            uri: IAM_SVC/oauth2/jwks
 
     spring:
       data:
@@ -46,7 +47,7 @@ app:
         
     inventory:
       api:
-        base-url: "http://INVENTORY_SVC:8084" # Dynamically replaced
+        base-url: "INVENTORY_SVC" # Dynamically replaced
 
     logging:
       level:
@@ -64,6 +65,14 @@ app:
         enabled: true
         sampling:
           probability: 1.0
+      endpoints:
+        web:
+          exposure:
+            include: health, info, prometheus
+        health:
+          probes:
+            enabled: true
+          show-details: "never"
 
 dependencies:
   inventoryReleaseName: "retailpulse-inventory" 

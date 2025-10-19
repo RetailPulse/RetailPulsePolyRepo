@@ -93,7 +93,7 @@ Identity Access Management Service Name
 */}}
 {{- define "user.iamService" -}}
 {{- if and .Values.global (.Values.global.iamInternalService) (ne .Values.global.iamInternalService nil) }}
-  {{- printf "%s://%s%s" .Values.global.protocol .Release.Name .Values.global.iamInternalService }}
+  {{- printf "%s://%s-%s" .Values.global.protocol .Release.Name .Values.global.iamInternalService }}
 {{- else if and .Values.dependencies (.Values.dependencies.iamReleaseName) (ne .Values.dependencies.iamReleaseName "") }}
   {{- printf "%s-rp-iam-app-svc" .Values.dependencies.iamReleaseName }}
 {{- else if and .Values.dependencies (.Values.dependencies.iamService) (ne .Values.dependencies.iamService "") }}

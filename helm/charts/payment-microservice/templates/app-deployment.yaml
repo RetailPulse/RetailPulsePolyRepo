@@ -56,18 +56,18 @@ spec:
               mountPath: /app/config
           ports:
             - containerPort: {{ .Values.app.port | default 8087 }}
-          # livenessProbe:
-          #   httpGet:
-          #     path: /actuator/health # Adjust if different
-          #     port: {{ .Values.app.port | default 8087 }}
-          #   initialDelaySeconds: 30
-          #   periodSeconds: 10
-          # readinessProbe:
-          #   httpGet:
-          #     path: /actuator/health # Adjust if different
-          #     port: {{ .Values.app.port | default 8087 }}
-          #   initialDelaySeconds: 20
-          #   periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /actuator/health # Adjust if different
+              port: {{ .Values.app.port | default 8087 }}
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /actuator/health # Adjust if different
+              port: {{ .Values.app.port | default 8087 }}
+            initialDelaySeconds: 20
+            periodSeconds: 5
           resources: {}
       volumes:
         - name: config-volume

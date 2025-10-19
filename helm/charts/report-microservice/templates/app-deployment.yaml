@@ -38,16 +38,19 @@ spec:
           volumeMounts:
             - name: app-config
               mountPath: /config
-          readinessProbe:
-            tcpSocket:
-              port: {{ .Values.app.port }}
-            initialDelaySeconds: 10
-            periodSeconds: 10
           livenessProbe:
-            tcpSocket:
+            httpGet:
+              path: /actuator/health # Adjust path if different
               port: {{ .Values.app.port }}
             initialDelaySeconds: 30
-            periodSeconds: 20
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /actuator/health # Adjust path if different
+              port: {{ .Values.app.port }}
+            initialDelaySeconds: 20
+            periodSeconds: 5
+          resources: {}
       volumes:
         - name: app-config
           configMap:

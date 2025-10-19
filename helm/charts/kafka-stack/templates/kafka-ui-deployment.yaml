@@ -24,8 +24,23 @@ spec:
           ports:
             - containerPort: {{ .Values.ui.port }}
           env:
+            - name: SERVER_PORT
+              value: {{ .Values.ui.port | quote }}
             - name: KAFKA_CLUSTERS_0_NAME
               value: {{ .Values.ui.clusterName | quote }}
             - name: KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS
               value: {{ include "kafka.resolvedBootstrapServers" . | quote }}
+          livenessProbe:
+            httpGet:
+              path: /actuator/health # Adjust path if different
+              port: {{ .Values.ui.port }}
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /actuator/health # Adjust path if different
+              port: {{ .Values.ui.port }}
+            initialDelaySeconds: 20
+            periodSeconds: 5
+          resources: {}
 {{- end }}

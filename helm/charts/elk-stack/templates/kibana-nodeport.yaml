@@ -1,0 +1,16 @@
+{{- if and .Values.kibana.enabled (eq .Values.kibana.service.type "NodePort") }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: kibana-nodeport
+  namespace: {{ .Values.namespace }}
+spec:
+  selector:
+    app: kibana
+  ports:
+    - name: http
+      port: 5601
+      targetPort: 5601
+      nodePort: {{ .Values.kibana.service.nodePort }}
+  type: NodePort
+{{- end }}

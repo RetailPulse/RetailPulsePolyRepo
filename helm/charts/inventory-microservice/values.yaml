@@ -313,21 +313,22 @@ redis:
 # Inventory App Configuration
 app:
   enabled: true
-  image: docker.io/casperyap/rp-inventory-app:v0.1.0
+  image: docker.io/casperyap/rp-inventory-app:v0.2.0
   imagePullPolicy: Always
   port: 8084
   nodePort: 30084
+  portType: NodePort
   configYaml: |
     server:
       port: 8084
 
     auth:
       enabled: true
-      origin: ORIGIN_URL:ORIGIN_PORT
+      origin: ORIGIN_URL
       jwt:
         key:
           set:
-            uri: /IAM_SVC:IAM_PORT/auth/oauth2/jwks
+            uri: IAM_SVC/oauth2/jwks
 
     spring:
       datasource:
@@ -371,10 +372,18 @@ app:
         enabled: true
         sampling:
           probability: 1.0
+      endpoints:
+        web:
+          exposure:
+            include: health, info, prometheus
+        health:
+          probes:
+            enabled: true
+          show-details: "never"
 
     # Service URL for BusinessEntity - dynamically replaced
     businessentity-service:
-      url: "http://BUSINESS_ENTITY_SVC:8083" # Assuming default BE port
+      url: "BUSINESS_ENTITY_SVC"
 
 dependencies:
   businessEntityReleaseName: retailpulse-be

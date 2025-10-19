@@ -14,15 +14,22 @@ global:
   kafkaPort: 9092
   kafkaPaymentTopic: "payment-events"
 
-  # Backend service DNS (internal)
-  iamInternalService: "-rp-iam-app-svc:8081/auth" 
-  userInternalService: "-rp-user-app-svc:8082/"
-  businessEntityInternalService: "-rp-business-entity-app-svc:8083/"
-  inventoryInternalService: "-rp-inventory-app-svc:8084/"
-  salesInternalService: "-rp-sales-app-svc:8085/"
-  reportInternalService: "-rp-report-app-svc:8086/"
-  paymentInternalService: "-rp-payment-app-svc:8087/"
+  kafka-stack:
+    enabled: true
+    kafka:
+      enabled: true
+    ui:
+      enabled: true
+      serviceType: ClusterIP
 
+  # Backend service DNS (internal)
+  iamInternalService: "rp-iam-app-svc:8081/auth" 
+  userInternalService: "rp-user-app-svc:8082/"
+  businessEntityInternalService: "rp-business-entity-app-svc:8083/"
+  inventoryInternalService: "rp-inventory-app-svc:8084/"
+  salesInternalService: "rp-sales-app-svc:8085/"
+  reportInternalService: "rp-report-app-svc:8086/"
+  paymentInternalService: "rp-payment-app-svc:8087/"
 
   # Backend service DNS (external)
   iamExternalService: "https://app.retailpulse.dev/auth" 
@@ -78,7 +85,7 @@ identity-access-management:
       alb.ingress.kubernetes.io/listen-ports: '[{"HTTP":80},{"HTTPS":443}]'
       alb.ingress.kubernetes.io/backend-protocol: HTTP
       alb.ingress.kubernetes.io/group.name: retailpulse-api
-      alb.ingress.kubernetes.io/group.order: "1"
+      alb.ingress.kubernetes.io/group.order: "2"
       alb.ingress.kubernetes.io/healthcheck-path: /actuator/health
       alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:ap-southeast-1:051826728851:certificate/6012df97-d861-4a1a-80a9-3675ecbf269d
     hosts:
@@ -103,10 +110,89 @@ identity-access-management:
 user-service:  
   app:
     enabled: true
-    image: docker.io/casperyap/rp-user-app:v0.1.0
+    image: docker.io/casperyap/rp-user-app:v0.2.0
     port: 8082
     serviceType: ClusterIP
 
+business-entity-microservice:  
+  app:
+    enabled: true
+    image: docker.io/casperyap/rp-businessentity-app:v0.2.0
+    port: 8083
+    serviceType: ClusterIP
+
+inventory-microservice:  
+  app:
+    enabled: true
+    image: docker.io/casperyap/rp-inventory-app:v0.2.0
+    port: 8084
+    serviceType: ClusterIP
+
+sales-microservice:  
+  app:
+    enabled: true
+    image: docker.io/casperyap/rp-sales-app:v0.2.0
+    port: 8085
+    serviceType: ClusterIP
+
+report-microservice:  
+  app:
+    enabled: true
+    image: docker.io/casperyap/rp-report-app:v0.2.0
+    port: 8086
+    serviceType: ClusterIP
+
+payment-microservice:  
+  app:
+    enabled: true
+    image: docker.io/casperyap/rp-payment-app:v0.2.0
+    port: 8087
+    serviceType: ClusterIP
+
+elk-stack:
+  enabled: true
+  elasticsearch:
+    enabled: true
+    storage:
+      enabled: true
+      size: 2Gi
+      storageClass: "gp3"
+  kibana:
+    enabled: true
+    serverBasePath: "/elk-logs"
+    serverRewriteBasePath: true
+    elasticsearchHosts:
+    - "http://elasticsearch:9200"
+    env:   
+    - name: NODE_OPTIONS
+      value: "--max-old-space-size=1536"
+    service:
+      type: ClusterIP
+      nodePort: 30601
+    ingress:
+      enabled: true
+      ingressClassName: alb
+      annotations:
+        # helm.sh/resource-policy: keep
+        alb.ingress.kubernetes.io/scheme: internet-facing
+        alb.ingress.kubernetes.io/target-type: ip
+        alb.ingress.kubernetes.io/listen-ports: '[{"HTTP":80},{"HTTPS":443}]'
+        alb.ingress.kubernetes.io/backend-protocol: HTTP
+        alb.ingress.kubernetes.io/group.name: retailpulse-api
+        alb.ingress.kubernetes.io/group.order: "1"
+        alb.ingress.kubernetes.io/healthcheck-path: /elk-logs/api/status
+        alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:ap-southeast-1:051826728851:certificate/6012df97-d861-4a1a-80a9-3675ecbf269d
+      hosts:
+        - host: app.retailpulse.dev
+          paths:
+            - path: /elk-logs
+              pathType: Prefix
+              backend:
+              service:
+                name: kibana
+                port:
+                  number: 5601
+      tls: []
 
 apiIngress:
   enabled: true
@@ -118,7 +204,7 @@ apiIngress:
     alb.ingress.kubernetes.io/listen-ports: '[{"HTTP":80},{"HTTPS":443}]'
     alb.ingress.kubernetes.io/backend-protocol: HTTP
     alb.ingress.kubernetes.io/group.name: retailpulse-api
-    alb.ingress.kubernetes.io/group.order: "2"
+    alb.ingress.kubernetes.io/group.order: "3"
     alb.ingress.kubernetes.io/healthcheck-path: /actuator/health
     alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:ap-southeast-1:051826728851:certificate/6012df97-d861-4a1a-80a9-3675ecbf269d
   hosts:
@@ -131,4 +217,39 @@ apiIngress:
           name: retailpulse-rp-user-app-svc
           port:
             number: 8082
+    - path: /api/businessEntity
+      pathType: Prefix
+      backend:
+        service:
+          name: retailpulse-rp-businessentity-app-svc
+          port:
+            number: 8083
+    - path: /api/inventory
+      pathType: Prefix
+      backend:
+        service:
+          name: retailpulse-rp-inventory-app-svc
+          port:
+            number: 8084
+    - path: /api/sales
+      pathType: Prefix
+      backend:
+        service:
+          name: retailpulse-rp-sales-app-svc
+          port:
+            number: 8085
+    - path: /api/report
+      pathType: Prefix
+      backend:
+        service:
+          name: retailpulse-rp-report-app-svc
+          port:
+            number: 8086
+    - path: /api/payment
+      pathType: Prefix
+      backend:
+        service:
+          name: retailpulse-rp-payment-app-svc
+          port:
+            number: 8087
   tls: []
