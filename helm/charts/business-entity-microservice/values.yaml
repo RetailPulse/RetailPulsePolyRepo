@@ -108,10 +108,10 @@ app:
     logging:
       level:
         root: "INFO"
-        com.retailpulse: "DEBUG"
-        org.springframework.security: "TRACE"
+        com.retailpulse: "INFO"
+        org.springframework.security: "INFO"
         org.springframework.boot.actuate.endpoint.web.servlet.AbstractWebMvcEndpointHandlerMapping: "WARN"
-        org.springframework.security.oauth2: "TRACE"
+        # org.springframework.security.oauth2: "INFO"
       file:
         name: logs/rp-businessentity.log
     

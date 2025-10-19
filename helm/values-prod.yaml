@@ -32,13 +32,13 @@ global:
   paymentInternalService: "rp-payment-app-svc:8087/"
 
   # Backend service DNS (external)
-  iamExternalService: "https://app.retailpulse.dev/auth" 
-  userExternalService: "https://app.retailpulse.dev/" 
-  businessEntityExternalService: "https://app.retailpulse.dev/api/businessEntity/"
-  inventoryExternalService: "https://app.retailpulse.dev/api/inventory/"
-  salesExternalService: "https://app.retailpulse.dev/api/sales/"
-  reportExternalService: "https://app.retailpulse.dev/api/report/" 
-  paymentExternalService: "https://app.retailpulse.dev/api/payment/"
+  iamExternalService: "https://app.retailpulse.dev/auth"
+  userExternalService: "https://app.retailpulse.dev/"
+  businessEntityExternalService: "https://app.retailpulse.dev/"
+  inventoryExternalService: "https://app.retailpulse.dev/"
+  salesExternalService: "https://app.retailpulse.dev/"
+  reportExternalService: "https://app.retailpulse.dev/"
+  paymentExternalService: "https://app.retailpulse.dev/"
     
 web-app:
   app:
@@ -74,7 +74,7 @@ identity-access-management:
     image: docker.io/casperyap/rp-iam-app:v0.2.0
     port: 8081
     urlPrefix: /auth
-    serviceType: ClusterIP
+    portType: ClusterIP
   ingress:
     enabled: true
     className: alb
@@ -86,7 +86,7 @@ identity-access-management:
       alb.ingress.kubernetes.io/backend-protocol: HTTP
       alb.ingress.kubernetes.io/group.name: retailpulse-api
       alb.ingress.kubernetes.io/group.order: "2"
-      alb.ingress.kubernetes.io/healthcheck-path: /actuator/health
+      alb.ingress.kubernetes.io/healthcheck-path: /auth/actuator/health
       alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:ap-southeast-1:051826728851:certificate/6012df97-d861-4a1a-80a9-3675ecbf269d
     hosts:
     - host: app.retailpulse.dev
@@ -112,42 +112,42 @@ user-service:
     enabled: true
     image: docker.io/casperyap/rp-user-app:v0.2.0
     port: 8082
-    serviceType: ClusterIP
+    portType: ClusterIP
 
 business-entity-microservice:  
   app:
     enabled: true
     image: docker.io/casperyap/rp-businessentity-app:v0.2.0
     port: 8083
-    serviceType: ClusterIP
+    portType: ClusterIP
 
 inventory-microservice:  
   app:
     enabled: true
     image: docker.io/casperyap/rp-inventory-app:v0.2.0
     port: 8084
-    serviceType: ClusterIP
+    portType: ClusterIP
 
 sales-microservice:  
   app:
     enabled: true
     image: docker.io/casperyap/rp-sales-app:v0.2.0
     port: 8085
-    serviceType: ClusterIP
+    portType: ClusterIP
 
 report-microservice:  
   app:
     enabled: true
     image: docker.io/casperyap/rp-report-app:v0.2.0
     port: 8086
-    serviceType: ClusterIP
+    portType: ClusterIP
 
 payment-microservice:  
   app:
     enabled: true
     image: docker.io/casperyap/rp-payment-app:v0.2.0
     port: 8087
-    serviceType: ClusterIP
+    portType: ClusterIP
 
 elk-stack:
   enabled: true
@@ -224,6 +224,13 @@ apiIngress:
           name: retailpulse-rp-businessentity-app-svc
           port:
             number: 8083
+    - path: /api/products
+      pathType: Prefix
+      backend:
+        service:
+          name: retailpulse-rp-inventory-app-svc
+          port:
+            number: 8084
     - path: /api/inventory
       pathType: Prefix
       backend:
@@ -231,6 +238,13 @@ apiIngress:
           name: retailpulse-rp-inventory-app-svc
           port:
             number: 8084
+    - path: /api/inventoryTransaction
+      pathType: Prefix
+      backend:
+        service:
+          name: retailpulse-rp-inventory-app-svc
+          port:
+            number: 8084    
     - path: /api/sales
       pathType: Prefix
       backend:
@@ -238,14 +252,14 @@ apiIngress:
           name: retailpulse-rp-sales-app-svc
           port:
             number: 8085
-    - path: /api/report
+    - path: /api/reports
       pathType: Prefix
       backend:
         service:
           name: retailpulse-rp-report-app-svc
           port:
             number: 8086
-    - path: /api/payment
+    - path: /api/payments
       pathType: Prefix
       backend:
         service:

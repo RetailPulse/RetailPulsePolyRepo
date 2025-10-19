@@ -356,14 +356,14 @@ app:
     logging:
       level:
         root: INFO
-        org.springframework.security: "INFO" # Less noisy than TRACE
-        com.retailpulse: "DEBUG"
+        org.springframework.security: TRACE # Less noisy than TRACE
+        com.retailpulse: INFO
         org.springframework.security.web.FilterChainProxy: INFO
         org.springframework.security.oauth2.server.resource.web.BearerTokenAuthenticationFilter: INFO
-        org.springframework.security.oauth2.jwt: INFO
+        org.springframework.security.oauth2.jwt: TRACE
         org.springframework.security.authentication.ProviderManager: INFO
-        org.springframework.cloud.openfeign: DEBUG
-        feign: DEBUG
+        org.springframework.cloud.openfeign: INFO
+        feign: INFO
       file:
         name: "logs/rp-inventory.log"
     
