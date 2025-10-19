@@ -41,6 +41,29 @@ kafka-stack:
     enabled: true
     portType: ClusterIP
     contextPath: /kafka-ui
+    ingress:
+      enabled: true
+      className: alb
+      annotations:
+        helm.sh/resource-policy: keep
+        alb.ingress.kubernetes.io/scheme: internet-facing
+        alb.ingress.kubernetes.io/target-type: ip
+        alb.ingress.kubernetes.io/listen-ports: '[{"HTTP":80},{"HTTPS":443}]'
+        alb.ingress.kubernetes.io/backend-protocol: HTTP
+        alb.ingress.kubernetes.io/group.name: retailpulse-api
+        alb.ingress.kubernetes.io/group.order: "2"
+        alb.ingress.kubernetes.io/healthcheck-path: /kafka-ui/actuator/health
+        alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:ap-southeast-1:051826728851:certificate/6012df97-d861-4a1a-80a9-3675ecbf269d
+      hosts:
+      - host: app.retailpulse.dev
+        paths:
+        - path: /kafka-ui
+          pathType: Prefix
+          backend:
+            service:
+              name: retailpulse-rp-kafka-ui-svc
+              port:
+                number: 8095
 
 web-app:
   app:
@@ -268,11 +291,4 @@ apiIngress:
           name: retailpulse-rp-payment-app-svc
           port:
             number: 8087
-    - path: /kafka-ui
-      pathType: Prefix
-      backend:
-        service:
-          name: retailpulse-rp-kafka-ui-app-svc
-          port:
-            number: 8088
   tls: []

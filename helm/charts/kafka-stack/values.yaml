@@ -43,7 +43,10 @@ ui:
   enabled: true
   image: provectuslabs/kafka-ui:latest
   imagePullPolicy: IfNotPresent
-  port: 8088
-  nodePort: 30088
+  port: 8095
+  nodePort: 30095
   portType: NodePort
   clusterName: "retailpulse-local"
+  ingress:
+    enabled: false
+    
