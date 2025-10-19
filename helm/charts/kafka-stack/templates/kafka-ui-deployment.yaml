@@ -30,15 +30,27 @@ spec:
               value: {{ .Values.ui.clusterName | quote }}
             - name: KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS
               value: {{ include "kafka.resolvedBootstrapServers" . | quote }}
+            {{- if and (hasKey .Values.ui "contextPath") (.Values.ui.contextPath) (ne .Values.ui.contextPath "") }}
+            - name: SERVER_SERVLET_CONTEXT_PATH
+              value: {{ .Values.ui.contextPath | quote }}
+            {{- end }}
           livenessProbe:
             httpGet:
-              path: /actuator/health # Adjust path if different
+              {{- if and (hasKey .Values.ui "contextPath") (.Values.ui.contextPath) (ne .Values.ui.contextPath "") }}
+              path: {{ .Values.ui.contextPath }}/actuator/health 
+              {{- else }}
+              path: /actuator/health 
+              {{- end }}
               port: {{ .Values.ui.port }}
             initialDelaySeconds: 30
             periodSeconds: 10
           readinessProbe:
             httpGet:
-              path: /actuator/health # Adjust path if different
+              {{- if and (hasKey .Values.ui "contextPath") (.Values.ui.contextPath) (ne .Values.ui.contextPath "") }}
+              path: {{ .Values.ui.contextPath }}/actuator/health 
+              {{- else }}
+              path: /actuator/health 
+              {{- end }}
               port: {{ .Values.ui.port }}
             initialDelaySeconds: 20
             periodSeconds: 5

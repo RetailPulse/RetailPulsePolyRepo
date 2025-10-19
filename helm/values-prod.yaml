@@ -14,14 +14,6 @@ global:
   kafkaPort: 9092
   kafkaPaymentTopic: "payment-events"
 
-  kafka-stack:
-    enabled: true
-    kafka:
-      enabled: true
-    ui:
-      enabled: true
-      serviceType: ClusterIP
-
   # Backend service DNS (internal)
   iamInternalService: "rp-iam-app-svc:8081/auth" 
   userInternalService: "rp-user-app-svc:8082/"
@@ -39,7 +31,17 @@ global:
   salesExternalService: "https://app.retailpulse.dev/"
   reportExternalService: "https://app.retailpulse.dev/"
   paymentExternalService: "https://app.retailpulse.dev/"
-    
+
+kafka-stack:
+  enabled: true
+  kafka:
+    enabled: true
+    portType: ClusterIP
+  ui:
+    enabled: true
+    portType: ClusterIP
+    contextPath: /kafka-ui
+
 web-app:
   app:
     enabled: true
@@ -107,7 +109,7 @@ identity-access-management:
               number: 8081
     tls: []
 
-user-service:  
+user-microservice:  
   app:
     enabled: true
     image: docker.io/casperyap/rp-user-app:v0.2.0
@@ -173,7 +175,7 @@ elk-stack:
       enabled: true
       ingressClassName: alb
       annotations:
-        # helm.sh/resource-policy: keep
+        helm.sh/resource-policy: keep
         alb.ingress.kubernetes.io/scheme: internet-facing
         alb.ingress.kubernetes.io/target-type: ip
         alb.ingress.kubernetes.io/listen-ports: '[{"HTTP":80},{"HTTPS":443}]'
@@ -266,4 +268,11 @@ apiIngress:
           name: retailpulse-rp-payment-app-svc
           port:
             number: 8087
+    - path: /kafka-ui
+      pathType: Prefix
+      backend:
+        service:
+          name: retailpulse-rp-kafka-ui-app-svc
+          port:
+            number: 8088
   tls: []
