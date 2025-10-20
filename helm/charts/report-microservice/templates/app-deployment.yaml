@@ -22,19 +22,37 @@ spec:
         image: busybox
         command: ['sh', '-c']
         args:
-          - >            
-            until nc -z ${MONGO_HOST} ${MONGO_PORT}; do
-              echo "Waiting for MongoDB at ${MONGO_HOST}:${MONGO_PORT}..."
-              sleep 2;
-            done &&
-            echo "MongoDB is up!"
+        - >            
+          until nc -z ${MONGO_HOST} ${MONGO_PORT}; do
+            echo "Waiting for MongoDB at ${MONGO_HOST}:${MONGO_PORT}..."
+            sleep 2;
+          done &&
+          echo "MongoDB is up!"
         envFrom:
-          - secretRef:
-              {{- if and (hasKey .Values "global") (hasKey .Values.global "reportDBRef") (ne .Values.global.reportDBRef "") }}
-              name: {{ .Values.global.reportDBRef }}
-              {{- else }}
-              name: {{ include "report.mongodbSecret" . }}
-              {{- end }}
+        - secretRef:
+            {{- if and (hasKey .Values "global") (hasKey .Values.global "reportDBRef") (ne .Values.global.reportDBRef "") }}
+            name: {{ .Values.global.reportDBRef }}
+            {{- else }}
+            name: {{ include "report.mongodbSecret" . }}
+            {{- end }}
+      # {{- if and (hasKey .Values "global") (hasKey .Values.global "reportDBRef") (ne .Values.global.reportDBRef "") }}
+      # - name: import-docdb-cert
+      #   image: eclipse-temurin:23-jdk
+      #   command:
+      #   - sh
+      #   - -c
+      #   - |
+      #     cp /certs/global-bundle.pem /tmp/
+      #     keytool -import -trustcacerts -alias aws-docdb \
+      #       -file /tmp/global-bundle.pem \
+      #       -keystore /truststore/truststore.jks \
+      #       -storepass changeit -noprompt
+      #   volumeMounts:
+      #   - name: aws-docdb-ca
+      #     mountPath: /certs
+      #   - name: truststore
+      #     mountPath: /truststore
+      #   {{- end }}
       containers:
       - name: rp-report-service
         image: {{ .Values.app.image }}
@@ -56,14 +74,19 @@ spec:
           value: "file:/config/"
         # Override URI from configmap for clarity and direct control
         - name: SPRING_DATA_MONGODB_URI
+          {{- if and (hasKey .Values "global") (hasKey .Values.global "reportDBRef") (ne .Values.global.reportDBRef "") }}
+          value: "mongodb://${MONGO_USER}:${MONGO_PASS}@${MONGO_HOST}:${MONGO_PORT}/${MONGO_DB}?ssl=true&authSource=admin&retryWrites=false"
+          {{- else -}}
           value: "mongodb://${MONGO_USER}:${MONGO_PASS}@${MONGO_HOST}:${MONGO_PORT}/${MONGO_DB}?authSource=admin"
+          {{- end }}
         # - name: SPRING_DATA_MONGODB_URI
         #   value: "mongodb://{{ .Values.mongodb.rootUsername }}:{{ .Values.mongodb.rootPassword }}@{{ include "report.mongodbService" . }}:27017/{{ .Values.mongodb.database }}?authSource=admin"
         - name: SERVER_PORT
-          value: {{ .Values.app.port | quote }}
-        # Consider if AUTH_SERVER_URL is still needed or if configmap uri is sufficient
-        # - name: AUTH_SERVER_URL
-        #   value: "http://{{ include "report.iamService" . }}:8081"        
+          value: {{ .Values.app.port | quote }}        
+        # {{- if and (hasKey .Values "global") (hasKey .Values.global "reportDBRef") (ne .Values.global.reportDBRef "") }}
+        # - name: JAVA_TOOL_OPTIONS
+        #   value: "-Djavax.net.ssl.trustStore=/certs/truststore.jks -Djavax.net.ssl.trustStorePassword=changeit"
+        # {{- end }}
         livenessProbe:
           httpGet:
             path: /actuator/health # Adjust path if different
@@ -80,6 +103,12 @@ spec:
         volumeMounts:
         - name: app-config
           mountPath: /config
+        # {{- if and (hasKey .Values "global") (hasKey .Values.global "reportDBRef") (ne .Values.global.reportDBRef "") }}
+        # - name: aws-docdb-ca
+        #   mountPath: /etc/ssl/certs
+        # - name: truststore
+        #   mountPath: /truststore
+        # {{- end }}
       volumes:
       - name: app-config
         configMap:
@@ -87,4 +116,11 @@ spec:
           items:
             - key: application.yaml
               path: application.yaml
+      # {{- if and (hasKey .Values "global") (hasKey .Values.global "reportDBRef") (ne .Values.global.reportDBRef "") }}
+      # - name: aws-docdb-ca
+      #   secret:
+      #     secretName: aws-docdb-ca
+      # - name: truststore
+      #   emptyDir: {}
+      # {{- end }}
 {{- end }}
