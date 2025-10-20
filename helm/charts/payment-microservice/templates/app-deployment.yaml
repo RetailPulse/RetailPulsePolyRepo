@@ -119,13 +119,13 @@ spec:
           httpGet:
             path: /actuator/health 
             port: {{ .Values.app.port | default 8087 }}
-          initialDelaySeconds: 30
+          initialDelaySeconds: 60
           periodSeconds: 10
         readinessProbe:
           httpGet:
             path: /actuator/health 
             port: {{ .Values.app.port | default 8087 }}
-          initialDelaySeconds: 20
+          initialDelaySeconds: 30
           periodSeconds: 5
         resources: {}
         volumeMounts:

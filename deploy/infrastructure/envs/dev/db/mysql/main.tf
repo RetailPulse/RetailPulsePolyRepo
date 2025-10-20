@@ -72,27 +72,27 @@ resource "aws_security_group_rule" "mysql_egress_all" {
 }
 
 resource "aws_secretsmanager_secret" "auth_admin" {
-  name = "auth-db-secret"
+  name = "${var.name_prefix}/db/auth-secret"
   recovery_window_in_days = 0
 }
 
 resource "aws_secretsmanager_secret" "be_admin" {
-  name = "be-db-secret"
+  name = "${var.name_prefix}/db/be-secret" 
   recovery_window_in_days = 0
 }
 
 resource "aws_secretsmanager_secret" "inventory_admin" {
-  name = "inventory-db-secret"
+  name = "${var.name_prefix}/db/inventory-secret"
   recovery_window_in_days = 0
 }
 
 resource "aws_secretsmanager_secret" "sales_admin" {
-  name = "sales-db-secret"
+  name = "${var.name_prefix}/db/sales-secret" 
   recovery_window_in_days = 0
 }
 
 resource "aws_secretsmanager_secret" "payment_admin" {
-  name = "payment-db-secret"
+  name = "${var.name_prefix}/db/payment-secret"
   recovery_window_in_days = 0
 }
 

@@ -34,7 +34,7 @@ spec:
         env:
         - name: MYSQL_HOST
           {{- if and (hasKey .Values "global") (hasKey .Values.global "salesDBRef") (ne .Values.global.salesDBRef "") }}
-          from:              
+          valueFrom:              
             secretKeyRef:                
               name: {{ .Values.global.salesDBRef }}
               key: DB_HOST
@@ -43,7 +43,7 @@ spec:
           {{- end }}
         - name: MYSQL_PORT
           {{- if and (hasKey .Values "global") (hasKey .Values.global "salesDBRef") (ne .Values.global.salesDBRef "") }}
-          from:              
+          valueFrom:              
             secretKeyRef:                
               name: {{ .Values.global.salesDBRef }}
               key: DB_PORT
@@ -108,13 +108,13 @@ spec:
           httpGet:
             path: /actuator/health 
             port: {{ .Values.app.port }}
-          initialDelaySeconds: 30
+          initialDelaySeconds: 60
           periodSeconds: 10
         readinessProbe:
           httpGet:
             path: /actuator/health 
             port: {{ .Values.app.port }}
-          initialDelaySeconds: 20
+          initialDelaySeconds: 30
           periodSeconds: 5
         resources: {}
         volumeMounts:

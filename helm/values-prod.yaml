@@ -9,9 +9,9 @@ global:
   userDBRef: "auth-db-secret"
   beDBRef: "be-db-secret"
   inventoryDBRef: "inventory-db-secret"
-  # salesDBRef: "sales-db"
+  salesDBRef: "sales-db-secret"
   # reportDBRef: "docdb"
-  # paymentDBRef: "payment-db"
+  paymentDBRef: "payment-db-secret"
 
   autoReleaseName: 1
   iamPort: 8081
@@ -169,7 +169,7 @@ inventory-microservice:
 
 sales-microservice:  
   mysql:
-    enabled: true
+    enabled: false
   app:
     enabled: true
     image: docker.io/casperyap/rp-sales-app:v0.2.0
@@ -187,7 +187,7 @@ report-microservice:
 
 payment-microservice:  
   mysql:
-    enabled: true
+    enabled: false
   app:
     enabled: true
     image: docker.io/casperyap/rp-payment-app:v0.2.0

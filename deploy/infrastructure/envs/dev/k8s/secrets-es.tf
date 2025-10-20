@@ -81,11 +81,11 @@ resource "kubernetes_manifest" "auth_db_extsec" {
         }
       }
       data = [
-        { secretKey = "host",     remoteRef = { key = "auth-db-secret", property = "host" } },
-        { secretKey = "port",     remoteRef = { key = "auth-db-secret", property = "port" } },
-        { secretKey = "dbname",   remoteRef = { key = "auth-db-secret", property = "dbname" } },
-        { secretKey = "username", remoteRef = { key = "auth-db-secret", property = "username" } },
-        { secretKey = "password", remoteRef = { key = "auth-db-secret", property = "password" } },
+        { secretKey = "host",     remoteRef = { key = "${var.name_prefix}/db/auth-secret", property = "host" } },
+        { secretKey = "port",     remoteRef = { key = "${var.name_prefix}/db/auth-secret", property = "port" } },
+        { secretKey = "dbname",   remoteRef = { key = "${var.name_prefix}/db/auth-secret", property = "dbname" } },
+        { secretKey = "username", remoteRef = { key = "${var.name_prefix}/db/auth-secret", property = "username" } },
+        { secretKey = "password", remoteRef = { key = "${var.name_prefix}/db/auth-secret", property = "password" } },
       ]
     }
   }
@@ -119,11 +119,11 @@ resource "kubernetes_manifest" "be_db_extsec" {
         }
       }
       data = [
-        { secretKey = "host",     remoteRef = { key = "be-db-secret", property = "host" } },
-        { secretKey = "port",     remoteRef = { key = "be-db-secret", property = "port" } },
-        { secretKey = "dbname",   remoteRef = { key = "be-db-secret", property = "dbname" } },
-        { secretKey = "username", remoteRef = { key = "be-db-secret", property = "username" } },
-        { secretKey = "password", remoteRef = { key = "be-db-secret", property = "password" } },
+        { secretKey = "host",     remoteRef = { key = "${var.name_prefix}/db/be-secret", property = "host" } },
+        { secretKey = "port",     remoteRef = { key = "${var.name_prefix}/db/be-secret", property = "port" } },
+        { secretKey = "dbname",   remoteRef = { key = "${var.name_prefix}/db/be-secret", property = "dbname" } },
+        { secretKey = "username", remoteRef = { key = "${var.name_prefix}/db/be-secret", property = "username" } },
+        { secretKey = "password", remoteRef = { key = "${var.name_prefix}/db/be-secret", property = "password" } },
       ]
     }
   }
@@ -157,11 +157,11 @@ resource "kubernetes_manifest" "inventory_db_extsec" {
         }
       }
       data = [
-        { secretKey = "host",     remoteRef = { key = "inventory-db-secret", property = "host" } },
-        { secretKey = "port",     remoteRef = { key = "inventory-db-secret", property = "port" } },
-        { secretKey = "dbname",   remoteRef = { key = "inventory-db-secret", property = "dbname" } },
-        { secretKey = "username", remoteRef = { key = "inventory-db-secret", property = "username" } },
-        { secretKey = "password", remoteRef = { key = "inventory-db-secret", property = "password" } },
+        { secretKey = "host",     remoteRef = { key = "${var.name_prefix}/db/inventory-secret", property = "host" } },
+        { secretKey = "port",     remoteRef = { key = "${var.name_prefix}/db/inventory-secret", property = "port" } },
+        { secretKey = "dbname",   remoteRef = { key = "${var.name_prefix}/db/inventory-secret", property = "dbname" } },
+        { secretKey = "username", remoteRef = { key = "${var.name_prefix}/db/inventory-secret", property = "username" } },
+        { secretKey = "password", remoteRef = { key = "${var.name_prefix}/db/inventory-secret", property = "password" } },
       ]
     }
   }
@@ -195,11 +195,11 @@ resource "kubernetes_manifest" "sales_db_extsec" {
         }
       }
       data = [
-        { secretKey = "host",     remoteRef = { key = "sales-db-secret", property = "host" } },
-        { secretKey = "port",     remoteRef = { key = "sales-db-secret", property = "port" } },
-        { secretKey = "dbname",   remoteRef = { key = "sales-db-secret", property = "dbname" } },
-        { secretKey = "username", remoteRef = { key = "sales-db-secret", property = "username" } },
-        { secretKey = "password", remoteRef = { key = "sales-db-secret", property = "password" } },
+        { secretKey = "host",     remoteRef = { key = "${var.name_prefix}/db/sales-secret", property = "host" } },
+        { secretKey = "port",     remoteRef = { key = "${var.name_prefix}/db/sales-secret", property = "port" } },
+        { secretKey = "dbname",   remoteRef = { key = "${var.name_prefix}/db/sales-secret", property = "dbname" } },
+        { secretKey = "username", remoteRef = { key = "${var.name_prefix}/db/sales-secret", property = "username" } },
+        { secretKey = "password", remoteRef = { key = "${var.name_prefix}/db/sales-secret", property = "password" } },
       ]
     }
   }
@@ -220,7 +220,7 @@ resource "kubernetes_manifest" "payment_db_extsec" {
       secretStoreRef  = { name = "aws-secrets", kind = "ClusterSecretStore" } 
 
       target = {
-        name           = "payment-db-secret"
+        name           = "payment-db-secret" 
         creationPolicy = "Owner"
         template = {
           data = {
@@ -233,11 +233,11 @@ resource "kubernetes_manifest" "payment_db_extsec" {
         }
       }
       data = [
-        { secretKey = "host",     remoteRef = { key = "payment-db-secret", property = "host" } },
-        { secretKey = "port",     remoteRef = { key = "payment-db-secret", property = "port" } },
-        { secretKey = "dbname",   remoteRef = { key = "payment-db-secret", property = "dbname" } },
-        { secretKey = "username", remoteRef = { key = "payment-db-secret", property = "username" } },
-        { secretKey = "password", remoteRef = { key = "payment-db-secret", property = "password" } },
+        { secretKey = "host",     remoteRef = { key = "${var.name_prefix}/db/payment-secret" , property = "host" } },
+        { secretKey = "port",     remoteRef = { key = "${var.name_prefix}/db/payment-secret" , property = "port" } },
+        { secretKey = "dbname",   remoteRef = { key = "${var.name_prefix}/db/payment-secret" , property = "dbname" } },
+        { secretKey = "username", remoteRef = { key = "${var.name_prefix}/db/payment-secret" , property = "username" } },
+        { secretKey = "password", remoteRef = { key = "${var.name_prefix}/db/payment-secret" , property = "password" } },
       ]
     }
   }

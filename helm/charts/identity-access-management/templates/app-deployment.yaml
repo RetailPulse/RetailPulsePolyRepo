@@ -111,13 +111,13 @@ spec:
             path: /auth/actuator/health
             port: {{ .Values.app.port }}
           initialDelaySeconds: 60
-          periodSeconds: 20
+          periodSeconds: 210
           failureThreshold: 5
         readinessProbe:
           httpGet:
             path: /auth/actuator/health
             port: {{ .Values.app.port }}
-          initialDelaySeconds: 20
+          initialDelaySeconds: 30
           periodSeconds: 5
           failureThreshold: 3
         resources: {}

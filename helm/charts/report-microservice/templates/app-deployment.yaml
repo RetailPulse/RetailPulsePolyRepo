@@ -68,13 +68,13 @@ spec:
           httpGet:
             path: /actuator/health # Adjust path if different
             port: {{ .Values.app.port }}
-          initialDelaySeconds: 30
+          initialDelaySeconds: 60
           periodSeconds: 10
         readinessProbe:
           httpGet:
             path: /actuator/health # Adjust path if different
             port: {{ .Values.app.port }}
-          initialDelaySeconds: 20
+          initialDelaySeconds: 30
           periodSeconds: 5
         resources: {}
         volumeMounts:
