@@ -1,4 +1,4 @@
-# {{- if .Values.app.enabled }}
+{{- if .Values.app.enabled }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -19,50 +19,110 @@ spec:
         app: {{ printf "%s-rp-iam-app-deploy" .Release.Name }}
     spec:
       initContainers:
-        - name: wait-for-mysql
-          image: busybox:1.35
-          command:
-            - sh
-            - -c
-            - >
-              until nc -z retailpulse-dev-auth-mysql.cl62ae2senvp.ap-southeast-1.rds.amazonaws.com 3306; do
-                echo "Waiting for MySQL at retailpulse-dev-auth-mysql.cl62ae2senvp.ap-southeast-1.rds.amazonaws.com:3306...";
-                sleep 5;
-              done;
-              echo "MySQL is ready!";
-          env:
-            - name: MYSQL_HOST
-              value: retailpulse-dev-auth-mysql.cl62ae2senvp.ap-southeast-1.rds.amazonaws.com
-            - name: MYSQL_PORT
-              value: "3306"
-
+      - name: wait-for-mysql
+        image: busybox:1.35
+        command:
+        - sh
+        - -c
+        - >
+          until nc -z $MYSQL_HOST $MYSQL_PORT; do
+            echo "Waiting for MySQL at $MYSQL_HOST:$MYSQL_PORT...";
+            sleep 5;
+          done;
+          echo "MySQL is ready!";
+        env:
+        - name: MYSQL_HOST
+          {{- if and (hasKey .Values "global") (hasKey .Values.global "userDBRef") (ne .Values.global.userDBRef "") }}
+          from:              
+            secretKeyRef:                
+              name: {{ .Values.global.userDBRef }}
+              key: DB_HOST
+          {{- else }}
+          value: {{ printf "%s-rp-user-sql-svc" .Release.Name }}
+          {{- end }}
+        - name: MYSQL_PORT
+          {{- if and (hasKey .Values "global") (hasKey .Values.global "userDBRef") (ne .Values.global.userDBRef "") }}
+          from:              
+            secretKeyRef:                
+              name: {{ .Values.global.userDBRef }}
+              key: DB_PORT
+          {{- else }}
+          value: "3306"
+          {{- end }}
       containers:
-        - image: {{ .Values.app.image }}
-          name: {{ printf "%s-rp-iam-app-pod" .Release.Name }}
-          imagePullPolicy: {{ .Values.app.imagePullPolicy }}
-          volumeMounts:
-            - name: config-volume
-              mountPath: /app/config
-          ports:
-            - containerPort: {{ .Values.app.port }}
-          envFrom:
-            - secretRef:
-                name: auth-db
-          # livenessProbe:
-          #   httpGet:
-          #     path: /actuator/health
-          #     port: {{ .Values.app.port }}
-          #   initialDelaySeconds: 30
-          #   periodSeconds: 10
-          # readinessProbe:
-          #   httpGet:
-          #     path: /actuator/health
-          #     port: {{ .Values.app.port }}
-          #   initialDelaySeconds: 20
-          #   periodSeconds: 5
-          resources: {}
-      volumes:
+      - image: {{ .Values.app.image }}
+        name: {{ printf "%s-rp-iam-app-pod" .Release.Name }}
+        imagePullPolicy: {{ .Values.app.imagePullPolicy }}
+        volumeMounts:
         - name: config-volume
-          configMap:
-            name: {{ printf "%s-rp-iam-app-cm" .Release.Name }}
-# {{- end }}
+          mountPath: /app/config
+        ports:
+        - containerPort: {{ .Values.app.port }}
+        env:
+        {{- if and (hasKey .Values "global") (hasKey .Values.global "userDBRef") (ne .Values.global.userDBRef "") }}
+        - name: DB_HOST
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.global.userDBRef }}
+              key: DB_HOST
+        - name: DB_PORT
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.global.userDBRef }}
+              key: DB_PORT
+        - name: DB_NAME
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.global.userDBRef }}
+              key: DB_NAME
+        - name: DB_USER
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.global.userDBRef }}
+              key: DB_USER
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.global.userDBRef }}
+              key: DB_PASSWORD
+        {{- else }}
+        - name: DB_HOST
+          value: {{ printf "%s-rp-user-sql-svc" .Release.Name }}
+        - name: DB_PORT
+          value: "3306"
+        - name: DB_NAME
+          valueFrom:
+            secretKeyRef:
+              name: {{ printf "%s-rp-user-sql-secret" .Release.Name }}
+              key: DB_NAME
+        - name: DB_USER
+          valueFrom:
+            secretKeyRef:
+              name: {{ printf "%s-rp-user-sql-secret" .Release.Name }}
+              key: DB_USER
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ printf "%s-rp-user-sql-secret" .Release.Name }}
+              key: DB_PASSWORD
+        {{- end }}
+        livenessProbe:
+          httpGet:
+            path: /auth/actuator/health
+            port: {{ .Values.app.port }}
+          initialDelaySeconds: 60
+          periodSeconds: 20
+          failureThreshold: 5
+        readinessProbe:
+          httpGet:
+            path: /auth/actuator/health
+            port: {{ .Values.app.port }}
+          initialDelaySeconds: 20
+          periodSeconds: 5
+          failureThreshold: 3
+        resources: {}
+      volumes:
+      - name: config-volume
+        configMap:
+          name: {{ printf "%s-rp-iam-app-cm" .Release.Name }}
+{{- end }}

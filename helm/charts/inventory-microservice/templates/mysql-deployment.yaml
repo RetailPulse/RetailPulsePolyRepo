@@ -27,17 +27,12 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: {{ printf "%s-rp-inventory-sql-secret" .Release.Name }}
-                  key: MYSQL_ROOT_PASSWORD
+                  key: DB_PASSWORD
             - name: MYSQL_DATABASE
               valueFrom:
                 secretKeyRef:
                   name: {{ printf "%s-rp-inventory-sql-secret" .Release.Name }}
-                  key: MYSQL_DATABASE
-          volumeMounts:
-            - name: mysql-data
-              mountPath: /var/lib/mysql
-            - name: init-sql-file
-              mountPath: /docker-entrypoint-initdb.d
+                  key: DB_NAME
           livenessProbe:
             exec:
               command: ["mysqladmin", "ping", "-h", "localhost"]
@@ -52,6 +47,11 @@ spec:
             periodSeconds: 30
             timeoutSeconds: 10
             failureThreshold: 5
+          volumeMounts:
+          - name: mysql-data
+            mountPath: /var/lib/mysql
+          - name: init-sql-file
+            mountPath: /docker-entrypoint-initdb.d
       volumes:
         - name: mysql-data
           persistentVolumeClaim:

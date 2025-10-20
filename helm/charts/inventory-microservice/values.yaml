@@ -3,12 +3,11 @@ namespace: ns-retailpulse
 
 # MySQL Configuration
 mysql:
-  enabled: false
+  enabled: true
   image: mysql:latest
-  rootPassword: password
-  database: RPInventoryDB
   storage: 1Gi
   nodePort: 30308
+  portType: ClusterIP
   # Note: The init.sql value is base64 encoded binary data from your original ConfigMap.
   # It's kept as a string here for Helm templating. Ensure it renders correctly.
   initSql: |
@@ -313,21 +312,22 @@ redis:
 # Inventory App Configuration
 app:
   enabled: true
-  image: docker.io/casperyap/rp-inventory-app:v0.1.0
+  image: docker.io/casperyap/rp-inventory-app:v0.2.0
   imagePullPolicy: Always
   port: 8084
   nodePort: 30084
+  portType: NodePort
   configYaml: |
     server:
       port: 8084
 
     auth:
       enabled: true
-      origin: ORIGIN_URL:ORIGIN_PORT
+      origin: ORIGIN_URL
       jwt:
         key:
           set:
-            uri: /IAM_SVC:IAM_PORT/auth/oauth2/jwks
+            uri: IAM_SVC/oauth2/jwks
 
     spring:
       datasource:
@@ -355,14 +355,14 @@ app:
     logging:
       level:
         root: INFO
-        org.springframework.security: "INFO" # Less noisy than TRACE
-        com.retailpulse: "DEBUG"
+        org.springframework.security: TRACE # Less noisy than TRACE
+        com.retailpulse: INFO
         org.springframework.security.web.FilterChainProxy: INFO
         org.springframework.security.oauth2.server.resource.web.BearerTokenAuthenticationFilter: INFO
-        org.springframework.security.oauth2.jwt: INFO
+        org.springframework.security.oauth2.jwt: TRACE
         org.springframework.security.authentication.ProviderManager: INFO
-        org.springframework.cloud.openfeign: DEBUG
-        feign: DEBUG
+        org.springframework.cloud.openfeign: INFO
+        feign: INFO
       file:
         name: "logs/rp-inventory.log"
     
@@ -371,10 +371,18 @@ app:
         enabled: true
         sampling:
           probability: 1.0
+      endpoints:
+        web:
+          exposure:
+            include: health, info, prometheus
+        health:
+          probes:
+            enabled: true
+          show-details: "never"
 
     # Service URL for BusinessEntity - dynamically replaced
     businessentity-service:
-      url: "http://BUSINESS_ENTITY_SVC:8083" # Assuming default BE port
+      url: "BUSINESS_ENTITY_SVC"
 
 dependencies:
   businessEntityReleaseName: retailpulse-be

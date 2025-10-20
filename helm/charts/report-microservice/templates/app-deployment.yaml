@@ -17,45 +17,74 @@ spec:
       labels:
         app: {{ printf "%s-rp-report-app-deploy" .Release.Name }}
     spec:
+      initContainers:
+      - name: wait-for-mongodb
+        image: busybox
+        command: ['sh', '-c']
+        args:
+          - >            
+            until nc -z ${MONGO_HOST} ${MONGO_PORT}; do
+              echo "Waiting for MongoDB at ${MONGO_HOST}:${MONGO_PORT}..."
+              sleep 2;
+            done &&
+            echo "MongoDB is up!"
+        envFrom:
+          - secretRef:
+              {{- if and (hasKey .Values "global") (hasKey .Values.global "reportDBRef") (ne .Values.global.reportDBRef "") }}
+              name: {{ .Values.global.reportDBRef }}
+              {{- else }}
+              name: {{ include "report.mongodbSecret" . }}
+              {{- end }}
       containers:
-        - name: rp-report-service
-          image: {{ .Values.app.image }}
-          imagePullPolicy: {{ .Values.app.imagePullPolicy }}
-          ports:
-            - containerPort: {{ .Values.app.port }}
-          envFrom:
-            - secretRef:
-                name: docdb
-          env:
-            # Make Spring read /config/application.yaml
-            - name: SPRING_CONFIG_ADDITIONAL_LOCATION
-              value: "file:/config/"
-            # Override URI from configmap for clarity and direct control
-            - name: SPRING_DATA_MONGODB_URI
-              value: "mongodb://{{ .Values.mongodb.rootUsername }}:{{ .Values.mongodb.rootPassword }}@{{ include "report.mongodbService" . }}:27017/{{ .Values.mongodb.database }}?authSource=admin"
-            - name: SERVER_PORT
-              value: {{ .Values.app.port | quote }}
-            # Consider if AUTH_SERVER_URL is still needed or if configmap uri is sufficient
-            # - name: AUTH_SERVER_URL
-            #   value: "http://{{ include "report.iamService" . }}:8081"
-          volumeMounts:
-            - name: app-config
-              mountPath: /config
-          readinessProbe:
-            tcpSocket:
-              port: {{ .Values.app.port }}
-            initialDelaySeconds: 10
-            periodSeconds: 10
-          livenessProbe:
-            tcpSocket:
-              port: {{ .Values.app.port }}
-            initialDelaySeconds: 30
-            periodSeconds: 20
-      volumes:
+      - name: rp-report-service
+        image: {{ .Values.app.image }}
+        imagePullPolicy: {{ .Values.app.imagePullPolicy }}
+        ports:
+          - containerPort: {{ .Values.app.port }}
+        # command: ["/bin/sh", "-c"]
+        # args: ["env && sleep 3600"]
+        envFrom:
+        - secretRef:
+            {{- if and (hasKey .Values "global") (hasKey .Values.global "reportDBRef") (ne .Values.global.reportDBRef "") }}
+            name: {{ .Values.global.reportDBRef }}
+            {{- else }}
+            name: {{ include "report.mongodbSecret" . }}
+            {{- end }}
+        env:
+        # Make Spring read /config/application.yaml
+        - name: SPRING_CONFIG_ADDITIONAL_LOCATION
+          value: "file:/config/"
+        # Override URI from configmap for clarity and direct control
+        - name: SPRING_DATA_MONGODB_URI
+          value: "mongodb://${MONGO_USER}:${MONGO_PASS}@${MONGO_HOST}:${MONGO_PORT}/${MONGO_DB}?authSource=admin"
+        # - name: SPRING_DATA_MONGODB_URI
+        #   value: "mongodb://{{ .Values.mongodb.rootUsername }}:{{ .Values.mongodb.rootPassword }}@{{ include "report.mongodbService" . }}:27017/{{ .Values.mongodb.database }}?authSource=admin"
+        - name: SERVER_PORT
+          value: {{ .Values.app.port | quote }}
+        # Consider if AUTH_SERVER_URL is still needed or if configmap uri is sufficient
+        # - name: AUTH_SERVER_URL
+        #   value: "http://{{ include "report.iamService" . }}:8081"        
+        livenessProbe:
+          httpGet:
+            path: /actuator/health # Adjust path if different
+            port: {{ .Values.app.port }}
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /actuator/health # Adjust path if different
+            port: {{ .Values.app.port }}
+          initialDelaySeconds: 20
+          periodSeconds: 5
+        resources: {}
+        volumeMounts:
         - name: app-config
-          configMap:
-            name: {{ printf "%s-rp-report-app-cm" .Release.Name }}
-            items:
-              - key: application.yaml
-                path: application.yaml
+          mountPath: /config
+      volumes:
+      - name: app-config
+        configMap:
+          name: {{ printf "%s-rp-report-app-cm" .Release.Name }}
+          items:
+            - key: application.yaml
+              path: application.yaml
 {{- end }}

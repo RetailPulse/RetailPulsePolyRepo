@@ -3,12 +3,11 @@ namespace: ns-retailpulse
 
 # MySQL Configuration
 mysql:
-  enabled: false
+  enabled: true
   image: mysql:latest
-  rootPassword: password
-  database: RPUserDB
   storage: 1Gi
   nodePort: 30305
+  portType: ClusterIP
   initSql: |
     -- CREATE DATABASE identity_access;
     -- GRANT ALL PRIVILEGES ON identity_access.* TO 'root'@'localhost';
@@ -119,10 +118,11 @@ mysql:
 # User App Configuration
 app:
   enabled: true
-  image: docker.io/casperyap/rp-user-app:v0.1.0
+  image: docker.io/casperyap/rp-user-app:v0.2.0
   imagePullPolicy: Always
   port: 8082
   nodePort: 30082
+  portType: NodePort
   configYaml: |
     server:
       port: 8082
@@ -151,8 +151,10 @@ app:
     logging:
       level:
         root: "INFO"
+        com.retailpulse: "INFO"
         org.springframework.security: "INFO"
-        com.retailpulse: "DEBUG"
+        org.springframework.boot.actuate.endpoint.web.servlet.AbstractWebMvcEndpointHandlerMapping: "WARN"
+        # org.springframework.security.oauth2: "TRACE"
       file:
         name: "logs/rp-user.log"
     
@@ -164,7 +166,7 @@ app:
       endpoints:
         web:
           exposure:
-            include: "health"
+            include: health, info, prometheus
         health:
           probes:
             enabled: true

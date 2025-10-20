@@ -19,78 +19,136 @@ spec:
         app: {{ printf "%s-rp-inventory-app-deploy" .Release.Name }}
     spec:
       initContainers:
-        # Wait for MySQL Service to be reachable
-        - name: wait-for-mysql
-          image: busybox:1.35
-          command:
-            - sh
-            - -c
-            - >
-              until nc -z {{ include "inventory.mysqlService" . }} 3306; do
-                echo "Waiting for MySQL at {{ include "inventory.mysqlService" . }}:3306...";
-                sleep 5;
-              done;
-              echo "MySQL is ready!";
-          env:
-            - name: MYSQL_HOST
-              value: {{ include "inventory.mysqlService" . }}
-            - name: MYSQL_PORT
-              value: "3306"
+      # Wait for MySQL Service to be reachable
+      - name: wait-for-mysql
+        image: busybox:1.35
+        command:
+        - sh
+        - -c
+        - >
+          until nc -z $MYSQL_HOST $MYSQL_PORT; do
+            echo "Waiting for MySQL at $MYSQL_HOST:$MYSQL_PORT...";
+            sleep 5;
+          done;
+          echo "MySQL is ready!";
+        env:
+        - name: MYSQL_HOST
+          {{- if and (hasKey .Values "global") (hasKey .Values.global "inventoryDBRef") (ne .Values.global.inventoryDBRef "") }}
+          from:              
+            secretKeyRef:                
+              name: {{ .Values.global.inventoryDBRef }}
+              key: DB_HOST
+          {{- else }}
+          value: {{ printf "%s-rp-inventory-sql-svc" .Release.Name }}
+          {{- end }}
+        - name: MYSQL_PORT
+          {{- if and (hasKey .Values "global") (hasKey .Values.global "inventoryDBRef") (ne .Values.global.inventoryDBRef "") }}
+          from:              
+            secretKeyRef:                
+              name: {{ .Values.global.inventoryDBRef }}
+              key: DB_PORT
+          {{- else }}
+          value: "3306"
+          {{- end }}
 
-        # Wait for Redis Service to be reachable
-        - name: wait-for-redis
-          image: redis:7.2 # Use redis image for redis-cli
-          command:
-            - sh
-            - -c
-            - >
-              until redis-cli -h {{ include "inventory.redisService" . }} -p {{ .Values.redis.port }} -a $$REDIS_PASSWORD ping; do
-                echo "Waiting for Redis at {{ include "inventory.redisService" . }}:{{ .Values.redis.port }}...";
-                sleep 5;
-              done;
-              echo "Redis is ready!";
-          env:
-            - name: REDIS_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "inventory.redisSecretName" . }} # Use helper for secret name
-                  key: REDIS_PASSWORD
-            - name: REDIS_HOST
-              value: {{ include "inventory.redisService" . }}
-            - name: REDIS_PORT
-              value: {{ .Values.redis.port | quote }}
+      # Wait for Redis Service to be reachable
+      - name: wait-for-redis
+        image: redis:7.2 # Use redis image for redis-cli
+        command:
+          - sh
+          - -c
+          - >
+            until redis-cli -h {{ include "inventory.redisService" . }} -p {{ .Values.redis.port }} -a $$REDIS_PASSWORD ping; do
+              echo "Waiting for Redis at {{ include "inventory.redisService" . }}:{{ .Values.redis.port }}...";
+              sleep 5;
+            done;
+            echo "Redis is ready!";
+        env:
+          - name: REDIS_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: {{ include "inventory.redisSecretName" . }} # Use helper for secret name
+                key: REDIS_PASSWORD
+          - name: REDIS_HOST
+            value: {{ include "inventory.redisService" . }} 
+          - name: REDIS_PORT
+            value: {{ .Values.redis.port | quote }}
 
       containers:
-        - image: {{ .Values.app.image }}
-          name: {{ printf "%s-rp-inventory-app-pod" .Release.Name }}
-          imagePullPolicy: {{ .Values.app.imagePullPolicy }}
-          env:
-            - name: REDIS_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "inventory.redisSecretName" . }} # Use helper for secret name
-                  key: REDIS_PASSWORD
-          volumeMounts:
-            - name: config-volume
-              mountPath: /app/config
-          ports:
-            - containerPort: {{ .Values.app.port }}
-          envFrom:
-            - secretRef:
-                name: core-db
-          # livenessProbe:
-          #   httpGet:
-          #     path: /actuator/health # Adjust path if different
-          #     port: {{ .Values.app.port }}
-          #   initialDelaySeconds: 30
-          #   periodSeconds: 10
-          # readinessProbe:
-          #   httpGet:
-          #     path: /actuator/health # Adjust path if different
-          #     port: {{ .Values.app.port }}
-          #   initialDelaySeconds: 20
-          #   periodSeconds: 5
-          resources: {}
+      - image: {{ .Values.app.image }}
+        name: {{ printf "%s-rp-inventory-app-pod" .Release.Name }}
+        imagePullPolicy: {{ .Values.app.imagePullPolicy }}        
+        ports:
+        - containerPort: {{ .Values.app.port }}
+        env:
+        - name: REDIS_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "inventory.redisSecretName" . }} # Use helper for secret name
+              key: REDIS_PASSWORD
+        {{- if and (hasKey .Values "global") (hasKey .Values.global "inventoryDBRef") (ne .Values.global.inventoryDBRef "") }}
+        - name: DB_HOST
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.global.inventoryDBRef }}
+              key: DB_HOST
+        - name: DB_PORT
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.global.inventoryDBRef }}
+              key: DB_PORT
+        - name: DB_NAME
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.global.inventoryDBRef }}
+              key: DB_NAME
+        - name: DB_USER
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.global.inventoryDBRef }}
+              key: DB_USER
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.global.inventoryDBRef }}
+              key: DB_PASSWORD
+        {{- else }}
+        - name: DB_HOST
+          value: {{ printf "%s-rp-inventory-sql-svc" .Release.Name }}
+        - name: DB_PORT
+          value: "3306"
+        - name: DB_NAME
+          valueFrom:
+            secretKeyRef:
+              name: {{ printf "%s-rp-inventory-sql-secret" .Release.Name }}
+              key: DB_NAME
+        - name: DB_USER
+          valueFrom:
+            secretKeyRef:
+              name: {{ printf "%s-rp-inventory-sql-secret" .Release.Name }}
+              key: DB_USER
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ printf "%s-rp-inventory-sql-secret" .Release.Name }}
+              key: DB_PASSWORD
+        {{- end }}
+        livenessProbe:
+          httpGet:
+            path: /actuator/health 
+            port: {{ .Values.app.port }}
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /actuator/health 
+            port: {{ .Values.app.port }}
+          initialDelaySeconds: 20
+          periodSeconds: 5
+        resources: {}
+        volumeMounts:
+        - name: config-volume
+          mountPath: /app/config
       volumes:
         - name: config-volume
           configMap:

@@ -22,3 +22,6 @@
 [submodule "PaymentService"]
 	path = PaymentService
 	url = https://github.com/RetailPulse/PaymentService
+[submodule "elk"]
+	path = elk
+	url = git@github.com:RetailPulse/logging-monitoring-elk.git

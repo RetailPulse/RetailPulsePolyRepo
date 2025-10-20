@@ -18,44 +18,49 @@ spec:
         app: {{ printf "%s-rp-report-mongodb-deploy" .Release.Name }}
     spec:
       containers:
-        - name: mongo
-          image: {{ .Values.mongodb.image }}
-          args:
-            - "--bind_ip_all"
-            - "--auth"
-          ports:
-            - containerPort: 27017
-          env:
-            - name: MONGO_INITDB_ROOT_USERNAME
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "report.mongodbSecret" . }}
-                  key: MONGO_INITDB_ROOT_USERNAME
-            - name: MONGO_INITDB_ROOT_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "report.mongodbSecret" . }}
-                  key: MONGO_INITDB_ROOT_PASSWORD
-            - name: MONGO_INITDB_DATABASE
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "report.mongodbSecret" . }}
-                  key: MONGO_INITDB_DATABASE
-          volumeMounts:
-            - name: mongo-data
-              mountPath: /data/db
-          readinessProbe:
-            tcpSocket:
-              port: 27017
-            initialDelaySeconds: 10
-            periodSeconds: 10
-          livenessProbe:
-            tcpSocket:
-              port: 27017
-            initialDelaySeconds: 30
-            periodSeconds: 20
-      volumes:
+      - name: mongo
+        image: {{ .Values.mongodb.image }}
+        args:
+        - "--bind_ip_all"
+        - "--auth"        
+        env:
+        - name: MONGO_INITDB_ROOT_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "report.mongodbSecret" . }}
+              key: MONGO_INITDB_ROOT_USERNAME
+        - name: MONGO_INITDB_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "report.mongodbSecret" . }}
+              key: MONGO_INITDB_ROOT_PASSWORD
+        - name: MONGO_INITDB_DATABASE
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "report.mongodbSecret" . }}
+              key: MONGO_DB
+        - name: MONGO_PORT
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "report.mongodbSecret" . }}
+              key: MONGO_PORT
+        ports:
+        - containerPort: {{ .Values.mongodb.port }}
+        readinessProbe:
+          tcpSocket:
+            port: {{ .Values.mongodb.port }}
+          initialDelaySeconds: 10
+          periodSeconds: 10
+        livenessProbe:
+          tcpSocket:
+            port: {{ .Values.mongodb.port }}
+          initialDelaySeconds: 30
+          periodSeconds: 20
+        volumeMounts:
         - name: mongo-data
-          persistentVolumeClaim:
-            claimName: {{ printf "%s-rp-report-mongodb-pvc" .Release.Name }}
+          mountPath: /data/db
+      volumes:
+      - name: mongo-data
+        persistentVolumeClaim:
+          claimName: {{ printf "%s-rp-report-mongodb-pvc" .Release.Name }}
 {{- end }}
