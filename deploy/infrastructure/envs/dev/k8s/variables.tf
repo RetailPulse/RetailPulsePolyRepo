@@ -13,3 +13,9 @@ variable "workload_namespace" {
   type        = string
   default     = "ns-retailpulse"
 }
+
+variable "observe_namespace" {
+  description = "Namespace for RetailPulse elk modules"
+  type        = string
+  default     = "observability"
+}

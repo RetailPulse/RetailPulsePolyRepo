@@ -67,6 +67,7 @@ module "k8s" {
   region           = var.region
   name_prefix      = local.name_prefix
   workload_namespace = "ns-retailpulse"
+  observe_namespace = "observability"
 
   providers = {
     kubernetes = kubernetes
@@ -75,6 +76,21 @@ module "k8s" {
   # Wait for Helm add-ons (External Secrets CRDs, etc.)
   depends_on = [ module.helm_addons ]
 }
+
+/* Step 4d: Init Database */
+module "k8s_init_job" {
+  source       = "./k8s_init_job"
+  namespace    = "ns-retailpulse"
+
+  db_host      = module.mysql.core_endpoint
+  db_user      = "admin"
+  db_password  = module.mysql.core_admin_password
+  db_name      = "RPBusinessEntityDB"
+
+  force_reinit = var.force_reinit_db
+  depends_on = [module.mysql]
+}
+
 
 /* Step 5: Setup API Gateway */
 module "api_gateway" {

@@ -90,7 +90,7 @@ resource "aws_db_instance" "auth" {
   username                = "admin"
   password                = random_password.auth_admin.result
 
-  db_name                 = "user_mgmt"  # initial schema; you can add others later
+  db_name                 = "RPUserDB"  # initial schema; you can add others later
   apply_immediately       = true
   deletion_protection     = false
   skip_final_snapshot     = true
@@ -113,7 +113,7 @@ resource "aws_db_instance" "core" {
   username                = "admin"
   password                = random_password.core_admin.result
 
-  db_name                 = "business_entity"
+  db_name                 = "RPBusinessEntityDB"
   apply_immediately       = true
   deletion_protection     = false
   skip_final_snapshot     = true
