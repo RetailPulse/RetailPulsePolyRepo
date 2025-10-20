@@ -5,29 +5,28 @@ namespace: ns-retailpulse
 mysql:
   enabled: true
   image: mysql:latest
-  rootPassword: password
-  database: RPPaymentDB
   storage: 1Gi
   nodePort: 30310 
-
+  portType: ClusterIP
 # Payment App Configuration
 app:
   enabled: true
-  image: docker.io/casperyap/rp-payment-app:v0.1.0
+  image: docker.io/casperyap/rp-payment-app:v0.2.0
   imagePullPolicy: Always
   port: 8087
   nodePort: 30087
+  portType: NodePort
   configYaml: |
     server:
       port: 8087
 
     auth:
-      enabled: false
-      origin: http://ORIGIN_URL:ORIGIN_PORT
+      enabled: true
+      origin: ORIGIN_URL
       jwt:
         key:
           set:
-            uri: "http://app-iam:8081/oauth2/jwks" # Or use IAM_SVC placeholder
+            uri: IAM_SVC/oauth2/jwks
 
     stripe:
       apiKey: ${STRIPE_API_KEY}
@@ -38,9 +37,9 @@ app:
         name: Payment
 
       datasource:
-        url: "jdbc:mysql://MYSQL_HOST:3306/RPPaymentDB" # Placeholder to be replaced
-        username: root
-        password: password
+        url: "jdbc:mysql://${DB_HOST}:${DB_PORT}/${DB_NAME}"
+        username: "${DB_USER}"
+        password: "${DB_PASSWORD}"
         driver-class-name: com.mysql.cj.jdbc.Driver
         hikari: # HikariCP Configuration
           minimum-idle: 5
@@ -79,12 +78,20 @@ app:
             enable.idempotence: true
             spring.json.add.type.headers: false
 
-    # Actuator
+    # Actuator    
     management:
+      tracing:
+        enabled: true
+        sampling:
+          probability: 1.0
       endpoints:
         web:
           exposure:
             include: health, info, prometheus
+        health:
+          probes:
+            enabled: true
+          show-details: "never"
 
     sales-service:
       url: "http://SALES_SVC:8085"

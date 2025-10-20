@@ -39,6 +39,7 @@ resource "aws_secretsmanager_secret" "admin" {
   name = "${var.name_prefix}/db/docdb/admin"
   recovery_window_in_days = 0
 }
+
 resource "aws_secretsmanager_secret_version" "admin_post" {
   secret_id = aws_secretsmanager_secret.admin.id
   secret_string = jsonencode({

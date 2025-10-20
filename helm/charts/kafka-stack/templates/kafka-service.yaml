@@ -12,13 +12,16 @@ spec:
     app: {{ printf "%s-rp-kafka" .Release.Name }}
   ports:
     - name: plaintext
+      protocol: TCP
       port: {{ .Values.kafka.listeners.plaintext.port }}
       targetPort: {{ .Values.kafka.listeners.plaintext.port }}
-      protocol: TCP
+      
     - name: external
-      port: {{ .Values.kafka.listeners.external.port }}
-      targetPort: {{ .Values.kafka.listeners.external.port }}
-      nodePort: {{ .Values.kafka.listeners.external.nodePort }}
       protocol: TCP
-  type: NodePort
+      port: {{ .Values.kafka.listeners.external.port }}      
+      targetPort: {{ .Values.kafka.listeners.external.port }}
+      {{- if eq .Values.kafka.portType "NodePort" }}
+      nodePort: {{ .Values.kafka.listeners.external.nodePort }}
+      {{- end }}
+  type: {{ .Values.kafka.portType }}
 {{- end }}

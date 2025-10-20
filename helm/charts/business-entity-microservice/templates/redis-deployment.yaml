@@ -18,25 +18,25 @@ spec:
         app: {{ printf "%s-rp-businessentity-redis-deploy" .Release.Name }} 
     spec:
       containers:
-        - name: redis
-          image: {{ .Values.redis.image }}
-          ports:
-            - containerPort: {{ .Values.redis.port }}
-          args: ["--requirepass", "$(REDIS_PASSWORD)"]
-          env:
-            - name: REDIS_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: {{ printf "%s-rp-businessentity-redis-secret" .Release.Name }} 
-                  key: REDIS_PASSWORD
-          readinessProbe:
-            tcpSocket:
-              port: {{ .Values.redis.port }}
-            initialDelaySeconds: 5
-            periodSeconds: 10
-          livenessProbe:
-            tcpSocket:
-              port: {{ .Values.redis.port }}
-            initialDelaySeconds: 10
-            periodSeconds: 20
+      - name: redis
+        image: {{ .Values.redis.image }}
+        ports:
+        - containerPort: {{ .Values.redis.port }}
+        args: ["--requirepass", "$(REDIS_PASSWORD)"]
+        env:
+        - name: REDIS_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ printf "%s-rp-businessentity-redis-secret" .Release.Name }} 
+              key: REDIS_PASSWORD
+        readinessProbe:
+          tcpSocket:
+            port: {{ .Values.redis.port }}
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        livenessProbe:
+          tcpSocket:
+            port: {{ .Values.redis.port }}
+          initialDelaySeconds: 10
+          periodSeconds: 20
 {{- end }}

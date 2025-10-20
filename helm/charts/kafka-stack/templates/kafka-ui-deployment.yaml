@@ -1,0 +1,58 @@
+{{- if .Values.ui.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ printf "%s-rp-kafka-ui" .Release.Name }}
+  namespace: {{ include "kafka.namespace" . }}
+  labels:
+    {{- include "kafka.labels" . | nindent 4 }}
+    app: {{ printf "%s-rp-kafka-ui" .Release.Name }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ printf "%s-rp-kafka-ui" .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ printf "%s-rp-kafka-ui" .Release.Name }}
+    spec:
+      containers:
+        - name: kafka-ui
+          image: {{ .Values.ui.image }}
+          imagePullPolicy: {{ .Values.ui.imagePullPolicy }}
+          ports:
+            - containerPort: {{ .Values.ui.port }}
+          env:
+            - name: SERVER_PORT
+              value: {{ .Values.ui.port | quote }}
+            - name: KAFKA_CLUSTERS_0_NAME
+              value: {{ .Values.ui.clusterName | quote }}
+            - name: KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS
+              value: {{ include "kafka.resolvedBootstrapServers" . | quote }}
+            {{- if and (hasKey .Values.ui "contextPath") (.Values.ui.contextPath) (ne .Values.ui.contextPath "") }}
+            - name: SERVER_SERVLET_CONTEXT_PATH
+              value: {{ .Values.ui.contextPath | quote }}
+            {{- end }}
+          livenessProbe:
+            httpGet:
+              {{- if and (hasKey .Values.ui "contextPath") (.Values.ui.contextPath) (ne .Values.ui.contextPath "") }}
+              path: {{ .Values.ui.contextPath }}/actuator/health 
+              {{- else }}
+              path: /actuator/health 
+              {{- end }}
+              port: {{ .Values.ui.port }}
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              {{- if and (hasKey .Values.ui "contextPath") (.Values.ui.contextPath) (ne .Values.ui.contextPath "") }}
+              path: {{ .Values.ui.contextPath }}/actuator/health 
+              {{- else }}
+              path: /actuator/health 
+              {{- end }}
+              port: {{ .Values.ui.port }}
+            initialDelaySeconds: 20
+            periodSeconds: 5
+          resources: {}
+{{- end }}

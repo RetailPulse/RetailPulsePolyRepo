@@ -12,9 +12,11 @@ spec:
   selector: 
     app: {{ printf "%s-rp-businessentity-app-deploy" .Release.Name }}
   ports:
-    - port: {{ .Values.app.port }}
-      protocol: TCP
-      targetPort: {{ .Values.app.port }}
-      nodePort: {{ .Values.app.nodePort }}
-  type: NodePort
+  - port: {{ .Values.app.port }}
+    protocol: TCP
+    targetPort: {{ .Values.app.port }}
+    {{- if eq .Values.app.portType "NodePort" }}
+    nodePort: {{ .Values.app.nodePort }}
+    {{- end }}
+  type: {{ .Values.app.portType }}
 {{- end }}  

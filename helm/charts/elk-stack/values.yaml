@@ -1,0 +1,88 @@
+createNamespace: false
+namespace: observability
+
+elasticsearch:
+  enabled: true
+  image:
+    repository: docker.elastic.co/elasticsearch/elasticsearch
+    tag: "8.12.2"
+  replicas: 1
+  storage:
+    enabled: true
+    size: 5Gi
+    storageClass: ""
+  resources:
+    limits:
+      cpu: "1"
+      memory: "1Gi"
+    requests:
+      cpu: "250m"
+      memory: "512Mi"
+  esJavaOpts: "-Xms512m -Xmx512m"
+  security:
+    enabled: false
+
+kibana:
+  enabled: true
+  image:
+    repository: docker.elastic.co/kibana/kibana
+    tag: "8.12.2"
+  replicas: 1
+  serverBasePath: "/"
+  serverRewriteBasePath: false
+  elasticsearchHosts:
+    - "http://elasticsearch:9200"
+  env:  
+  - name: NODE_OPTIONS
+    value: "--max-old-space-size=1536"
+  service:
+    type: NodePort
+    nodePort: 30601
+  resources:
+    limits:
+      cpu: "1000m"
+      memory: "2Gi"
+    requests:
+      cpu: "200m"
+      memory: "1Gi"
+  ingress:
+    enabled: false
+    ingressClassName: nginx
+    annotations: {}
+      # nginx.ingress.kubernetes.io/rewrite-target: /
+      # cert-manager.io/cluster-issuer: letsencrypt-prod
+    hosts:
+      - host: kibana.local
+        paths:
+          - path: /
+            pathType: Prefix
+    tls: []
+      # - secretName: kibana-tls
+      #   hosts:
+      #     - kibana.local
+
+filebeat:
+  enabled: true
+  image:
+    repository: docker.elastic.co/beats/filebeat
+    tag: "8.12.2"
+  serviceAccountName: filebeat
+  config:
+    outputHosts: ["http://elasticsearch:9200"]
+  runAsRoot: true
+  resources:
+    limits:
+      cpu: "500m"
+      memory: "1Gi"
+    requests:
+      cpu: "200m"
+      memory: "500Mi"
+
+networkpolicy:
+  enabled: true
+  allowNamespaces:
+    - ns-retailpulse
+    - observability
+
+# Common defaults
+fullnameOverride: "observability"

@@ -5,10 +5,9 @@ namespace: ns-retailpulse
 mysql:
   enabled: true
   image: mysql:latest
-  rootPassword: password
-  database: RPBusinessEntityDB
   storage: 1Gi
   nodePort: 30307
+  portType: ClusterIP
   initSql: |
     -- MySQL dump 10.13  Distrib 9.3.0, for Linux (x86_64)
     -- Host: localhost    Database: RPBusinessEntityDB
@@ -65,27 +64,28 @@ redis:
 # BusinessEntity App Configuration
 app:
   enabled: true
-  image: docker.io/casperyap/rp-businessentity-app:v0.1.0
+  image: docker.io/casperyap/rp-businessentity-app:v0.2.0
   imagePullPolicy: Always
   port: 8083
   nodePort: 30083
+  portType: NodePort
   configYaml: |    
     server:
       port: 8083
 
     auth:
       enabled: true
-      origin: http://ORIGIN_URL:ORIGIN_PORT
+      origin: ORIGIN_URL
       jwt:
         key:
           set:
-            uri: http://IAM_SVC:IAM_PORT/oauth2/jwks
+            uri: IAM_SVC/oauth2/jwks
 
     spring:
       datasource:
-        url: jdbc:mysql://MYSQL_HOST:3306/RPBusinessEntityDB
-        username: root
-        password: password
+        url: "jdbc:mysql://${DB_HOST}:${DB_PORT}/${DB_NAME}"
+        username: "${DB_USER}"
+        password: "${DB_PASSWORD}"
         driver-class-name: com.mysql.cj.jdbc.Driver
 
       jpa:
@@ -107,8 +107,10 @@ app:
     logging:
       level:
         root: "INFO"
+        com.retailpulse: "INFO"
         org.springframework.security: "INFO"
-        com.retailpulse: "DEBUG"
+        org.springframework.boot.actuate.endpoint.web.servlet.AbstractWebMvcEndpointHandlerMapping: "WARN"
+        # org.springframework.security.oauth2: "INFO"
       file:
         name: logs/rp-businessentity.log
     
@@ -117,6 +119,14 @@ app:
         enabled: true
         sampling:
           probability: 1.0
+      endpoints:
+        web:
+          exposure:
+            include: health, info, prometheus
+        health:
+          probes:
+            enabled: true
+          show-details: "never"
 
 dependencies:
   iamReleaseName: retailpulse-iam

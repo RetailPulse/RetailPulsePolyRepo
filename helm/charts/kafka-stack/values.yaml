@@ -13,6 +13,7 @@ kafka:
   enabled: true
   image: confluentinc/cp-kafka:7.7.5
   imagePullPolicy: IfNotPresent
+  portType: NodePort
   brokerId: 1
   # Zookeeper Service Name - dynamically resolved
   zookeeperConnect: "" # Will be auto-resolved if empty
@@ -35,13 +36,17 @@ kafka:
   offsetsReplicationFactor: 1
   transactionStateReplicationFactor: 1
   transactionStateMinIsr: 1
-  groupInitialRebalanceDelayMs: 0
+  groupInitialRebalanceDelayMs: 0  
 
 # Kafka UI Configuration
 ui:
   enabled: true
   image: provectuslabs/kafka-ui:latest
-  imagePullPolicy: Always
-  port: 8080
+  imagePullPolicy: IfNotPresent
+  port: 8095
   nodePort: 30095
+  portType: NodePort
   clusterName: "retailpulse-local"
+  ingress:
+    enabled: false
+    

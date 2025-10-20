@@ -14,6 +14,8 @@ spec:
     - port: {{ .Values.app.port | default 8087 }}
       protocol: TCP
       targetPort: {{ .Values.app.port | default 8087 }}
-      nodePort: {{ .Values.app.nodePort | default 30087 }}
-  type: NodePort
+      {{- if eq .Values.app.portType "NodePort" }}
+      nodePort: {{ .Values.app.nodePort }}
+      {{- end }}
+  type: {{ .Values.app.portType }}
 {{- end }}

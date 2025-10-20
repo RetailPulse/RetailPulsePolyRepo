@@ -88,8 +88,8 @@ Web-App Port
 Identity Access Management Service Name
 */}}
 {{- define "payment.iamService" -}}
-{{- if and .Values.global (.Values.global.autoReleaseName) (ne .Values.global.autoReleaseName nil) }}
-  {{- printf "%s-rp-iam-app-svc" .Release.Name }}
+{{- if and .Values.global (.Values.global.iamInternalService) (ne .Values.global.iamInternalService nil) }}
+  {{- printf "%s://%s-%s" .Values.global.protocol .Release.Name .Values.global.iamInternalService }}
 {{- else if and .Values.dependencies (.Values.dependencies.iamReleaseName) (ne .Values.dependencies.iamReleaseName "") }}
   {{- printf "%s-rp-iam-app-svc" .Values.dependencies.iamReleaseName }}
 {{- else if and .Values.dependencies (.Values.dependencies.iamService) (ne .Values.dependencies.iamService "") }}
@@ -113,15 +113,17 @@ Identity Access Management Service Port
 {{- end }}
 
 {{/*
-Sales Service Name (Dynamic Resolution)
+Sales Service Name 
 */}}
 {{- define "payment.salesService" -}}
-{{- if .Values.dependencies.salesService }}
-{{- .Values.dependencies.salesService }}
-{{- else if .Values.dependencies.salesReleaseName }}
-{{- printf "svc-%s-app-svc" .Values.dependencies.salesReleaseName }}
+{{- if and .Values.global (.Values.global.salesInternalService) (ne .Values.global.salesInternalService nil) }}
+  {{- printf "%s-%s" .Release.Name .Values.global.salesInternalService }}
+{{- else if and .Values.dependencies (.Values.dependencies.salesService) (ne .Values.dependencies.salesService "") }}
+  {{- .Values.dependencies.salesService }}
+{{- else if and .Values.dependencies (.Values.dependencies.salesReleaseName) (ne .Values.dependencies.salesReleaseName "") }}
+  {{- printf "%s-rp-sales-app-svc" .Values.dependencies.salesReleaseName }}
 {{- else }}
-{{- "svc-rp-sales" }} 
+  {{- printf "%s-rp-sales-app-svc" .Release.Name }} # Fallback, might not be correct
 {{- end }}
 {{- end }}
 

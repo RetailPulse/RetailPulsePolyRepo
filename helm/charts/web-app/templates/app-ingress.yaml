@@ -35,9 +35,9 @@ spec:
             pathType: {{ .pathType }}
             backend:
               service:
-                name: {{ printf "%s-rp-web-svc" $.Release.Name }}
+                name: {{ .backend.service.name }}
                 port:
-                  number: {{ $.Values.app.port }}
+                  number: {{ .backend.service.port.number }}
           {{- end }}
     {{- end }}
 {{- end }}

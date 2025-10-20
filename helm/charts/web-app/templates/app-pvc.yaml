@@ -1,0 +1,15 @@
+{{- if .Values.app.enabled }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ printf "%s-rp-web-app-pvc" .Release.Name }}
+  namespace: {{ include "web.namespace" . }}
+  labels:
+    {{- include "web.labels" . | nindent 4 }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ .Values.app.storage }}
+{{- end }}

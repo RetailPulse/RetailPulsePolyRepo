@@ -1,0 +1,69 @@
+{{- if .Values.kibana.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: kibana
+  namespace: {{ .Values.namespace }}
+spec:
+  selector:
+    app: kibana
+  ports:
+    - name: http
+      port: 5601
+      targetPort: 5601
+  type: {{ .Values.kibana.service.type }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kibana
+  namespace: {{ .Values.namespace }}
+spec:
+  replicas: {{ .Values.kibana.replicas }}
+  selector:
+    matchLabels:
+      app: kibana
+  template:
+    metadata:
+      labels:
+        app: kibana
+    spec:
+      volumes:
+      - name: kibana-config-vol
+        configMap:
+          name: kibana-config
+      containers:
+        - name: kibana
+          image: {{ .Values.kibana.image.repository }}:{{ .Values.kibana.image.tag }}
+          ports:
+          - containerPort: 5601
+          volumeMounts:
+          - name: kibana-config-vol
+            mountPath: /usr/share/kibana/config/kibana.yml
+            subPath: kibana.yml
+          env:
+          {{- with .Values.kibana.env }}
+          {{- toYaml . | nindent 10 }}
+          {{- end }}          
+          readinessProbe:
+            httpGet:
+              path: /elk-logs/api/status
+              port: 5601
+            initialDelaySeconds: 40
+            periodSeconds: 15
+            timeoutSeconds: 15
+            failureThreshold: 5
+          livenessProbe:
+            httpGet:
+              path: /elk-logs/api/status
+              port: 5601
+            initialDelaySeconds: 40
+            periodSeconds: 20
+          resources:
+            limits:
+              cpu: {{ .Values.kibana.resources.limits.cpu }}
+              memory: {{ .Values.kibana.resources.limits.memory }}
+            requests:
+              cpu: {{ .Values.kibana.resources.requests.cpu }}
+              memory: {{ .Values.kibana.resources.requests.memory }}
+{{- end }}

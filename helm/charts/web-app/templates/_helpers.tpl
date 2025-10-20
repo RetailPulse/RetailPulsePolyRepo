@@ -279,3 +279,14 @@ Web-App Port
   {{- 30080  }}
 {{- end }}
 {{- end }}
+
+{{/*
+Protocol (http or https)
+*/}}
+{{- define "web.protocol" -}}
+{{- if and .Values.global (.Values.global.protocol) (eq .Values.global.protocol "https") }}
+  {{- true }}
+{{- else }}
+  {{- false  }}
+{{- end }}
+{{- end }}

@@ -20,5 +20,8 @@
   path = ReportMicroservice
   url = https://github.com/RetailPulse/ReportMicroservice.git
 [submodule "PaymentService"]
-  path = PaymentService
-  url = https://github.com/RetailPulse/PaymentService.git
+	path = PaymentService
+	url = https://github.com/RetailPulse/PaymentService
+[submodule "elk"]
+	path = elk
+	url = git@github.com:RetailPulse/logging-monitoring-elk.git

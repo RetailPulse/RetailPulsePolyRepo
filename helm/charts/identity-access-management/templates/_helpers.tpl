@@ -56,6 +56,41 @@ Namespace
 {{- end }}
 
 {{/*
+URL API Prefix
+*/}}
+{{- define "identity-access-management.urlPrefix" -}}
+  {{- .Values.app.urlPrefix }}
+{{- end }}
+
+{{/*
+Identity Access Management Service Name
+*/}}
+{{- define "identity-access-management.iamExternalService" -}}
+{{- if and .Values.global (.Values.global.iamExternalService) (ne .Values.global.iamExternalService nil) }}
+  {{- .Values.global.iamExternalService }}
+{{- else if and .Values.global (.Values.global.rootHost) (ne .Values.global.rootHost nil) }}
+  {{- .Values.global.rootHost }}
+{{- else if and .Values.dependencies (.Values.dependencies.rootHost) (ne .Values.dependencies.rootHost "") }}
+  {{- .Values.dependencies.rootHost }}
+{{- else }}
+  {{- "localhost" }}
+{{- end }}
+{{- end }}
+
+{{/*
+Identity Access Management Service Port
+*/}}
+{{- define "identity-access-management.iamExternalPort" -}}
+{{- if and .Values.global (.Values.global.iamExternalPort) (ne .Values.global.iamExternalPort nil) }}
+  {{- .Values.global.iamExternalPort }}
+{{- else if and .Values.dependencies (.Values.dependencies.iamExternalPort) (ne .Values.dependencies.iamExternalPort nil) }}
+  {{- .Values.dependencies.iamExternalPort }}
+{{- else }}
+  {{- 8081  }}
+{{- end }}
+{{- end }}
+
+{{/*
 Web-App URL
 */}}
 {{- define "identity-access-management.webURL" -}}

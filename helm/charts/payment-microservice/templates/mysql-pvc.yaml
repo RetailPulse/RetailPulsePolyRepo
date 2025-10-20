@@ -7,6 +7,11 @@ metadata:
   labels:
     {{- include "payment.labels" . | nindent 4 }}
 spec:
+  {{- if and (hasKey .Values "global") (hasKey .Values.global "storageClass") (ne .Values.global.storageClass "") }}
+  storageClassName: {{ .Values.global.storageClass }}
+  {{- else if and (hasKey .Values.mysql "storageClass") (ne .Values.mysql.storageClass "") }}
+  storageClassName: {{ .Values.mysql.storageClass }}
+  {{- end }}
   accessModes:
     - ReadWriteOnce
   resources:

@@ -1,3 +1,10 @@
+locals {
+  auth_db_name = "RPUserDB"
+  be_db_name = "RPBusinessEntityDB"
+  inventory_db_name = "RPInventoryDB"
+  sales_db_name = "RPSalesDB"  
+  payment_db_name = "RPPaymentDB"
+}
 
 # Strong passwords using an allowed special set (safe for RDS/DocDB); Secrets: admin passwords
 resource "random_password" "auth_admin" {
@@ -65,12 +72,27 @@ resource "aws_security_group_rule" "mysql_egress_all" {
 }
 
 resource "aws_secretsmanager_secret" "auth_admin" {
-  name = "${var.name_prefix}/db/auth/admin"
+  name = "${var.name_prefix}/db/auth-secret"
   recovery_window_in_days = 0
 }
 
-resource "aws_secretsmanager_secret" "core_admin" {
-  name = "${var.name_prefix}/db/core/admin"
+resource "aws_secretsmanager_secret" "be_admin" {
+  name = "${var.name_prefix}/db/be-secret" 
+  recovery_window_in_days = 0
+}
+
+resource "aws_secretsmanager_secret" "inventory_admin" {
+  name = "${var.name_prefix}/db/inventory-secret"
+  recovery_window_in_days = 0
+}
+
+resource "aws_secretsmanager_secret" "sales_admin" {
+  name = "${var.name_prefix}/db/sales-secret" 
+  recovery_window_in_days = 0
+}
+
+resource "aws_secretsmanager_secret" "payment_admin" {
+  name = "${var.name_prefix}/db/payment-secret"
   recovery_window_in_days = 0
 }
 
@@ -90,7 +112,7 @@ resource "aws_db_instance" "auth" {
   username                = "admin"
   password                = random_password.auth_admin.result
 
-  db_name                 = "user_mgmt"  # initial schema; you can add others later
+  db_name                 = local.auth_db_name
   apply_immediately       = true
   deletion_protection     = false
   skip_final_snapshot     = true
@@ -113,7 +135,7 @@ resource "aws_db_instance" "core" {
   username                = "admin"
   password                = random_password.core_admin.result
 
-  db_name                 = "business_entity"
+  db_name                 = local.be_db_name
   apply_immediately       = true
   deletion_protection     = false
   skip_final_snapshot     = true
@@ -128,19 +150,70 @@ resource "aws_secretsmanager_secret_version" "auth_admin_post" {
     password = random_password.auth_admin.result
     host     = aws_db_instance.auth.address
     port     = 3306
-    dbname   = "user_mgmt"
+    dbname   = local.auth_db_name
   })
-  depends_on = [aws_db_instance.auth]
+  depends_on = [
+    aws_db_instance.auth,
+    aws_secretsmanager_secret.auth_admin
+  ]
 }
 
-resource "aws_secretsmanager_secret_version" "core_admin_post" {
-  secret_id = aws_secretsmanager_secret.core_admin.id
+resource "aws_secretsmanager_secret_version" "be_admin_post" {
+  secret_id = aws_secretsmanager_secret.be_admin.id
   secret_string = jsonencode({
     username = "admin"
     password = random_password.core_admin.result
     host     = aws_db_instance.core.address
     port     = 3306
-    dbname   = "business_entity"
+    dbname   = local.be_db_name
   })
-  depends_on = [aws_db_instance.core]
+  depends_on = [
+    aws_db_instance.core,
+    aws_secretsmanager_secret.be_admin
+  ]
+}
+
+resource "aws_secretsmanager_secret_version" "inventory_admin_post" {
+  secret_id = aws_secretsmanager_secret.inventory_admin.id
+  secret_string = jsonencode({
+    username = "admin"
+    password = random_password.core_admin.result
+    host     = aws_db_instance.core.address
+    port     = 3306
+    dbname   = local.inventory_db_name
+  })
+  depends_on = [
+    aws_db_instance.core,
+    aws_secretsmanager_secret.inventory_admin
+  ]
+}
+
+resource "aws_secretsmanager_secret_version" "sales_admin_post" {
+  secret_id = aws_secretsmanager_secret.sales_admin.id
+  secret_string = jsonencode({
+    username = "admin"
+    password = random_password.core_admin.result
+    host     = aws_db_instance.core.address
+    port     = 3306
+    dbname   = local.sales_db_name
+  })
+  depends_on = [
+    aws_db_instance.core,
+    aws_secretsmanager_secret.sales_admin
+  ]
+}
+
+resource "aws_secretsmanager_secret_version" "payment_admin_post" {
+  secret_id = aws_secretsmanager_secret.payment_admin.id
+  secret_string = jsonencode({
+    username = "admin"
+    password = random_password.core_admin.result
+    host     = aws_db_instance.core.address
+    port     = 3306
+    dbname   = local.payment_db_name
+  })
+  depends_on = [
+    aws_db_instance.core,
+    aws_secretsmanager_secret.payment_admin
+  ]
 }
