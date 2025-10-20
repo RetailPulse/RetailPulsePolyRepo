@@ -114,7 +114,7 @@ app:
 
 stripe:
   apiKey: sk_test_51Rwa98Fo0IYXjs5fnTRUlbpN0TwKCHV2GhVI1hfCM1oI8bMYfP1aYetD8hC9vYazOAoR9fd6AvxV9dn9eanK98Wo00voU4Crd8
-  webhookSecret: whsec_53d63261913c1329c7f48c310297ac40b4d0ef6bb1f6bc3f541af4b6114cf3a7
+  webhookSecret: whsec_FdJd7SUTeULROIN11IEntwPCy9eyOIfR
 
 # Dependencies (if needed for dynamic service name resolution)
 dependencies:
