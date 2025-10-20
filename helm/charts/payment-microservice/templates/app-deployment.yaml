@@ -19,58 +19,120 @@ spec:
         app: {{ printf "%s-rp-payment-app-deploy" .Release.Name }}
     spec:
       initContainers: # Wait for MySQL Service to be reachable
-        - name: wait-for-mysql
-          image: busybox:1.35
-          command:
-            - sh
-            - -c
-            - >
-              until nc -z {{ printf "%s-rp-payment-sql-svc" .Release.Name }} 3306; do
-                echo "Waiting for MySQL at {{ printf "%s-rp-payment-sql-svc" .Release.Name }}:3306...";
-                sleep 5;
-              done;
-              echo "MySQL is ready!";
-          env:
-            - name: MYSQL_HOST
-              value: {{ printf "%s-rp-payment-sql-svc" .Release.Name }}
-            - name: MYSQL_PORT
-              value: "3306"
+      - name: wait-for-mysql
+        image: busybox:1.35
+        command:
+        - sh
+        - -c
+        - >
+          until nc -z $MYSQL_HOST $MYSQL_PORT; do
+            echo "Waiting for MySQL at $MYSQL_HOST:$MYSQL_PORT...";
+            sleep 5;
+          done;
+          echo "MySQL is ready!";
+        env:
+        - name: MYSQL_HOST
+          {{- if and (hasKey .Values "global") (hasKey .Values.global "paymentDBRef") (ne .Values.global.paymentDBRef "") }}
+          valueFrom:              
+            secretKeyRef:                
+              name: {{ .Values.global.paymentDBRef }}
+              key: DB_HOST
+          {{- else }}
+          value: {{ printf "%s-rp-payment-sql-svc" .Release.Name }}
+          {{- end }}
+        - name: MYSQL_PORT
+          {{- if and (hasKey .Values "global") (hasKey .Values.global "paymentDBRef") (ne .Values.global.paymentDBRef "") }}
+          valueFrom:              
+            secretKeyRef:                
+              name: {{ .Values.global.paymentDBRef }}
+              key: DB_PORT
+          {{- else }}
+          value: "3306"
+          {{- end }}
+
       containers:
-        - image: {{ .Values.app.image | default "rp-payment-app:v0.1.0" }}
-          name: {{ printf "%s-rp-payment-app-pod" .Release.Name }}
-          imagePullPolicy: {{ .Values.app.imagePullPolicy | default "Always" }}
-          env:
-            # Inject Stripe secrets
-            - name: STRIPE_API_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: {{ printf "%s-rp-payment-app-secret" .Release.Name }}
-                  key: STRIPE_API_KEY
-            - name: STRIPE_WEBHOOK_SECRET
-              valueFrom:
-                secretKeyRef:
-                  name: {{ printf "%s-rp-payment-app-secret" .Release.Name }}
-                  key: STRIPE_WEBHOOK_SECRET
-          volumeMounts:
-            - name: config-volume
-              mountPath: /app/config
-          ports:
-            - containerPort: {{ .Values.app.port | default 8087 }}
-          # livenessProbe:
-          #   httpGet:
-          #     path: /actuator/health # Adjust if different
-          #     port: {{ .Values.app.port | default 8087 }}
-          #   initialDelaySeconds: 30
-          #   periodSeconds: 10
-          # readinessProbe:
-          #   httpGet:
-          #     path: /actuator/health # Adjust if different
-          #     port: {{ .Values.app.port | default 8087 }}
-          #   initialDelaySeconds: 20
-          #   periodSeconds: 5
-          resources: {}
+      - image: {{ .Values.app.image | default "rp-payment-app:v0.1.0" }}
+        name: {{ printf "%s-rp-payment-app-pod" .Release.Name }}
+        imagePullPolicy: {{ .Values.app.imagePullPolicy | default "Always" }}
+        ports:
+        - containerPort: {{ .Values.app.port | default 8087 }}
+        env:
+        # Inject Stripe secrets
+        - name: STRIPE_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: {{ printf "%s-rp-payment-app-secret" .Release.Name }}
+              key: STRIPE_API_KEY
+        - name: STRIPE_WEBHOOK_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: {{ printf "%s-rp-payment-app-secret" .Release.Name }}
+              key: STRIPE_WEBHOOK_SECRET
+        {{- if and (hasKey .Values "global") (hasKey .Values.global "paymentDBRef") (ne .Values.global.paymentDBRef "") }}
+        - name: DB_HOST
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.global.paymentDBRef }}
+              key: DB_HOST
+        - name: DB_PORT
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.global.paymentDBRef }}
+              key: DB_PORT
+        - name: DB_NAME
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.global.paymentDBRef }}
+              key: DB_NAME
+        - name: DB_USER
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.global.paymentDBRef }}
+              key: DB_USER
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.global.paymentDBRef }}
+              key: DB_PASSWORD
+        {{- else }}
+        - name: DB_HOST
+          value: {{ printf "%s-rp-payment-sql-svc" .Release.Name }}
+        - name: DB_PORT
+          value: "3306"
+        - name: DB_NAME
+          valueFrom:
+            secretKeyRef:
+              name: {{ printf "%s-rp-payment-sql-secret" .Release.Name }}
+              key: DB_NAME
+        - name: DB_USER
+          valueFrom:
+            secretKeyRef:
+              name: {{ printf "%s-rp-payment-sql-secret" .Release.Name }}
+              key: DB_USER
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ printf "%s-rp-payment-sql-secret" .Release.Name }}
+              key: DB_PASSWORD
+        {{- end }}
+        livenessProbe:
+          httpGet:
+            path: /actuator/health 
+            port: {{ .Values.app.port | default 8087 }}
+          initialDelaySeconds: 60
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /actuator/health 
+            port: {{ .Values.app.port | default 8087 }}
+          initialDelaySeconds: 30
+          periodSeconds: 5
+        resources: {}
+        volumeMounts:
+          - name: config-volume
+            mountPath: /app/config
       volumes:
-        - name: config-volume
-          configMap:
-            name: {{ printf "%s-rp-payment-app-cm" .Release.Name }}
+      - name: config-volume
+        configMap:
+          name: {{ printf "%s-rp-payment-app-cm" .Release.Name }}
 {{- end }}            

@@ -12,9 +12,11 @@ spec:
   selector:
     app: {{ printf "%s-rp-businessentity-sql-deploy" .Release.Name }}
   ports:
-    - protocol: TCP
-      port: 3306
-      targetPort: 3306
-      nodePort: {{ .Values.mysql.nodePort }}
-  type: NodePort
+  - protocol: TCP
+    port: 3306
+    targetPort: 3306
+    {{- if eq .Values.mysql.portType "NodePort" }}
+    nodePort: {{ .Values.mysql.nodePort }}
+    {{- end }}
+  type: {{ .Values.mysql.portType }}
 {{- end }}

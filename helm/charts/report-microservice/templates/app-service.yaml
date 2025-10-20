@@ -14,6 +14,8 @@ spec:
     - name: http
       port: {{ .Values.app.port }}
       targetPort: {{ .Values.app.port }}
+      {{- if eq .Values.app.portType "NodePort" }}
       nodePort: {{ .Values.app.nodePort }}
-  type: NodePort
+      {{- end }}
+  type: {{ .Values.app.portType }}
 {{- end }}

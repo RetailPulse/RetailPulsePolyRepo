@@ -1,0 +1,12 @@
+{{- if .Values.createNamespace }}
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: {{ .Values.namespace | default "observability" }}
+  labels:
+    name: {{ .Values.namespace | default "observability" }}
+
+{{- if not (hasKey .Release "IsInstall") }}
+# (Helm note: Namespace resource will be created when you use --create-namespace or Helm 3 will create the namespace for the release)
+{{- end }}
+{{- end }}

@@ -66,7 +66,8 @@ module "k8s" {
 
   region           = var.region
   name_prefix      = local.name_prefix
-  sample_namespace = "sample"
+  workload_namespace = "ns-retailpulse"
+  observe_namespace = "observability"
 
   providers = {
     kubernetes = kubernetes
@@ -75,3 +76,61 @@ module "k8s" {
   # Wait for Helm add-ons (External Secrets CRDs, etc.)
   depends_on = [ module.helm_addons ]
 }
+
+/* Step 4d: Init Database */
+module "k8s_init_job" {
+  source       = "./k8s_init_job"
+  namespace    = "ns-retailpulse"
+  
+  # auth init inputs
+  db_auth_host      = module.mysql.auth_endpoint
+  db_auth_admin     = "admin"
+  db_auth_password  = module.mysql.auth_admin_password
+  db_auth_name      = "RPUserDB"
+
+  # core init inputs
+  db_host      = module.mysql.core_endpoint
+  db_user      = "admin"
+  db_password  = module.mysql.core_admin_password
+  
+  db_be_name        = module.mysql.be_db_name 
+  db_inventory_name = module.mysql.inventory_db_name 
+  db_sales_name     = module.mysql.sales_db_name 
+  db_payment_name   = module.mysql.payment_db_name 
+
+  force_reinit = var.force_reinit_db
+  depends_on = [module.mysql]
+}
+
+
+/* Step 5: Setup API Gateway */
+module "api_gateway" {
+  source = "./api-gateway"
+
+  name_prefix        = "retailpulse"
+  project            = "retailpulse"
+  env                = "dev"
+
+  vpc_id             = module.network.vpc_id
+  private_subnet_ids = module.network.private_app_subnets
+  alb_sg_id          = module.network.alb_sg_id
+
+  services = [
+    {
+      name         = "iam"
+      path_prefix  = "/auth"
+      listener_arn = "arn:aws:elasticloadbalancing:ap-southeast-1:051826728851:listener/app/k8s-retailpulseapi-8cb0989ca5/0cfdd45244a40e2a/153863d6f4470788"
+    },
+    {
+      name         = "user"
+      path_prefix  = "/user"
+      listener_arn = "arn:aws:elasticloadbalancing:ap-southeast-1:051826728851:listener/app/k8s-retailpulseapi-8cb0989ca5/0cfdd45244a40e2a/153863d6f4470788"
+    },
+    {
+      name         = "inventory"
+      path_prefix  = "/inventory"
+      listener_arn = "arn:aws:elasticloadbalancing:ap-southeast-1:051826728851:listener/app/k8s-retailpulseapi-8cb0989ca5/0cfdd45244a40e2a/153863d6f4470788"
+    }
+  ]
+}
+

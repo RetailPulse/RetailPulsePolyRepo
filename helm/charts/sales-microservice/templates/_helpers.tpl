@@ -94,8 +94,8 @@ Web-App Port
 Identity Access Management Service Name
 */}}
 {{- define "sales.iamService" -}}
-{{- if and .Values.global (.Values.global.autoReleaseName) (ne .Values.global.autoReleaseName nil) }}
-  {{- printf "%s-rp-iam-app-svc" .Release.Name }}
+{{- if and .Values.global (.Values.global.iamInternalService) (ne .Values.global.iamInternalService nil) }}
+  {{- printf "%s://%s-%s" .Values.global.protocol .Release.Name .Values.global.iamInternalService }}
 {{- else if and .Values.dependencies (.Values.dependencies.iamReleaseName) (ne .Values.dependencies.iamReleaseName "") }}
   {{- printf "%s-rp-iam-app-svc" .Values.dependencies.iamReleaseName }}
 {{- else if and .Values.dependencies (.Values.dependencies.iamService) (ne .Values.dependencies.iamService "") }}
@@ -122,14 +122,14 @@ Identity Access Management Service Port
 Inventory Service Name
 */}}
 {{- define "sales.inventoryService" -}}
-{{- if and .Values.global (.Values.global.autoReleaseName) (ne .Values.global.autoReleaseName nil) }}
-  {{- printf "%s-rp-inventory-app-svc" .Release.Name }}
+{{- if and .Values.global (.Values.global.inventoryInternalService) (ne .Values.global.inventoryInternalService nil) }}
+  {{- printf "%s-%s" .Release.Name .Values.global.inventoryInternalService }}
 {{- else if and .Values.dependencies (.Values.dependencies.inventoryService) (ne .Values.dependencies.inventoryService "") }}
   {{- .Values.dependencies.inventoryService }}
 {{- else if and .Values.dependencies (.Values.dependencies.inventoryReleaseName) (ne .Values.dependencies.inventoryReleaseName "") }}
   {{- printf "%s-rp-inventory-app-svc" .Values.dependencies.inventoryReleaseName }}
 {{- else }}
-  {{- printf "%s-rp-inventory-app-svc" .Release.Name }}
+  {{- printf "%s-rp-inventory-app-svc" .Release.Name }} # Fallback, might not be correct
 {{- end }}
 {{- end }}
 
@@ -137,8 +137,8 @@ Inventory Service Name
 Payment Service Name
 */}}
 {{- define "sales.paymentService" -}}
-{{- if and .Values.global (.Values.global.autoReleaseName) (ne .Values.global.autoReleaseName nil) }}
-  {{- printf "%s-rp-payment-app-svc" .Release.Name }}
+{{- if and .Values.global (.Values.global.paymentInternalService) (ne .Values.global.paymentInternalService nil) }}
+  {{- printf "%s-%s" .Release.Name .Values.global.paymentInternalService }}
 {{- else if and .Values.dependencies (.Values.dependencies.paymentService) (ne .Values.dependencies.paymentService "") }}
   {{- .Values.dependencies.paymentService }}
 {{- else if and .Values.dependencies (.Values.dependencies.paymentReleaseName) (ne .Values.dependencies.paymentReleaseName "") }}

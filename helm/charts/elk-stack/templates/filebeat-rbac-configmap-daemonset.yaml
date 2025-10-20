@@ -1,0 +1,145 @@
+{{- if .Values.filebeat.enabled }}
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ .Values.filebeat.serviceAccountName }}
+  namespace: {{ .Values.namespace }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: filebeat
+rules:
+  - apiGroups: [ "" ]
+    resources: [ "pods", "namespaces", "nodes" ]
+    verbs: [ "get", "list", "watch" ]
+  - apiGroups: [ "apps" ]
+    resources: [ "replicasets" ]
+    verbs: [ "get", "list", "watch" ]
+  - nonResourceURLs: [ "/metrics" ]
+    verbs: [ "get" ]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: filebeat
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: filebeat
+subjects:
+  - kind: ServiceAccount
+    name: {{ .Values.filebeat.serviceAccountName }}
+    namespace: {{ .Values.namespace }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: filebeat-config
+  namespace: {{ .Values.namespace }}
+data:
+  filebeat.yml: |
+    filebeat.inputs:
+      - type: filestream
+        id: container-logs
+        enabled: true
+        paths:
+          - /var/log/containers/*.log
+        prospector.scanner.symlinks: true
+        parsers:
+          - container:
+              stream: all
+
+        processors:
+          - add_kubernetes_metadata:
+              host: ${NODE_NAME}
+              matchers:
+                - logs_path:
+                    logs_path: /var/log/containers/
+
+    output.elasticsearch:
+      hosts: {{ toJson .Values.filebeat.config.outputHosts }}
+
+    setup.template.enabled: true
+    setup.ilm.enabled: false
+
+    monitoring:
+      enabled: false
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: filebeat
+  namespace: {{ .Values.namespace }}
+  labels: { app: filebeat }
+spec:
+  selector:
+    matchLabels: { app: filebeat }
+  template:
+    metadata:
+      labels: { app: filebeat }
+    spec:
+      serviceAccountName: {{ .Values.filebeat.serviceAccountName }}
+      terminationGracePeriodSeconds: 30
+      hostNetwork: false
+      dnsPolicy: ClusterFirst
+      containers:
+        - name: filebeat
+          image: {{ .Values.filebeat.image.repository }}:{{ .Values.filebeat.image.tag }}
+          args: [ "-e", "-strict.perms=false" ]
+          env:
+            - name: NODE_NAME
+              valueFrom:
+                fieldRef: { fieldPath: spec.nodeName }
+          securityContext:
+            runAsUser: {{ ternary 0 1000 .Values.filebeat.runAsRoot }}
+          resources:
+            limits:
+              cpu: {{ .Values.filebeat.resources.limits.cpu }}
+              memory: {{ .Values.filebeat.resources.limits.memory }}
+            requests:
+              cpu: {{ .Values.filebeat.resources.requests.cpu }}
+              memory: {{ .Values.filebeat.resources.requests.memory }}
+          volumeMounts:
+            - name: filebeat-config
+              mountPath: /usr/share/filebeat/filebeat.yml
+              subPath: filebeat.yml
+              readOnly: true
+            - name: varlogcontainers
+              mountPath: /var/log/containers
+              readOnly: true
+            - name: varlogpods
+              mountPath: /var/log/pods
+              readOnly: true
+            - name: varlibdockercontainers
+              mountPath: /var/lib/docker/containers
+              readOnly: true
+            - name: varlibkubeletpods
+              mountPath: /var/lib/kubelet/pods
+              readOnly: true
+            - name: varlibcontainerd
+              mountPath: /var/lib/containerd
+              readOnly: true
+            - name: runcontainerd
+              mountPath: /run/containerd
+              readOnly: true
+      volumes:
+        - name: filebeat-config
+          configMap:
+            name: filebeat-config
+            defaultMode: 0640
+        - name: varlogcontainers
+          hostPath: { path: /var/log/containers }
+        - name: varlogpods
+          hostPath: { path: /var/log/pods }
+        - name: varlibdockercontainers
+          hostPath: { path: /var/lib/docker/containers }
+        - name: varlibkubeletpods
+          hostPath: { path: /var/lib/kubelet/pods }
+        - name: varlibcontainerd
+          hostPath:
+            path: /var/lib/containerd
+        - name: runcontainerd
+          hostPath:
+            path: /run/containerd
+{{- end }}

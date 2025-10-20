@@ -11,8 +11,11 @@ spec:
   selector:
     app: {{ printf "%s-rp-report-mongodb-deploy" .Release.Name }}
   ports:
-    - name: mongodb
-      port: 27017
-      targetPort: 27017
-  type: ClusterIP
+  - name: mongodb
+    port: {{ .Values.mongodb.port }}
+    targetPort: {{ .Values.mongodb.port }}
+    {{- if eq .Values.mongodb.portType "NodePort" }}
+    nodePort: {{ .Values.mongodb.nodePort }}
+    {{- end }}
+  type: {{ .Values.mongodb.portType }}
 {{- end }}

@@ -1,0 +1,15 @@
+# retailpulse-webapp-ingressroute.yaml
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: retailpulse-webapp-route
+  namespace: ns-retailpulse
+spec:
+  entryPoints:
+    - web
+  routes:
+    - match: Host(`k8s-traefik-traefik-131d86e2c6-5adeec6549daa627.elb.ap-southeast-1.amazonaws.com`)
+      kind: Rule
+      services:
+        - name: retailpulse-rp-web-svc
+          port: 8080

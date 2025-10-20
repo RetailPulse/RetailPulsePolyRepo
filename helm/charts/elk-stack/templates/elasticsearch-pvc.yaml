@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: elasticsearch-pvc
+  namespace: {{ .Values.namespace }}
+spec:
+  accessModes: [ "ReadWriteOnce" ]
+  resources:
+    requests:
+      storage: {{ .Values.elasticsearch.storage.size }}
+  {{- if and (hasKey .Values "global") (hasKey .Values.global "storageClass") (ne .Values.global.storageClass "") }}
+  storageClassName: {{ .Values.global.storageClass }}
+  {{- else if and (hasKey .Values.elasticsearch "storageClass") (ne .Values.elasticsearch.storageClass "") }}
+  storageClassName: {{ .Values.elasticsearch.storageClass }}
+  {{- end }}
+ 

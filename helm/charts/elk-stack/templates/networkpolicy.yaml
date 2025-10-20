@@ -1,0 +1,25 @@
+{{- if .Values.networkpolicy.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: es-allow-retailpulse-and-observability
+  namespace: {{ .Values.namespace }}
+spec:
+  podSelector:
+    matchLabels:
+      app: elasticsearch
+  policyTypes: [ "Ingress" ]
+  ingress:
+    - from:
+{{- range .Values.networkpolicy.allowNamespaces }}
+        - namespaceSelector:
+            matchLabels:
+              name: {{ . }}
+{{- end }}
+        - podSelector:
+            matchLabels:
+              app: filebeat
+      ports:
+        - protocol: TCP
+          port: 9200
+{{- end }}
