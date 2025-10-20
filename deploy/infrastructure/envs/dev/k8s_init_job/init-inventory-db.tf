@@ -1,23 +1,23 @@
 locals {
-  be_job_name = "init-businessentity-db"
+  inventory_job_name = "init-inventory-db"
 }
 
 # --- ConfigMap holding SQL ---
-resource "kubernetes_config_map" "init_sql_be" {
+resource "kubernetes_config_map" "init_inventory_sql" {
   metadata {
-    name      = "${local.be_job_name}-sql"
+    name      = "${local.inventory_job_name}-sql"
     namespace = var.namespace
   }
 
-  data = {
-    "init.sql" = file("${path.module}/businessEntity.init.sql")
+  binary_data = {
+    "inventory.init.sql" = filebase64("${path.module}/inventory.init.sql")
   }
 }
 
-# --- Kubernetes Job definition ---
-resource "kubernetes_job" "mysql_init_be" {
+# --- Kubernetes Job for initializing user database ---
+resource "kubernetes_job" "init_inventory_db" {
   metadata {
-    name      = local.be_job_name
+    name      = local.inventory_job_name
     namespace = var.namespace
     annotations = {
       force_reinit_timestamp = var.force_reinit ? timestamp() : ""
@@ -25,12 +25,13 @@ resource "kubernetes_job" "mysql_init_be" {
   }
 
   spec {
-    backoff_limit = 2
+    backoff_limit              = 0
+    ttl_seconds_after_finished = 600  # keep failed/success pods for 10 mins for debugging
 
     template {
       metadata {
         labels = {
-          job = local.be_job_name
+          job = local.inventory_job_name
         }
       }
 
@@ -40,12 +41,14 @@ resource "kubernetes_job" "mysql_init_be" {
           image = "mysql:8.0"
           command = [
             "sh", "-c",
-            "mysql -h ${var.db_host} -u${var.db_user} < /sql/init.sql"
+            "mysql -h ${var.db_host} -u${var.db_user} < /sql/inventory.init.sql"
           ]
+
           env {
             name  = "MYSQL_PWD"
             value = var.db_password
           }
+
           volume_mount {
             name       = "sql"
             mount_path = "/sql"
@@ -55,7 +58,7 @@ resource "kubernetes_job" "mysql_init_be" {
         volume {
           name = "sql"
           config_map {
-            name = kubernetes_config_map.init_sql_be.metadata[0].name
+            name = kubernetes_config_map.init_inventory_sql.metadata[0].name
           }
         }
 
@@ -64,7 +67,7 @@ resource "kubernetes_job" "mysql_init_be" {
     }
   }
 
-  # Run only when forced, or first time (create new job on force)
+# Run only when forced, or first time (create new job on force)
   lifecycle {
     create_before_destroy = true
     ignore_changes = [
@@ -72,18 +75,18 @@ resource "kubernetes_job" "mysql_init_be" {
     ]
   }
 
-  depends_on = [kubernetes_config_map.init_sql_be]
+  depends_on = [kubernetes_config_map.init_inventory_sql]
 }
 
 # --- Local-exec to wait for job completion and delete it ---
-resource "null_resource" "cleanup_be_db" {
+resource "null_resource" "cleanup_inventory_db" {
+  depends_on = [kubernetes_job.init_inventory_db]
+
   triggers = {
     always_run = timestamp()
   }
 
   provisioner "local-exec" {
-    command = "kubectl delete job init-businessentity-db -n ${var.namespace} --ignore-not-found=true || true"
+    command = "kubectl delete job init-inventory-db -n ${var.namespace} --ignore-not-found=true || true"
   }
-
-  depends_on = [kubernetes_job.mysql_init_be]
 }

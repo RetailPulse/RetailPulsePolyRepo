@@ -6,9 +6,9 @@ global:
   namespace: ns-retailpulse
   
   # Database Secrets Reference Names
-  userDBRef: "auth-db"
-  beDBRef: "core-db" # "be-db"
-  # inventoryDBRef: "inventory-db"
+  userDBRef: "auth-db-secret"
+  beDBRef: "be-db-secret"
+  inventoryDBRef: "inventory-db-secret"
   # salesDBRef: "sales-db"
   # reportDBRef: "docdb"
   # paymentDBRef: "payment-db"
@@ -160,7 +160,7 @@ business-entity-microservice:
 
 inventory-microservice:
   mysql:
-    enabled: true
+    enabled: false
   app:
     enabled: true
     image: docker.io/casperyap/rp-inventory-app:v0.2.0

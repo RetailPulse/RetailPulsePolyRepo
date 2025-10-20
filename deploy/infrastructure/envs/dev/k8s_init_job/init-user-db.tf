@@ -41,7 +41,7 @@ resource "kubernetes_job" "init_user_db" {
           image = "mysql:8.0"
           command = [
             "sh", "-c",
-            "mysql -h ${var.db_auth_host} -u${var.db_auth_admin} ${var.db_auth_name} < /sql/identity.init.sql"
+            "mysql -h ${var.db_auth_host} -u${var.db_auth_admin} < /sql/identity.init.sql"
           ]
 
           env {

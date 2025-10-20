@@ -1,6 +1,9 @@
 -- CREATE DATABASE identity_access;
 -- GRANT ALL PRIVILEGES ON identity_access.* TO 'root'@'localhost';
 -- FLUSH PRIVILEGES;
+CREATE DATABASE IF NOT EXISTS RPUserDB;
+
+USE RPUserDB;
 
 DROP TABLE IF EXISTS `oauth2_authorization_consent`;
 DROP TABLE IF EXISTS `oauth2_authorization`;

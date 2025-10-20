@@ -41,7 +41,7 @@ spec:
           value: {{ printf "%s-rp-payment-sql-svc" .Release.Name }}
           {{- end }}
         - name: MYSQL_PORT
-          {{- if and (hasKey .Values "global") (hasKey .Values.global "beDBRef") (ne .Values.global.beDBRef "") }}
+          {{- if and (hasKey .Values "global") (hasKey .Values.global "paymentDBRef") (ne .Values.global.paymentDBRef "") }}
           valueFrom:              
             secretKeyRef:                
               name: {{ .Values.global.paymentDBRef }}
@@ -49,6 +49,7 @@ spec:
           {{- else }}
           value: "3306"
           {{- end }}
+
       containers:
       - image: {{ .Values.app.image | default "rp-payment-app:v0.1.0" }}
         name: {{ printf "%s-rp-payment-app-pod" .Release.Name }}

@@ -92,7 +92,11 @@ module "k8s_init_job" {
   db_host      = module.mysql.core_endpoint
   db_user      = "admin"
   db_password  = module.mysql.core_admin_password
-  db_name      = "RPBusinessEntityDB"
+  
+  db_be_name        = module.mysql.be_db_name 
+  db_inventory_name = module.mysql.inventory_db_name 
+  db_sales_name     = module.mysql.sales_db_name 
+  db_payment_name   = module.mysql.payment_db_name 
 
   force_reinit = var.force_reinit_db
   depends_on = [module.mysql]

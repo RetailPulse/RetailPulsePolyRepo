@@ -10,7 +10,11 @@ variable "db_auth_name" { type = string }
 variable "db_host" { type = string }
 variable "db_user" { type = string }
 variable "db_password" { type = string }
-variable "db_name" { type = string }
+
+variable "db_be_name" { type = string }
+variable "db_inventory_name" { type = string }
+variable "db_sales_name" { type = string }
+variable "db_payment_name" { type = string }
 
 # When true, re-run the job even if it's already completed before
 variable "force_reinit" {

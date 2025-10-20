@@ -18,6 +18,9 @@
 --
 -- Table structure for table `business_entity`
 --
+CREATE DATABASE IF NOT EXISTS RPBusinessEntityDB;
+
+USE RPBusinessEntityDB;
 
 DROP TABLE IF EXISTS `business_entity`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
