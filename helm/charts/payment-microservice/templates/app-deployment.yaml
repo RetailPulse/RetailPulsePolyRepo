@@ -33,7 +33,7 @@ spec:
         env:
         - name: MYSQL_HOST
           {{- if and (hasKey .Values "global") (hasKey .Values.global "paymentDBRef") (ne .Values.global.paymentDBRef "") }}
-          from:              
+          valueFrom:              
             secretKeyRef:                
               name: {{ .Values.global.paymentDBRef }}
               key: DB_HOST
@@ -42,7 +42,7 @@ spec:
           {{- end }}
         - name: MYSQL_PORT
           {{- if and (hasKey .Values "global") (hasKey .Values.global "beDBRef") (ne .Values.global.beDBRef "") }}
-          from:              
+          valueFrom:              
             secretKeyRef:                
               name: {{ .Values.global.paymentDBRef }}
               key: DB_PORT

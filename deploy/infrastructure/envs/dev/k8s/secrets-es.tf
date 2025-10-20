@@ -27,7 +27,8 @@ resource "kubernetes_manifest" "core_db_extsec" {
     metadata   = { name = "core-db", namespace = var.workload_namespace }
     spec = {
       refreshInterval = "1h"
-      secretStoreRef  = { name = "aws-secrets", kind = "ClusterSecretStore" } # <- change
+      secretStoreRef  = { name = "aws-secrets", kind = "ClusterSecretStore" } 
+
       target = {
         name           = "core-db"
         creationPolicy = "Owner"
@@ -65,6 +66,7 @@ resource "kubernetes_manifest" "auth_db_extsec" {
     spec = {
       refreshInterval = "1h"
       secretStoreRef  = { name = "aws-secrets", kind = "ClusterSecretStore" }
+
       target = {
         name           = "auth-db"
         creationPolicy = "Owner"
@@ -102,6 +104,7 @@ resource "kubernetes_manifest" "docdb_extsec" {
     spec = {
       refreshInterval = "1h"
       secretStoreRef  = { name = "aws-secrets", kind = "ClusterSecretStore" }
+      
       target = {
         name           = "docdb"
         creationPolicy = "Owner"

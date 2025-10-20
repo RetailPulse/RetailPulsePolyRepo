@@ -33,7 +33,7 @@ spec:
           env:
           - name: MYSQL_HOST
             {{- if and (hasKey .Values "global") (hasKey .Values.global "userDBRef") (ne .Values.global.userDBRef "") }}
-            from:              
+            valueFrom:              
               secretKeyRef:                
                 name: {{ .Values.global.userDBRef }}
                 key: DB_HOST
@@ -42,7 +42,7 @@ spec:
             {{- end }}
           - name: MYSQL_PORT
             {{- if and (hasKey .Values "global") (hasKey .Values.global "userDBRef") (ne .Values.global.userDBRef "") }}
-            from:              
+            valueFrom:              
               secretKeyRef:                
                 name: {{ .Values.global.userDBRef }}
                 key: DB_PORT

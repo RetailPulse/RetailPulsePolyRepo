@@ -19,6 +19,9 @@ resource "kubernetes_job" "mysql_init" {
   metadata {
     name      = local.job_name
     namespace = var.namespace
+    annotations = {
+      force_reinit_timestamp = var.force_reinit ? timestamp() : ""
+    }
   }
 
   spec {
@@ -37,7 +40,7 @@ resource "kubernetes_job" "mysql_init" {
           image = "mysql:8.0"
           command = [
             "sh", "-c",
-            "mysql -h ${var.db_host} -u${var.db_user} -p${var.db_password} ${var.db_name} < /sql/init.sql"
+            "mysql -h ${var.db_host} -u${var.db_user} ${var.db_name} < /sql/init.sql"
           ]
           env {
             name  = "MYSQL_PWD"
@@ -73,25 +76,14 @@ resource "kubernetes_job" "mysql_init" {
 }
 
 # --- Local-exec to wait for job completion and delete it ---
-resource "null_resource" "job_cleanup" {
+resource "null_resource" "cleanup_be_db" {
   depends_on = [kubernetes_job.mysql_init]
 
   triggers = {
-    force_reinit = var.force_reinit ? timestamp() : ""
+    always_run = timestamp()
   }
 
   provisioner "local-exec" {
-    command = <<EOT
-      echo "Waiting for Kubernetes Job '${local.job_name}' to complete..."
-      kubectl wait --for=condition=complete job/${local.job_name} -n ${var.namespace} --timeout=300s
-
-      if [ $? -eq 0 ]; then
-        echo "Job completed successfully. Deleting job..."
-        kubectl delete job ${local.job_name} -n ${var.namespace} --ignore-not-found=true
-      else
-        echo "Job did not complete successfully."
-        exit 1
-      fi
-    EOT
+    command = "kubectl delete job init-businessentity-db -n ${var.namespace} --ignore-not-found=true || true"
   }
 }

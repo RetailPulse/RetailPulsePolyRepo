@@ -34,7 +34,7 @@ spec:
         env:
         - name: MYSQL_HOST
           {{- if and (hasKey .Values "global") (hasKey .Values.global "inventoryDBRef") (ne .Values.global.inventoryDBRef "") }}
-          from:              
+          valueFrom:              
             secretKeyRef:                
               name: {{ .Values.global.inventoryDBRef }}
               key: DB_HOST
@@ -43,7 +43,7 @@ spec:
           {{- end }}
         - name: MYSQL_PORT
           {{- if and (hasKey .Values "global") (hasKey .Values.global "inventoryDBRef") (ne .Values.global.inventoryDBRef "") }}
-          from:              
+          valueFrom:              
             secretKeyRef:                
               name: {{ .Values.global.inventoryDBRef }}
               key: DB_PORT

@@ -81,7 +81,14 @@ module "k8s" {
 module "k8s_init_job" {
   source       = "./k8s_init_job"
   namespace    = "ns-retailpulse"
+  
+  # auth init inputs
+  db_auth_host      = module.mysql.auth_endpoint
+  db_auth_admin     = "admin"
+  db_auth_password  = module.mysql.auth_admin_password
+  db_auth_name      = "RPUserDB"
 
+  # core init inputs
   db_host      = module.mysql.core_endpoint
   db_user      = "admin"
   db_password  = module.mysql.core_admin_password
