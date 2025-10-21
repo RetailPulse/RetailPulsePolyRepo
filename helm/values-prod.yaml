@@ -154,6 +154,7 @@ business-entity-microservice:
     enabled: false
   app:
     enabled: true
+    replicaCount: 3
     image: docker.io/casperyap/rp-businessentity-app:v0.2.0
     port: 8083
     portType: ClusterIP
@@ -177,7 +178,7 @@ sales-microservice:
     portType: ClusterIP
 
 report-microservice:  
-  mysql:
+  mongodb:
     enabled: true
   app:
     enabled: true
