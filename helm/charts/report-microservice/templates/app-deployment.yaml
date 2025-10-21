@@ -42,14 +42,18 @@ spec:
         - sh
         - -c
         - |
-          cp /certs/global-bundle.pem /tmp/
-          keytool -import -trustcacerts -alias aws-docdb \
-            -file /tmp/global-bundle.pem \
-            -keystore /truststore/truststore.jks \
-            -storepass changeit -noprompt
+          # Split the AWS DocDB bundle into individual PEMs and import ALL of them into the JVM truststore
+          awk 'BEGIN{c=0}/BEGIN CERTIFICATE/{c++}{print > ("/tmp/ca" c ".pem")}' /aws-docdb-ca/global-bundle.pem
+          for f in /tmp/ca*.pem; do
+            keytool -importcert -noprompt \
+              -alias aws-docdb-$(basename "$f" .pem) \
+              -file "$f" \
+              -keystore /truststore/truststore.jks \
+              -storepass changeit
+          done
         volumeMounts:
         - name: aws-docdb-ca
-          mountPath: /certs
+          mountPath: /aws-docdb-ca
         - name: truststore
           mountPath: /truststore
         {{- end }}
@@ -78,7 +82,7 @@ spec:
           # value: "mongodb://docdb_admin:%5E%3BRi%21SPz5KTyO9fi%2CjYh%23TI2@retailpulse-dev-docdb.cluster-cl62ae2senvp.ap-southeast-1.docdb.amazonaws.com:27017/reportdb?tls=true&tlsCAFile=/certs/global-bundle.pem&readPreference=secondaryPreferred&retryWrites=false&authSource=admin"
           value: "mongodb://docdb_admin:%5E%3BRi%21SPz5KTyO9fi%2CjYh%23TI2@retailpulse-dev-docdb.cluster-cl62ae2senvp.ap-southeast-1.docdb.amazonaws.com:27017/reportdb?tls=true&authSource=admin"
           # value: "mongodb://${MONGO_USER}:${MONGO_PASS}@${MONGO_HOST}:${MONGO_PORT}/${MONGO_DB}?tls=true&tlsCAFile=/certs/global-bundle.pem&replicaSet=rs0&readPreference=secondaryPreferred&retryWrites=false&authSource=admin"
-          # value: "mongodb://${MONGO_USER}:${MONGO_PASS}@${MONGO_HOST}:${MONGO_PORT}/${MONGO_DB}?tls=true&authSource=admin"          
+          # value: "mongodb://${MONGO_USER}:${MONGO_PASS}@${MONGO_HOST}:${MONGO_PORT}/${MONGO_DB}?tls=true&authSource=admin"
           {{- else }}
           value: "mongodb://${MONGO_USER}:${MONGO_PASS}@${MONGO_HOST}:${MONGO_PORT}/${MONGO_DB}?authSource=admin"
           {{- end }}
@@ -92,7 +96,7 @@ spec:
           value: {{ .Values.app.port | quote }}
         # Consider if AUTH_SERVER_URL is still needed or if configmap uri is sufficient
         # - name: AUTH_SERVER_URL
-        #   value: "http://{{ include "report.iamService" . }}:8081"        
+        #   value: "http://{{ include "report.iamService" . }}:8081"
         livenessProbe:
           httpGet:
             path: /actuator/health # Adjust path if different
@@ -111,7 +115,7 @@ spec:
           mountPath: /config
         {{- if and (hasKey .Values "global") (hasKey .Values.global "reportDBRef") (ne .Values.global.reportDBRef "") }}
         - name: aws-docdb-ca
-          mountPath: /certs
+          mountPath: /aws-docdb-ca
         - name: truststore
           mountPath: /truststore
         {{- end }}

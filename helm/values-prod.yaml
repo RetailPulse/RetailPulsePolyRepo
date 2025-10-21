@@ -10,7 +10,7 @@ global:
   beDBRef: "be-db-secret"
   inventoryDBRef: "inventory-db-secret"
   salesDBRef: "sales-db-secret"
-  # reportDBRef: "docdb"
+  reportDBRef: "docdb"
   paymentDBRef: "payment-db-secret"
 
   autoReleaseName: 1
@@ -179,7 +179,7 @@ sales-microservice:
 
 report-microservice:  
   mongodb:
-    enabled: true
+    enabled: false
   app:
     enabled: true
     image: docker.io/casperyap/rp-report-app:v0.2.0
