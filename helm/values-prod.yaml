@@ -25,7 +25,7 @@ global:
   # Backend service DNS (internal)
   iamInternalService: "rp-iam-app-svc:8081/auth" 
   userInternalService: "rp-user-app-svc:8082/"
-  businessEntityInternalService: "rp-business-entity-app-svc:8083/"
+  businessEntityInternalService: "rp-businessentity-app-svc:8083/"
   inventoryInternalService: "rp-inventory-app-svc:8084/"
   salesInternalService: "rp-sales-app-svc:8085/"
   reportInternalService: "rp-report-app-svc:8086/"
