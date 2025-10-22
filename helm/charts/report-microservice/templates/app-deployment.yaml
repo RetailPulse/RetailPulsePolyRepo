@@ -63,8 +63,6 @@ spec:
         imagePullPolicy: {{ .Values.app.imagePullPolicy }}
         ports:
           - containerPort: {{ .Values.app.port }}
-        # command: ["/bin/sh", "-c"]
-        # args: ["env && sleep 3600"]
         envFrom:
         - secretRef:
             {{- if and (hasKey .Values "global") (hasKey .Values.global "reportDBRef") (ne .Values.global.reportDBRef "") }}
@@ -78,34 +76,26 @@ spec:
           value: "file:/config/"
         # Override URI from configmap for clarity and direct control
         - name: SPRING_DATA_MONGODB_URI
-          {{- if and (hasKey .Values "global") (hasKey .Values.global "reportDBRef") (ne .Values.global.reportDBRef "") }}
-          # value: "mongodb://docdb_admin:%5E%3BRi%21SPz5KTyO9fi%2CjYh%23TI2@retailpulse-dev-docdb.cluster-cl62ae2senvp.ap-southeast-1.docdb.amazonaws.com:27017/reportdb?tls=true&tlsCAFile=/certs/global-bundle.pem&readPreference=secondaryPreferred&retryWrites=false&authSource=admin"
-          value: "mongodb://docdb_admin:%5E%3BRi%21SPz5KTyO9fi%2CjYh%23TI2@retailpulse-dev-docdb.cluster-cl62ae2senvp.ap-southeast-1.docdb.amazonaws.com:27017/reportdb?tls=true&authSource=admin"
-          # value: "mongodb://${MONGO_USER}:${MONGO_PASS}@${MONGO_HOST}:${MONGO_PORT}/${MONGO_DB}?tls=true&tlsCAFile=/certs/global-bundle.pem&replicaSet=rs0&readPreference=secondaryPreferred&retryWrites=false&authSource=admin"
-          # value: "mongodb://${MONGO_USER}:${MONGO_PASS}@${MONGO_HOST}:${MONGO_PORT}/${MONGO_DB}?tls=true&authSource=admin"
+          {{- if and (hasKey .Values "global") (hasKey .Values.global "reportDBRef") (ne .Values.global.reportDBRef "") }}          
+          value: "mongodb://${MONGO_USER}:${MONGO_PASS}@${MONGO_HOST}:${MONGO_PORT}/${MONGO_DB}?tls=true&authSource=admin"
           {{- else }}
           value: "mongodb://${MONGO_USER}:${MONGO_PASS}@${MONGO_HOST}:${MONGO_PORT}/${MONGO_DB}?authSource=admin"
           {{- end }}
         {{- if and (hasKey .Values "global") (hasKey .Values.global "reportDBRef") (ne .Values.global.reportDBRef "") }}
         - name: JAVA_TOOL_OPTIONS
           value: "-Djavax.net.ssl.trustStore=/truststore/truststore.jks -Djavax.net.ssl.trustStorePassword=changeit"
-        {{- end }}
-        # - name: SPRING_DATA_MONGODB_URI
-        #   value: "mongodb://{{ .Values.mongodb.rootUsername }}:{{ .Values.mongodb.rootPassword }}@{{ include "report.mongodbService" . }}:27017/{{ .Values.mongodb.database }}?authSource=admin"
+        {{- end }}        
         - name: SERVER_PORT
-          value: {{ .Values.app.port | quote }}
-        # Consider if AUTH_SERVER_URL is still needed or if configmap uri is sufficient
-        # - name: AUTH_SERVER_URL
-        #   value: "http://{{ include "report.iamService" . }}:8081"
+          value: {{ .Values.app.port | quote }}        
         livenessProbe:
           httpGet:
-            path: /actuator/health # Adjust path if different
+            path: /actuator/health
             port: {{ .Values.app.port }}
           initialDelaySeconds: 60
           periodSeconds: 10
         readinessProbe:
           httpGet:
-            path: /actuator/health # Adjust path if different
+            path: /actuator/health
             port: {{ .Values.app.port }}
           initialDelaySeconds: 30
           periodSeconds: 5
