@@ -10,7 +10,7 @@ global:
   beDBRef: "be-db-secret"
   inventoryDBRef: "inventory-db-secret"
   salesDBRef: "sales-db-secret"
-  # reportDBRef: "docdb"
+  reportDBRef: "docdb"
   paymentDBRef: "payment-db-secret"
 
   autoReleaseName: 1
@@ -25,7 +25,7 @@ global:
   # Backend service DNS (internal)
   iamInternalService: "rp-iam-app-svc:8081/auth" 
   userInternalService: "rp-user-app-svc:8082/"
-  businessEntityInternalService: "rp-business-entity-app-svc:8083/"
+  businessEntityInternalService: "rp-businessentity-app-svc:8083/"
   inventoryInternalService: "rp-inventory-app-svc:8084/"
   salesInternalService: "rp-sales-app-svc:8085/"
   reportInternalService: "rp-report-app-svc:8086/"
@@ -154,6 +154,7 @@ business-entity-microservice:
     enabled: false
   app:
     enabled: true
+    replicaCount: 3
     image: docker.io/casperyap/rp-businessentity-app:v0.2.0
     port: 8083
     portType: ClusterIP
@@ -177,8 +178,8 @@ sales-microservice:
     portType: ClusterIP
 
 report-microservice:  
-  mysql:
-    enabled: true
+  mongodb:
+    enabled: false
   app:
     enabled: true
     image: docker.io/casperyap/rp-report-app:v0.2.0

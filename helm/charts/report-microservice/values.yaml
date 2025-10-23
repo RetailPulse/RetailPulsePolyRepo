@@ -35,7 +35,7 @@ app:
       data:
         mongodb:
           uri: "mongodb://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}?ssl=true&replicaSet=rs0&readPreference=secondaryPreferred&retryWrites=false&tlsAllowInvalidHostnames=true"
-          database: reportsdb
+          database: reportdb
           
     app:
       gridfs:
