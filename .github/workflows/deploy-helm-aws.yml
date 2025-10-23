@@ -1,8 +1,8 @@
 name: Deploy Helm Chart to AWS EKS
 
 on:
-  push:
-    branches: [ main ]
+  # push:
+  #   branches: [ main ]
   workflow_dispatch:
 
 jobs:
@@ -44,5 +44,6 @@ jobs:
           helm upgrade --install retailpulse ./helm \
             --namespace ns-retailpulse \
             --create-namespace \
+            --values ./helm/values-prod.yaml \
             --set global.imageTag=$(cat VERSION) \
-            --wait --timeout 5m
+            --wait --timeout 10m
