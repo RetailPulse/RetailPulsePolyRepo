@@ -9,7 +9,7 @@ elasticsearch:
   replicas: 1
   storage:
     enabled: true
-    size: 5Gi
+    size: 2Gi
     storageClass: ""
   resources:
     limits:
