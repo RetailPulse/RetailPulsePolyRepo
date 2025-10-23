@@ -44,6 +44,6 @@ jobs:
           helm upgrade --install retailpulse ./helm \
             --namespace ns-retailpulse \
             --create-namespace \
-            --values ./helm/values-prod.yaml \
+            -f ./helm/values-prod.yaml \
             --set global.imageTag=$(cat VERSION) \
             --wait --timeout 10m
