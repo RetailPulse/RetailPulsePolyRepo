@@ -51,7 +51,7 @@ spec:
           {{- end }}
 
       containers:
-      - image: {{ .Values.app.image | default "rp-payment-app:v0.1.0" }}
+      - image: {{ .Values.app.image }}:{{ .Values.global.imageTag | default .Values.app.imageTag }}
         name: {{ printf "%s-rp-payment-app-pod" .Release.Name }}
         imagePullPolicy: {{ .Values.app.imagePullPolicy | default "Always" }}
         ports:

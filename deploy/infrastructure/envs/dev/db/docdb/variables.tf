@@ -13,7 +13,7 @@ variable "instance_class"    {
 }
 variable "instances"         {
     type = number
-    default = 1
+    default = 3
 }
 
 variable "master_username" {

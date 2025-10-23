@@ -4,7 +4,8 @@ namespace: ns-retailpulse
 # IAM App Configuration
 app:
   enabled: true
-  image: docker.io/casperyap/rp-iam-app:v0.2.0
+  image: docker.io/casperyap/rp-iam-app
+  imageTag: v0.2.0
   imagePullPolicy: Always
   port: 8081
   nodePort: 30081

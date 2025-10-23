@@ -2,7 +2,6 @@ name: Build & Push Docker Images with Trivy Security Scan
 
 on:
   workflow_dispatch:
-
   push:
     branches:
       - main
@@ -10,7 +9,7 @@ on:
 permissions:
   security-events: write
   actions: read
-  contents: read
+  contents: write   # changed from read → write to allow version commits
 
 jobs:
   build-and-push:
@@ -44,40 +43,73 @@ jobs:
         run: |
           trivy image --cache-dir "${TRIVY_CACHE_DIR}" --download-db-only
 
+      # --- NEW: bump and record semantic version ---
+      - name: Bump version
+        id: bump_version
+        run: |
+          VERSION_FILE="VERSION"
+          if [ ! -f "$VERSION_FILE" ]; then
+            echo "0.0.0" > "$VERSION_FILE"
+          fi
+          OLD_VERSION=$(cat $VERSION_FILE)
+          IFS='.' read -r major minor patch <<< "$OLD_VERSION"
+          NEW_VERSION="$major.$((minor+1)).$patch"
+          echo "$NEW_VERSION" > "$VERSION_FILE"
+          echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
+          echo "Bumped version from $OLD_VERSION to $NEW_VERSION"
+
+      - name: Commit and push new version
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "github-actions@github.com"
+          git add VERSION
+          git commit -m "Bump version to ${{ steps.bump_version.outputs.version }}" || echo "No changes to commit"
+          git push || echo "No changes to push"
+
+      # --- Optional: create git tag for visibility ---
+      - name: Create Git tag
+        run: |
+          git tag -a "v${{ steps.bump_version.outputs.version }}" -m "Release v${{ steps.bump_version.outputs.version }}" || true
+          git push origin "v${{ steps.bump_version.outputs.version }}" || true
+
       - name: Build and push Docker images for all submodules
         run: |
           export TRIVY_REPORT_DIR="./trivy-reports"
           mkdir -p "$TRIVY_REPORT_DIR"
+          VERSION=${{ steps.bump_version.outputs.version }}
+
           for dir in BusinessEntityMicroservice InventoryMicroservice PaymentService ReportMicroservice SalesMicroservice web-app user-management identity-access-management; do 
             if [ -f "$dir/Dockerfile" ]; then
-              echo "📦 Building and pushing $dir..."
+              echo "📦 Building and pushing $dir."
               lower_dir=$(echo "$dir" | tr '[:upper:]' '[:lower:]')
               IMAGE_NAME="${{ secrets.DOCKERHUB_USERNAME }}/${lower_dir}"
-              docker build -t $IMAGE_NAME:latest $dir
-          
+
+              # build both versioned and latest tags
+              docker build -t $IMAGE_NAME:$VERSION -t $IMAGE_NAME:latest $dir
+
               # Run Trivy scan (SARIF format)
-              echo "🛡️ Scanning $dir with Trivy..."
+              echo "🛡️ Scanning $dir with Trivy."
               REPORT_PATH="$TRIVY_REPORT_DIR/$dir.sarif"
               trivy image \
                 --cache-dir "${TRIVY_CACHE_DIR}" \
                 --format sarif \
                 --output "$REPORT_PATH" \
-                $IMAGE_NAME:latest || echo "Trivy scan failed for $dir"
-          
+                $IMAGE_NAME:$VERSION || echo "Trivy scan failed for $dir"
+
               # Run Trivy scan (JSON format)
-              echo "🛡️ Scanning $dir with Trivy (JSON)..."
+              echo "🛡️ Scanning $dir with Trivy (JSON)."
               JSON_PATH="$TRIVY_REPORT_DIR/$dir.json"
               trivy image \
                 --cache-dir "${TRIVY_CACHE_DIR}" \
                 --format json \
                 --output "$JSON_PATH" \
-                $IMAGE_NAME:latest || echo "Trivy JSON scan failed for $dir"
-          
-              echo "Scanned $dir with Trivy success. Report saved at $REPORT_PATH"            
-              echo "Pushing image..."
-              # Push Docker image
+                $IMAGE_NAME:$VERSION || echo "Trivy JSON scan failed for $dir"
+
+              echo "✅ Scanned $dir successfully. Reports saved at $REPORT_PATH"
+              echo "🚀 Pushing images to Docker Hub..."
+              docker push $IMAGE_NAME:$VERSION
               docker push $IMAGE_NAME:latest
-              echo "Image Pushed."
+              echo "Image Pushed: $IMAGE_NAME:$VERSION"
             else
               echo "⚠️ Skipping $dir (no Dockerfile found)"
             fi
@@ -85,7 +117,7 @@ jobs:
 
       - name: Run Trivy IaC Scan
         run: |
-          echo "🛡️ Scanning OpenTofu IaC with Trivy..."
+          echo "🛡️ Scanning OpenTofu IaC with Trivy."
           trivy config ./deploy \
             --cache-dir "${TRIVY_CACHE_DIR}" \
             --format sarif \

@@ -14,5 +14,5 @@ variable "allocated_storage" {
 }
 variable "multi_az"          {
     type = bool
-    default = false
+    default = true
 }

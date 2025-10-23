@@ -50,7 +50,7 @@ spec:
             value: "3306"
             {{- end }}
       containers:
-      - image: {{ .Values.app.image }}
+      - image: {{ .Values.app.image }}:{{ .Values.global.imageTag | default .Values.app.imageTag }}
         name: {{ printf "%s-rp-user-app-pod" .Release.Name }}
         imagePullPolicy: {{ .Values.app.imagePullPolicy }}
         volumeMounts:

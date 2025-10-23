@@ -75,7 +75,7 @@ spec:
             value: {{ .Values.redis.port | quote }}
 
       containers:
-      - image: {{ .Values.app.image }}
+      - image: {{ .Values.app.image }}:{{ .Values.global.imageTag | default .Values.app.imageTag }}
         name: {{ printf "%s-rp-inventory-app-pod" .Release.Name }}
         imagePullPolicy: {{ .Values.app.imagePullPolicy }}        
         ports:
