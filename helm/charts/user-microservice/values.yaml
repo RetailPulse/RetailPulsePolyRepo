@@ -118,7 +118,8 @@ mysql:
 # User App Configuration
 app:
   enabled: true
-  image: docker.io/casperyap/rp-user-app:v0.2.0
+  image: docker.io/casperyap/rp-user-app
+  imageTag: v0.2.0
   imagePullPolicy: Always
   port: 8082
   nodePort: 30082

@@ -59,7 +59,7 @@ spec:
         {{- end }}
       containers:
       - name: rp-report-service
-        image: {{ .Values.app.image }}
+        image: {{ .Values.app.image }}:{{ .Values.global.imageTag | default .Values.app.imageTag }}
         imagePullPolicy: {{ .Values.app.imagePullPolicy }}
         ports:
           - containerPort: {{ .Values.app.port }}

@@ -99,7 +99,8 @@ mysql:
 # Sales App Configuration
 app:
   enabled: true
-  image: docker.io/casperyap/rp-sales-app:v0.2.0
+  image: docker.io/casperyap/rp-sales-app
+  imageTag: v0.2.0
   imagePullPolicy: Always
   port: 8085
   nodePort: 30085
