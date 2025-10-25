@@ -65,7 +65,7 @@ redis:
 app:
   enabled: true
   image: docker.io/casperyap/rp-businessentity-app
-  imageTag: v0.2.0
+  imageTag: v0.3.0
   imagePullPolicy: Always
   port: 8083
   nodePort: 30083

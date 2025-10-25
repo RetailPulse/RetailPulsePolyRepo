@@ -15,7 +15,7 @@ mongodb:
 app:
   enabled: true
   image: docker.io/casperyap/rp-report-app
-  imageTag: v0.2.0
+  imageTag: v0.3.0
   imagePullPolicy: Always
   port: 8086
   nodePort: 30086
