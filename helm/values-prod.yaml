@@ -4,7 +4,7 @@ global:
   rootURL: "https://app.retailpulse.dev"
   webURL: "https://app.retailpulse.dev"   
   namespace: ns-
-  imageTag: 1.1.0
+  imageTag: 1.0.0
   
   # Database Secrets Reference Names
   userDBRef: "auth-db-secret"
