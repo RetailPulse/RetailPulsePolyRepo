@@ -77,7 +77,7 @@ jobs:
 
           for dir in BusinessEntityMicroservice InventoryMicroservice PaymentService ReportMicroservice SalesMicroservice web-app user-management identity-access-management; do 
             if [ -f "$dir/Dockerfile" ]; then
-              echo "📦 Building and pushing $dir."
+              echo " Building and pushing $dir."
               lower_dir=$(echo "$dir" | tr '[:upper:]' '[:lower:]')
               IMAGE_NAME="${{ secrets.DOCKERHUB_USERNAME }}/${lower_dir}"
 
@@ -85,7 +85,7 @@ jobs:
               docker build -t $IMAGE_NAME:$VERSION -t $IMAGE_NAME:latest $dir
 
               # Run Trivy scan (SARIF format)
-              echo "🛡️ Scanning $dir with Trivy."
+              echo " Scanning $dir with Trivy."
               REPORT_PATH="$TRIVY_REPORT_DIR/$dir.sarif"
               trivy image \
                 --cache-dir "${TRIVY_CACHE_DIR}" \
@@ -102,13 +102,13 @@ jobs:
                 --output "$JSON_PATH" \
                 $IMAGE_NAME:$VERSION || echo "Trivy JSON scan failed for $dir"
 
-              echo "✅ Scanned $dir successfully. Reports saved at $REPORT_PATH"
+              echo " Scanned $dir successfully. Reports saved at $REPORT_PATH"
               echo "🚀 Pushing images to Docker Hub..."
               docker push $IMAGE_NAME:$VERSION
               docker push $IMAGE_NAME:latest
               echo "Image Pushed: $IMAGE_NAME:$VERSION"
             else
-              echo "⚠️ Skipping $dir (no Dockerfile found)"
+              echo " Skipping $dir (no Dockerfile found)"
             fi
           done
 
