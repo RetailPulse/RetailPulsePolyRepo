@@ -43,9 +43,9 @@ jobs:
         run: |
           trivy image --cache-dir "${TRIVY_CACHE_DIR}" --download-db-only
 
-      # --- NEW: bump and record semantic version ---
-      - name: Bump version
-        id: bump_version
+      # --- NEW: Get version from VERSION file ---
+      - name: Get version
+        id: get_version
         run: |
           VERSION_FILE="VERSION"
           if [ ! -f "$VERSION_FILE" ]; then
@@ -60,20 +60,14 @@ jobs:
           git config --global user.name "github-actions"
           git config --global user.email "github-actions@github.com"
           git add VERSION
-          git commit -m "Bump version to ${{ steps.bump_version.outputs.version }}" || echo "No changes to commit"
+          git commit -m "Bump version to ${{ steps.get_version.outputs.version }}" || echo "No changes to commit"
           git push || echo "No changes to push"
-
-      # --- Optional: create git tag for visibility ---
-      - name: Create Git tag
-        run: |
-          git tag -a "v${{ steps.bump_version.outputs.version }}" -m "Release v${{ steps.bump_version.outputs.version }}" || true
-          git push origin "v${{ steps.bump_version.outputs.version }}" || true
 
       - name: Build and push Docker images for all submodules
         run: |
           export TRIVY_REPORT_DIR="./trivy-reports"
           mkdir -p "$TRIVY_REPORT_DIR"
-          VERSION=${{ steps.bump_version.outputs.version }}
+          VERSION=${{ steps.get_version.outputs.version }}
 
           for dir in BusinessEntityMicroservice InventoryMicroservice PaymentService ReportMicroservice SalesMicroservice web-app user-management identity-access-management; do 
             if [ -f "$dir/Dockerfile" ]; then
