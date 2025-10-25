@@ -35,3 +35,56 @@ global:
 
 apiIngress:
   enabled: false
+
+# web-app:
+#   app:
+#     enabled: false
+
+# identity-access-management: 
+#   app:
+#     enabled: false
+
+# user-microservice:
+#   mysql:
+#     enabled: true    
+#     nodePort: 30305
+#     portType: NodePort
+#   app:
+#     enabled: false
+
+# business-entity-microservice: 
+#   mysql:
+#     enabled: true    
+#     nodePort: 30307
+#     portType: NodePort
+#   app:
+#     enabled: false
+
+# inventory-microservice:
+#   mysql:
+#     enabled: true
+#     nodePort: 30308
+#     portType: NodePort  
+#   app:
+#     enabled: false
+
+# sales-microservice:
+#   mysql:
+#     enabled: true
+#     nodePort: 30309
+#     portType: NodePort  
+#   app:
+#     enabled: false
+
+
+# report-microservice:
+#   app:
+#     enabled: false
+
+# payment-microservice:
+#   mysql:
+#     enabled: true
+#     nodePort: 30310
+#     portType: NodePort  
+#   app:
+#     enabled: false

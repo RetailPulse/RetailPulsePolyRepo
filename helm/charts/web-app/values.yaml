@@ -4,7 +4,7 @@ namespace: ns-retailpulse
 # Web App Configuration
 app:
   enabled: true
-  image: docker.io/casperyap/rp-web-app:v0.2.0
+  image: docker.io/casperyap/rp-web-app:v0.3.0
   imagePullPolicy: Always
   storage: 1Gi
   portType: NodePort # Options: ClusterIP, NodePort, LoadBalancer
