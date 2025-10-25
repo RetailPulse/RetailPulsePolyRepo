@@ -85,7 +85,7 @@ spec:
       containers:
       - image: {{ .Values.app.image }}:{{ .Values.global.imageTag | default .Values.app.imageTag }}
         name: {{ printf "%s-rp-businessentity-app-pod" .Release.Name }}
-        imagePullPolicy: {{ .Values.app.imagePullPolicy }}        
+        imagePullPolicy: {{ .Values.app.imagePullPolicy }}
         env:
         - name: REDIS_PASSWORD
           valueFrom:
